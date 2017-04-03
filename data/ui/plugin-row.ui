@@ -74,14 +74,14 @@
             <signal name="notify::active" handler="loaded_switch_changed" object="GtdPluginDialogRow" swapped="yes" />
           </object>
           <packing>
-            <property name="left_attach">3</property>
+            <property name="left_attach">4</property>
             <property name="top_attach">0</property>
             <property name="height">2</property>
           </packing>
         </child>
         <child>
           <object class="GtkButton" id="preferences_button">
-            <property name="visible">True</property>
+            <property name="visible">False</property>
             <property name="can_focus">True</property>
             <property name="sensitive">False</property>
             <property name="halign">center</property>
@@ -100,7 +100,7 @@
             </child>
           </object>
           <packing>
-            <property name="left_attach">4</property>
+            <property name="left_attach">3</property>
             <property name="top_attach">0</property>
             <property name="height">2</property>
           </packing>

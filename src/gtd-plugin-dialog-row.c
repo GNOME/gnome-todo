@@ -280,7 +280,7 @@ gtd_plugin_dialog_row_set_plugin (GtdPluginDialogRow *row,
       show_preferences = activatable != NULL &&
                          gtd_activatable_get_preferences_panel (activatable) != NULL;
 
-      gtk_widget_set_sensitive (row->preferences_button, show_preferences);
+      gtk_widget_set_visible (row->preferences_button, show_preferences);
 
       /* Setup the switch and make sure we don't fire notify::active */
       g_signal_handlers_block_by_func (row->loaded_switch,

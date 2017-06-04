@@ -2,7 +2,7 @@ include $(top_srcdir)/common.am
 
 ACLOCAL_AMFLAGS = --install -I m4 ${ACLOCAL_FLAGS}
 
-SUBDIRS = plugins src data po doc
+SUBDIRS = plugins src data po doc tests
 DIST_SUBDIRS = $(SUBDIRS)
 
 EXTRA_DIST = \

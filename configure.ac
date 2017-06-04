@@ -23,6 +23,23 @@ AX_REQUIRE_DEFINED([APPSTREAM_XML])
 # Add debug symbol
 AX_CHECK_ENABLE_DEBUG([yes], [GNOME_TODO_ENABLE_DEBUG])
 
+AC_ARG_ENABLE([tests],
+              AS_HELP_STRING([--enable-tests],
+                             [Enable always building tests during 'make all' [default=no]]),
+              [enable_tests=$enableval], [enable_tests=yes])
+AM_CONDITIONAL([ENABLE_TESTS], test "$enable_tests" = "yes")
+
+AC_ARG_ENABLE(installed-tests,
+              AS_HELP_STRING([--enable-installed-tests],
+                             [Enable installation of some test cases]),
+              [enable_installed_tests=$enableval], [enable_installed_tests=yes])
+AM_CONDITIONAL([ENABLE_INSTALLED_TESTS], test "$enable_installed_tests" = "yes")
+
+if test "$enable_installed_tests" = "yes"; then
+  AC_SUBST(installed_test_metadir, [${datadir}/installed-tests/]AC_PACKAGE_NAME)
+  AC_SUBST(installed_testdir, [${libexecdir}/installed-tests/]AC_PACKAGE_NAME)
+fi
+
 # Enable compiler warnings
 AX_COMPILER_FLAGS([GNOME_TODO_WARN_CFLAGS], [GNOME_TODO_WARN_LDFLAGS])
 
@@ -114,6 +131,7 @@ AM_CONDITIONAL(ENABLE_DOC_CROSS_REFERENCES, test x$enable_doc_cross_references !
 AC_CONFIG_FILES([
       Makefile
       src/Makefile
+      tests/Makefile
       data/Makefile
       data/icons/Makefile
       data/gnome-todo.pc
@@ -132,11 +150,14 @@ echo "
         gnome-todo $VERSION
         ==================
 
-        prefix:        ${prefix}
-        compiler:      ${CC}
-        global flags:  ${CFLAGS} ${CPPFLAGS} ${LDFLAGS}
-        release:       ${ax_is_release}
-        documentation: ${enable_gtk_doc}
+        prefix:          ${prefix}
+        compiler:        ${CC}
+        global flags:    ${CFLAGS} ${CPPFLAGS} ${LDFLAGS}
+        release:         ${ax_is_release}
+        documentation:   ${enable_gtk_doc}
+        build Test Suite ${enable_tests}
+        Installed tests  ${enable_installed_tests}
+
 
     Plugins:
         Dark theme .............. ${enable_dark_theme_plugin}

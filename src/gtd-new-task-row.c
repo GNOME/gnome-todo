@@ -19,6 +19,7 @@
 #include "gtd-manager.h"
 #include "gtd-new-task-row.h"
 #include "gtd-provider.h"
+#include "gtd-rows-common-private.h"
 #include "gtd-task.h"
 #include "gtd-task-list.h"
 
@@ -284,6 +285,7 @@ gtd_new_task_row_class_init (GtdNewTaskRowClass *klass)
   object_class->set_property = gtd_new_task_row_set_property;
 
   widget_class->focus_in_event = gtd_new_task_row_focus_in_event;
+  widget_class->get_preferred_width = gtd_row_get_preferred_width_with_max;
 
   /**
    * GtdNewTaskRow::enter:

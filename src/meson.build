@@ -52,6 +52,7 @@ sources = files(
   'gtd-object.c',
   'gtd-plugin-dialog.c',
   'gtd-plugin-dialog-row.c',
+  'gtd-rows-common.c',
   'gtd-task.c',
   'gtd-task-list.c',
   'gtd-task-list-view.c',

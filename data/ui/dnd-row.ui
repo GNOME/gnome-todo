@@ -5,6 +5,7 @@
     <property name="can_focus">True</property>
     <property name="activatable">False</property>
     <property name="selectable">False</property>
+    <property name="halign">center</property>
     <child>
       <object class="GtkBox" id="box">
         <property name="visible">True</property>

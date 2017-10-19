@@ -19,6 +19,7 @@
 #include "gtd-edit-pane.h"
 #include "gtd-manager.h"
 #include "gtd-provider.h"
+#include "gtd-rows-common-private.h"
 #include "gtd-task-row.h"
 #include "gtd-task.h"
 #include "gtd-task-list.h"
@@ -539,6 +540,7 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
 
   widget_class->focus_in_event = gtd_task_row_focus_in_event;
   widget_class->key_press_event = gtd_task_row__key_press_event;
+  widget_class->get_preferred_width = gtd_row_get_preferred_width_with_max;
 
   /**
    * GtdTaskRow::handle-subtasks:

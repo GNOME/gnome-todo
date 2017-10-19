@@ -19,6 +19,7 @@
 #include "gtd-dnd-row.h"
 #include "gtd-new-task-row.h"
 #include "gtd-provider.h"
+#include "gtd-rows-common-private.h"
 #include "gtd-task.h"
 #include "gtd-task-list.h"
 #include "gtd-task-row.h"
@@ -126,6 +127,8 @@ gtd_dnd_row_class_init (GtdDndRowClass *klass)
   object_class->get_property = gtd_dnd_row_get_property;
   object_class->set_property = gtd_dnd_row_set_property;
 
+  widget_class->get_preferred_width = gtd_row_get_preferred_width_with_max;
+
   properties[PROP_ROW_ABOVE] = g_param_spec_object ("row-above",
                                                     "Row above",
                                                     "The task row above this row",
@@ -183,9 +186,12 @@ gtd_dnd_row_drag_motion (GtkWidget      *widget,
                          gint            y,
                          guint           time)
 {
+  GtkAllocation alloc;
   GtdDndRow *self;
 
   self = GTD_DND_ROW (widget);
+
+  gtk_widget_get_allocation (widget, &alloc);
 
   if (self->row_above && GTD_IS_TASK_ROW (self->row_above))
     {
@@ -194,7 +200,7 @@ gtd_dnd_row_drag_motion (GtkWidget      *widget,
 
       task = gtd_task_row_get_task (GTD_TASK_ROW (self->row_above));
       offset = gtk_widget_get_margin_start (self->box) + gtk_widget_get_allocated_width (self->icon) + 12;
-      self->depth = CLAMP (floor ((x - offset) / 32),
+      self->depth = CLAMP (floor ((x - alloc.x - offset) / 32),
                            0,
                            gtd_task_get_depth (task) + 1);
     }

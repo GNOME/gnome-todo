@@ -581,8 +581,7 @@ gtd_task_list_view__update_empty_state (GtdTaskListView *view)
 
   for (l = tasks; l != NULL; l = l->next)
     {
-      if (!gtd_task_get_complete (l->data) ||
-          (priv->show_completed && gtd_task_get_complete (l->data)))
+      if (priv->show_completed || !gtd_task_get_complete (l->data))
         {
           is_empty = FALSE;
           break;

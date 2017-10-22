@@ -588,9 +588,15 @@ gtd_task_list_view__update_empty_state (GtdTaskListView *view)
         }
     }
 
-  gtk_widget_set_visible (view->priv->empty_box, is_empty);
-  gtd_empty_list_widget_set_is_empty (GTD_EMPTY_LIST_WIDGET (view->priv->empty_box),
-                                      view->priv->complete_tasks == 0);
+  gtk_widget_set_visible (priv->empty_box, is_empty);
+  gtd_empty_list_widget_set_is_empty (GTD_EMPTY_LIST_WIDGET (priv->empty_box),
+                                      priv->complete_tasks == 0);
+
+  /*
+   * If there are visible tasks, we visually separate the New Task row by
+   * increasing the top margin to 12px.
+   */
+  gtk_widget_set_margin_top (GTK_WIDGET (priv->new_task_row), is_empty ? 3 : 12);
 
   g_list_free (tasks);
 }

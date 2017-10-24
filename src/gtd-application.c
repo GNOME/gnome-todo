@@ -72,6 +72,14 @@ static void           gtd_application_quit                        (GSimpleAction
 
 G_DEFINE_TYPE_WITH_PRIVATE (GtdApplication, gtd_application, GTK_TYPE_APPLICATION)
 
+static GOptionEntry cmd_options[] = {
+  {
+    "quit", 'q', 0,
+    G_OPTION_ARG_NONE, NULL,
+    N_("Quit all running instances of the application"), NULL
+  }
+};
+
 static const GActionEntry gtd_application_entries[] = {
   { "activate", gtd_application_activate_action },
   { "start-client", gtd_application_start_client },
@@ -180,7 +188,7 @@ gtd_application_new (void)
 
   return g_object_new (GTD_TYPE_APPLICATION,
                        "application-id", "org.gnome.Todo",
-                       "flags", G_APPLICATION_FLAGS_NONE,
+                       "flags", G_APPLICATION_HANDLES_COMMAND_LINE,
                        "resource-base-path", "/org/gnome/todo",
                        NULL);
 }
@@ -303,6 +311,25 @@ gtd_application_startup (GApplication *application)
   gtd_manager_load_plugins (priv->manager);
 }
 
+static gint
+gtd_application_command_line (GApplication            *app,
+                              GApplicationCommandLine *command_line)
+{
+  GVariantDict *options;
+
+  options = g_application_command_line_get_options_dict (command_line);
+
+  if (g_variant_dict_contains (options, "quit"))
+    {
+      g_application_quit (app);
+      return 0;
+    }
+
+  g_application_activate (app);
+
+  return 0;
+}
+
 static gboolean
 gtd_application_local_command_line (GApplication   *application,
                                     gchar        ***arguments,
@@ -325,6 +352,7 @@ gtd_application_class_init (GtdApplicationClass *klass)
 
   application_class->activate = gtd_application_activate;
   application_class->startup = gtd_application_startup;
+  application_class->command_line = gtd_application_command_line;
   application_class->local_command_line = gtd_application_local_command_line;
 }
 
@@ -334,6 +362,8 @@ gtd_application_init (GtdApplication *self)
   GtdApplicationPrivate *priv = gtd_application_get_instance_private (self);
 
   self->priv = priv;
+
+  g_application_add_main_option_entries (G_APPLICATION (self), cmd_options);
 }
 
 GtdManager*

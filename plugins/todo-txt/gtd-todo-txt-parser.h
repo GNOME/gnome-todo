@@ -39,9 +39,6 @@ gboolean      gtd_todo_txt_parser_is_date                         (gchar        
 
 gboolean      gtd_todo_txt_parser_is_word                         (gchar             *token);
 
-gint          gtd_todo_txt_parser_get_token_id                    (gchar             *token,
-                                                                   gint               last_read);
-
 void          gtd_todo_txt_parser_parse_tokens                    (GtdTask           *task,
                                                                    GList             *tokens);
 

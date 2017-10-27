@@ -28,6 +28,7 @@ struct _GtdTodoTxtParser
 
 enum
 {
+  NONE,
   TASK_COMPLETE,
   TASK_PRIORITY,
   TASK_DATE,
@@ -42,6 +43,10 @@ G_DEFINE_TYPE (GtdTodoTxtParser, gtd_todo_txt_parser, GTD_TYPE_OBJECT);
 gint
 gtd_todo_txt_parser_get_priority (gchar *token)
 {
+  gunichar priority;
+
+  priority = g_utf8_get_char (&token[1]);
+
   switch (token[1])
     {
     case 'A':
@@ -104,55 +109,43 @@ gtd_todo_txt_parser_is_word (gchar *token)
 
   token_length = g_utf8_strlen (token, -1);
 
-  for (pos = 0; pos < token_length; pos++)
-    {
-      if (!g_unichar_isalnum (token[pos]))
-        return FALSE;
-    }
-
-  return TRUE;
+  return g_utf8_validate (token, -1, NULL);
 }
 
-gint
-gtd_todo_txt_parser_get_token_id (gchar *token,
-                                  gint last_read)
+static gint
+get_token_id (gchar *token,
+              gint last_read,
+              gboolean title_read)
 {
   gint token_length;
 
   token_length = strlen (token);
 
-  if (!g_strcmp0 (token, "x"))
+  if (!g_strcmp0 (token, "x") &&
+      last_read == NONE)
     return TASK_COMPLETE;
 
   if (token_length == 3 && token[0] == '(' && token[2] == ')')
     return TASK_PRIORITY;
 
-  if (!g_str_has_prefix (token , "due:") && gtd_todo_txt_parser_is_date (token))
+  if (token_length > 1 && g_str_has_prefix (token , "@"))
+    return TASK_LIST_NAME;
+
+  if (token_length > 1 && g_str_has_prefix (token , "+"))
+    return ROOT_TASK_NAME;
+
+  if (g_str_has_prefix (token , "due:") && gtd_todo_txt_parser_is_date (token))
+    return TASK_DUE_DATE;
+
+  if (gtd_todo_txt_parser_is_date (token))
     return TASK_DATE;
 
-  if (gtd_todo_txt_parser_is_word (token) &&
-      (last_read == TASK_DATE ||
-       last_read == TASK_PRIORITY ||
-       last_read == TASK_COMPLETE||
-       last_read == TASK_TITLE))
+  if ((!title_read && gtd_todo_txt_parser_is_word (token)) ||
+      title_read && last_read == TASK_TITLE &&
+      gtd_todo_txt_parser_is_word (token))
     {
       return TASK_TITLE;
     }
-
-  if (token_length > 1 && token[0] == '@')
-    return TASK_LIST_NAME;
-
-  if (token_length > 1 && token[0] == '+')
-    return ROOT_TASK_NAME;
-
-  if (gtd_todo_txt_parser_is_word (token) && last_read == TASK_LIST_NAME)
-    return TASK_LIST_NAME;
-
-  if (gtd_todo_txt_parser_is_word (token) && last_read == ROOT_TASK_NAME)
-    return ROOT_TASK_NAME;
-
-  if (g_str_has_prefix (token , "due:"))
-    return TASK_DUE_DATE;
 
   return -1;
 }
@@ -168,25 +161,31 @@ gtd_todo_txt_parser_parse_tokens (GtdTask *task,
   GList *l;
   gboolean is_subtask;
   gint last_read_token;
+  gboolean title_read;
   gint token_id;
 
   l = NULL;
   dt = NULL;
   is_subtask = FALSE;
+  title_read = FALSE;
   title = g_string_new (NULL);
   list_name = g_string_new (NULL);
   root_task_name = g_string_new (NULL);
 
-  last_read_token = TASK_COMPLETE;
+  last_read_token =  NONE;
 
   for (l = tokens; l != NULL; l = l->next)
     {
 
       gchar *str;
+      gchar *utf_str;
 
       g_strstrip (l->data);
       str = l->data;
-      token_id = gtd_todo_txt_parser_get_token_id (l->data, last_read_token);
+
+      utf_str =   g_utf8_make_valid (str, -1);
+
+      token_id = get_token_id (utf_str, last_read_token, title_read);
 
       switch (token_id)
         {
@@ -207,6 +206,7 @@ gtd_todo_txt_parser_parse_tokens (GtdTask *task,
 
         case TASK_TITLE:
           last_read_token = TASK_TITLE;
+          title_read = TRUE;
           g_string_append (title, l->data);
           g_string_append (title, " ");
           break;
@@ -259,6 +259,7 @@ gtd_todo_txt_parser_validate_token_format (GList *tokens)
   gboolean complete_tk = FALSE;
   gboolean priority_tk = FALSE;
   gboolean task_list_name_tk = FALSE;
+  gboolean title_read = FALSE;
 
   gint last_read = TASK_COMPLETE;
 
@@ -267,36 +268,23 @@ gtd_todo_txt_parser_validate_token_format (GList *tokens)
       gchar *str;
 
       str = it->data;
-      token_id = gtd_todo_txt_parser_get_token_id (it->data, last_read);
+      token_id = get_token_id (it->data, last_read, title_read);
       position++;
 
       switch (token_id)
         {
         case TASK_COMPLETE:
           last_read = TASK_COMPLETE;
-
-          if (position != 1)
-            return FALSE;
-          else
-            complete_tk = TRUE;
-
           break;
 
         case TASK_PRIORITY:
           last_read = TASK_PRIORITY;
-
-          if (position != (complete_tk + 1))
-            return FALSE;
-          else
-            priority_tk = TRUE;
+          priority_tk = TRUE;
 
           break;
 
         case TASK_DATE:
           last_read = TASK_DATE;
-
-          if (position != (complete_tk + priority_tk + 1))
-            return FALSE;
 
           if (!gtd_todo_txt_parser_is_date (it->data))
             {
@@ -312,6 +300,7 @@ gtd_todo_txt_parser_validate_token_format (GList *tokens)
 
         case TASK_TITLE:
           last_read = TASK_TITLE;
+          title_read = TRUE;
           break;
 
         case TASK_LIST_NAME:

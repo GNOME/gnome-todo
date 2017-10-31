@@ -77,8 +77,12 @@
                 </child>
 
                 <child>
-                  <object class="GtkEventBox">
+                  <object class="GtkEventBox" id="header_event_box">
                     <property name="visible">True</property>
+                    <signal name="button-press-event" handler="button_press_event" object="GtdTaskRow" swapped="no" />
+                    <signal name="drag-begin" handler="drag_begin_cb" object="GtdTaskRow" swapped="no" />
+                    <signal name="drag-end" handler="drag_end_cb" object="GtdTaskRow" swapped="no" />
+                    <signal name="drag-failed" handler="drag_failed_cb" object="GtdTaskRow" swapped="no" />
                     <signal name="enter-notify-event" handler="mouse_over_event_cb" object="GtdTaskRow" swapped="no" />
                     <signal name="leave-notify-event" handler="mouse_out_event_cb" object="GtdTaskRow" swapped="no" />
                     <child>

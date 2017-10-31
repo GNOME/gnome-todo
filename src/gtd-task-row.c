@@ -39,6 +39,7 @@ struct _GtdTaskRow
   GtkWidget          *done_check;
   GtkWidget          *edit_panel;
   GtkWidget          *edit_panel_revealer;
+  GtkWidget          *header_event_box;
   GtkWidget          *title_entry;
   GtkWidget          *toggle_button;
 
@@ -199,7 +200,7 @@ button_press_event (GtkWidget      *widget,
 }
 
 static void
-drag_begin_cb (GtkWidget      *dnd_event_box,
+drag_begin_cb (GtkWidget      *event_box,
                GdkDragContext *context,
                GtdTaskRow     *self)
 {
@@ -209,7 +210,7 @@ drag_begin_cb (GtkWidget      *dnd_event_box,
 
   widget = GTK_WIDGET (self);
 
-  gtk_widget_translate_coordinates (dnd_event_box,
+  gtk_widget_translate_coordinates (event_box,
                                     widget,
                                     self->clicked_x,
                                     self->clicked_y,
@@ -234,7 +235,7 @@ drag_begin_cb (GtkWidget      *dnd_event_box,
 }
 
 static void
-drag_end_cb (GtkWidget      *dnd_event_box,
+drag_end_cb (GtkWidget      *event_box,
              GdkDragContext *context,
              GtdTaskRow     *self)
 {
@@ -619,6 +620,7 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, done_check);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, edit_panel);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, edit_panel_revealer);
+  gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, header_event_box);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, revealer);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, task_date_label);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, task_list_label);
@@ -650,6 +652,13 @@ gtd_task_row_init (GtdTaskRow *self)
 
   /* The source of DnD is the drag icon */
   gtk_drag_source_set (self->dnd_event_box,
+                       GDK_BUTTON1_MASK,
+                       NULL,
+                       0,
+                       GDK_ACTION_MOVE);
+
+  /* But the rest of the row header is also draggable */
+  gtk_drag_source_set (self->header_event_box,
                        GDK_BUTTON1_MASK,
                        NULL,
                        0,

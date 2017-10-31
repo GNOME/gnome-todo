@@ -89,6 +89,18 @@ static guint signals[NUM_SIGNALS] = { 0, };
  * Auxiliary methods
  */
 
+static GtkWidget*
+create_transient_row (GtdTaskRow *self)
+{
+  GtdTaskRow *new_row;
+
+  new_row = GTD_TASK_ROW (gtd_task_row_new (self->task));
+  gtk_revealer_set_transition_duration (new_row->revealer, 0);
+  gtk_revealer_set_reveal_child (new_row->revealer, TRUE);
+
+  return GTK_WIDGET (new_row);
+}
+
 static void
 set_cursor (GtkWidget   *widget,
             const gchar *cursor_name)
@@ -109,34 +121,6 @@ set_cursor (GtkWidget   *widget,
   gdk_display_flush (display);
 
   g_clear_object (&cursor);
-}
-
-static cairo_surface_t*
-get_dnd_icon (GtdTaskRow *self)
-{
-  cairo_surface_t *surface;
-  GtkWidget *widget;
-  cairo_t *cr;
-  gint real_x;
-  gint real_y;
-
-  widget = GTK_WIDGET (self);
-  gtk_widget_translate_coordinates (self->dnd_event_box,
-                                    widget,
-                                    self->clicked_x,
-                                    self->clicked_y,
-                                    &real_x,
-                                    &real_y);
-
-  /* Make it transparent */
-  surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
-                                        gtk_widget_get_allocated_width (widget),
-                                        gtk_widget_get_allocated_height (widget));
-
-  cr = cairo_create (surface);
-  gtk_widget_draw (widget, cr);
-
-  return surface;
 }
 
 
@@ -215,42 +199,53 @@ button_press_event (GtkWidget      *widget,
 }
 
 static void
-drag_begin_cb (GtkWidget      *widget,
+drag_begin_cb (GtkWidget      *dnd_event_box,
                GdkDragContext *context,
                GtdTaskRow     *self)
 {
-  cairo_surface_t *surface;
-
+  GtkWidget *widget, *new_row;
   gint real_x;
   gint real_y;
 
   widget = GTK_WIDGET (self);
-  gtk_widget_translate_coordinates (self->dnd_event_box,
-                                    GTK_WIDGET (self),
+
+  gtk_widget_translate_coordinates (dnd_event_box,
+                                    widget,
                                     self->clicked_x,
                                     self->clicked_y,
                                     &real_x,
                                     &real_y);
 
-  surface = get_dnd_icon (self);
-
   set_cursor (widget, "grabbing");
 
-  gtk_drag_set_icon_surface (context, surface);
-  gdk_drag_context_set_hotspot (context, self->clicked_x, self->clicked_y);
+  /*
+   * gtk_drag_set_icon_widget() inserts the row in a different GtkWindow, so
+   * we have to create a new, transient row.
+   */
+  new_row = create_transient_row (self);
 
-  g_message ("Hotspot → %d, %d", real_x, real_y);
+  gtk_widget_set_size_request (new_row,
+                               gtk_widget_get_allocated_width (widget),
+                               gtk_widget_get_allocated_height (widget));
 
-  gtk_widget_hide (GTK_WIDGET (self));
+  gtk_drag_set_icon_widget (context, new_row, real_x, real_y);
 
-  g_clear_pointer (&surface, cairo_surface_destroy);
+  gtk_widget_hide (widget);
+}
+
+static void
+drag_end_cb (GtkWidget      *dnd_event_box,
+             GdkDragContext *context,
+             GtdTaskRow     *self)
+{
+  gtk_widget_show (GTK_WIDGET (self));
 }
 
 static gboolean
-drag_failed_cb (GtkWidget	*widget,
-                GdkDragContext	*context,
-                GtkDragResult	result,
-                GtdTaskRow	*self)
+drag_failed_cb (GtkWidget      *widget,
+                GdkDragContext *context,
+                GtkDragResult   result,
+                GtdTaskRow     *self)
 {
   gtk_widget_show (GTK_WIDGET (self));
 
@@ -631,6 +626,7 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, button_press_event);
   gtk_widget_class_bind_template_callback (widget_class, complete_check_toggled_cb);
   gtk_widget_class_bind_template_callback (widget_class, drag_begin_cb);
+  gtk_widget_class_bind_template_callback (widget_class, drag_end_cb);
   gtk_widget_class_bind_template_callback (widget_class, drag_failed_cb);
   gtk_widget_class_bind_template_callback (widget_class, mouse_out_event_cb);
   gtk_widget_class_bind_template_callback (widget_class, mouse_out_dnd_event_cb);
@@ -655,7 +651,7 @@ gtd_task_row_init (GtdTaskRow *self)
                        GDK_BUTTON1_MASK,
                        NULL,
                        0,
-                       GDK_ACTION_COPY);
+                       GDK_ACTION_MOVE);
 }
 
 GtkWidget*

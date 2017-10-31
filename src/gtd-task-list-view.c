@@ -1469,6 +1469,8 @@ listbox_drag_drop (GtkWidget       *widget,
 
   check_dnd_scroll (self, TRUE, -1);
 
+  gtk_drag_finish (context, TRUE, TRUE, time);
+
   return TRUE;
 }
 

@@ -1441,7 +1441,7 @@ success:
 
   check_dnd_scroll (self, FALSE, y);
 
-  gdk_drag_status (context, GDK_ACTION_COPY, time);
+  gdk_drag_status (context, GDK_ACTION_MOVE, time);
 
   return TRUE;
 
@@ -1640,7 +1640,7 @@ gtd_task_list_view_init (GtdTaskListView *self)
                      0,
                      NULL,
                      0,
-                     GDK_ACTION_COPY);
+                     GDK_ACTION_MOVE);
 }
 
 /**

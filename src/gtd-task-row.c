@@ -238,6 +238,7 @@ drag_end_cb (GtkWidget      *dnd_event_box,
              GdkDragContext *context,
              GtdTaskRow     *self)
 {
+  set_cursor (GTK_WIDGET (self), NULL);
   gtk_widget_show (GTK_WIDGET (self));
 }
 
@@ -247,6 +248,7 @@ drag_failed_cb (GtkWidget      *widget,
                 GtkDragResult   result,
                 GtdTaskRow     *self)
 {
+  set_cursor (GTK_WIDGET (self), NULL);
   gtk_widget_show (GTK_WIDGET (self));
 
   return FALSE;

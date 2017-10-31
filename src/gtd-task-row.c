@@ -62,8 +62,7 @@ struct _GtdTaskRow
   gboolean            active;
 };
 
-#define PRIORITY_ICON_SIZE         8
-#define DND_ICON_SCALE             0.85
+#define PRIORITY_ICON_SIZE 8
 
 G_DEFINE_TYPE (GtdTaskRow, gtd_task_row, GTK_TYPE_LIST_BOX_ROW)
 
@@ -119,28 +118,23 @@ get_dnd_icon (GtdTaskRow *self)
   GtkWidget *widget;
   cairo_t *cr;
   gint real_x;
+  gint real_y;
 
   widget = GTK_WIDGET (self);
   gtk_widget_translate_coordinates (self->dnd_event_box,
-                                    gtk_widget_get_parent (widget),
-                                    0,
-                                    0,
+                                    widget,
+                                    self->clicked_x,
+                                    self->clicked_y,
                                     &real_x,
-                                    NULL);
+                                    &real_y);
 
   /* Make it transparent */
   surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
-                                        gtk_widget_get_allocated_width (widget) * DND_ICON_SCALE,
-                                        gtk_widget_get_allocated_height (widget) * DND_ICON_SCALE);
+                                        gtk_widget_get_allocated_width (widget),
+                                        gtk_widget_get_allocated_height (widget));
 
   cr = cairo_create (surface);
-  cairo_scale (cr, DND_ICON_SCALE, DND_ICON_SCALE);
-
   gtk_widget_draw (widget, cr);
-
-  cairo_surface_set_device_offset (surface,
-                                   -(self->clicked_x + real_x) * DND_ICON_SCALE,
-                                   -self->clicked_y * DND_ICON_SCALE);
 
   return surface;
 }
@@ -227,11 +221,25 @@ drag_begin_cb (GtkWidget      *widget,
 {
   cairo_surface_t *surface;
 
+  gint real_x;
+  gint real_y;
+
+  widget = GTK_WIDGET (self);
+  gtk_widget_translate_coordinates (self->dnd_event_box,
+                                    GTK_WIDGET (self),
+                                    self->clicked_x,
+                                    self->clicked_y,
+                                    &real_x,
+                                    &real_y);
+
   surface = get_dnd_icon (self);
 
   set_cursor (widget, "grabbing");
 
   gtk_drag_set_icon_surface (context, surface);
+  gdk_drag_context_set_hotspot (context, self->clicked_x, self->clicked_y);
+
+  g_message ("Hotspot → %d, %d", real_x, real_y);
 
   gtk_widget_hide (GTK_WIDGET (self));
 

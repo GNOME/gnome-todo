@@ -69,6 +69,9 @@
                     <property name="wrap-mode">word-char</property>
                     <signal name="button-press-event" handler="trap_textview_clicks_cb" swapped="no" after="yes" />
                     <signal name="button-release-event" handler="trap_textview_clicks_cb" swapped="no" after="yes" />
+                    <signal name="focus-in-event" handler="focused_textview_cb" swapped="no" after="yes" />
+                    <signal name="focus-out-event" handler="focused_out_textview_cb" swapped="no" after="yes" />
+
                   </object>
                 </child>
               </object>

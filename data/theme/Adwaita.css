@@ -77,9 +77,11 @@ taskrow.priority-hight:dir(ltr)  { border-left:  solid 6px #cc0000; padding-left
 taskrow.priority-hight:dir(rtl)  { border-right: solid 6px #cc0000; padding-right: 0; }
 
 /* task title entry */
-taskrow entry                                      { border: none; background: none; }
-taskrow:not(.new-task-row) entry                   { border: solid 1px transparent; }
-taskrow:not(.new-task-row) entry:hover:not(:focus) { border: solid 1px @borders; }
+taskrow entry                    { border: none; background: none; }
+taskrow entry                    { border: solid 1px transparent; }
+taskrow entry:hover:not(:focus)  { border: solid 1px @borders; }
+taskrow entry:focus		 { border-radius: 3px; box-shadow: 0px 0px 0px 1px rgb(74,144,217); border-color:rgb(74,144,217)}
+
 
 /* line-through complete tasks */
 taskrow.complete entry.title { text-decoration-line: line-through; }
@@ -115,3 +117,28 @@ tasklistview.light emptylistwidget label,
 tasklistview.light emptylistwidget image {
     color: black;
 }
+/*
+ * Edit pane
+ */
+editpane scrolledwindow,
+editpane scrolledwindow textview,
+editpane scrolledwindow textview text{
+	 border-radius: 3px;
+}
+editpane scrolledwindow{
+	 border-width: 1px;
+}
+.focused{
+	border-color : rgb(74,144,217);
+	box-shadow : 0px 0px 0px 1px rgb(74,144,217);
+}
+.focused,
+.focused textview,
+.focused text{
+ 	border-radius: 3px;
+}
+
+entry,scrolledwindow{
+	margin: 1px
+}
+

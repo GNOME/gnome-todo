@@ -161,6 +161,30 @@ gtd_edit_pane_update_date (GtdEditPane *self)
   g_free (text);
 }
 
+static gboolean
+focused_textview_cb (GtkWidget *textview,
+                   GdkEvent    *event)
+{
+  GtkWidget *parent = gtk_widget_get_ancestor( textview, GTK_TYPE_SCROLLED_WINDOW);
+  GtkStyleContext *context = gtk_widget_get_style_context( GTK_WIDGET(parent));
+
+  gtk_style_context_add_class(context,"focused");
+
+  return FALSE;
+}
+
+static gboolean
+focused_out_textview_cb (GtkWidget *textview,
+                   GdkEvent    *event)
+{
+  GtkWidget *parent = gtk_widget_get_ancestor( textview, GTK_TYPE_SCROLLED_WINDOW);
+  GtkStyleContext *context = gtk_widget_get_style_context( GTK_WIDGET(parent));
+
+  gtk_style_context_remove_class(context,"focused");
+
+  return FALSE;
+}
+
 static void
 date_selected_cb (GtkCalendar *calendar,
                   GtdEditPane *self)
@@ -310,6 +334,8 @@ gtd_edit_pane_class_init (GtdEditPaneClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, today_button_clicked);
   gtk_widget_class_bind_template_callback (widget_class, tomorrow_button_clicked);
   gtk_widget_class_bind_template_callback (widget_class, trap_textview_clicks_cb);
+  gtk_widget_class_bind_template_callback (widget_class, focused_textview_cb);
+  gtk_widget_class_bind_template_callback (widget_class, focused_out_textview_cb);
 
   gtk_widget_class_set_css_name (widget_class, "editpane");
 }

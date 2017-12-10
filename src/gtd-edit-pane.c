@@ -162,25 +162,37 @@ gtd_edit_pane_update_date (GtdEditPane *self)
 }
 
 static gboolean
-focused_textview_cb (GtkWidget *textview,
-                   GdkEvent    *event)
+focused_textview_cb (GtkWidget  *textview,
+                     GdkEvent   *event)
 {
-  GtkWidget *parent = gtk_widget_get_ancestor( textview, GTK_TYPE_SCROLLED_WINDOW);
-  GtkStyleContext *context = gtk_widget_get_style_context( GTK_WIDGET(parent));
+  GtkWidget *parent;
+  GtkStyleContext *context;
 
-  gtk_style_context_add_class(context,"focused");
+  parent  = gtk_widget_get_ancestor(textview,
+                                    GTK_TYPE_SCROLLED_WINDOW);
+
+  context = gtk_widget_get_style_context( GTK_WIDGET(parent));
+
+  gtk_style_context_add_class(context,
+                              "focused");
 
   return FALSE;
 }
 
 static gboolean
-focused_out_textview_cb (GtkWidget *textview,
-                   GdkEvent    *event)
+focused_out_textview_cb (GtkWidget  *textview,
+                         GdkEvent   *event)
 {
-  GtkWidget *parent = gtk_widget_get_ancestor( textview, GTK_TYPE_SCROLLED_WINDOW);
-  GtkStyleContext *context = gtk_widget_get_style_context( GTK_WIDGET(parent));
+  GtkWidget *parent;
+  GtkStyleContext *context;
 
-  gtk_style_context_remove_class(context,"focused");
+  parent = gtk_widget_get_ancestor(textview,
+                                   GTK_TYPE_SCROLLED_WINDOW);
+
+  context = gtk_widget_get_style_context( GTK_WIDGET(parent));
+
+  gtk_style_context_remove_class(context,
+                                 "focused");
 
   return FALSE;
 }

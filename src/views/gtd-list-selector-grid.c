@@ -112,10 +112,10 @@ gtd_list_selector_grid_sort_func (GtdListSelectorItem *a,
   if (retval != 0)
     return retval;
 
-  name1 = g_utf8_casefold (gtd_task_list_get_name (l1), -1);
-  name2 = g_utf8_casefold (gtd_task_list_get_name (l2), -1);
+  name1 = g_utf8_normalize(gtd_task_list_get_name(l1),-1,G_NORMALIZE_DEFAULT);
+  name2 = g_utf8_normalize(gtd_task_list_get_name(l2),-1,G_NORMALIZE_DEFAULT);
 
-  retval = g_strcmp0 (name1, name2);
+  retval = g_ascii_strcasecmp (name1, name2);
 
   g_free (name1);
   g_free (name2);

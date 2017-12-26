@@ -21,6 +21,7 @@
 #include "gtd-empty-list-widget.h"
 #include "gtd-task-list-view.h"
 #include "gtd-manager.h"
+#include "gtd-markup-renderer.h"
 #include "gtd-new-task-row.h"
 #include "gtd-notification.h"
 #include "gtd-provider.h"
@@ -83,6 +84,9 @@ typedef struct
   GList                 *list;
   GtdTaskList           *task_list;
   GDateTime             *default_date;
+
+  /* Markup renderer*/
+  GtdMarkupRenderer     *renderer;
 
   /* DnD autoscroll */
   guint                  scroll_timeout_id;
@@ -181,7 +185,9 @@ set_active_row (GtdTaskListView *self,
   if (priv->active_row)
     {
       if (GTD_IS_TASK_ROW (priv->active_row))
-        gtd_task_row_set_active (GTD_TASK_ROW (priv->active_row), FALSE);
+        {
+          gtd_task_row_set_active (GTD_TASK_ROW (priv->active_row), FALSE);
+        }
       else
         gtd_new_task_row_set_active (GTD_NEW_TASK_ROW (priv->active_row), FALSE);
     }
@@ -191,7 +197,12 @@ set_active_row (GtdTaskListView *self,
   if (row)
     {
       if (GTD_IS_TASK_ROW (row))
-        gtd_task_row_set_active (GTD_TASK_ROW (row), TRUE);
+        {
+          gtd_task_row_set_active (GTD_TASK_ROW (row), TRUE);
+
+          g_clear_object (&priv->renderer);
+          gtd_task_row_set_markup_renderer (GTD_TASK_ROW (row), &priv->renderer);
+        }
       else
         gtd_new_task_row_set_active (GTD_NEW_TASK_ROW (row), TRUE);
 

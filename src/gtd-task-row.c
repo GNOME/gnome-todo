@@ -19,6 +19,7 @@
 #include "gtd-edit-pane.h"
 #include "gtd-expandable-entry.h"
 #include "gtd-manager.h"
+#include "gtd-markup-renderer.h"
 #include "gtd-provider.h"
 #include "gtd-rows-common-private.h"
 #include "gtd-task-row.h"
@@ -105,6 +106,156 @@ create_transient_row (GtdTaskRow *self)
   gtk_revealer_set_reveal_child (GTK_REVEALER (new_row->edit_panel_revealer), self->active);
 
   return GTK_WIDGET (new_row);
+}
+
+static gboolean
+on_hyperlink_hover (GtkWidget      *text_view,
+                    GdkEventMotion *event)
+{
+  GSList *tags = NULL, *tagp = NULL;
+  GtkTextIter iter;
+  gboolean hovering = FALSE;
+  gdouble ex, ey;
+  gint x, y;
+  gchar *tag_name;
+
+  gdk_event_get_coords ((GdkEvent *)event, &ex, &ey);
+  gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (text_view),
+                                         GTK_TEXT_WINDOW_WIDGET,
+                                         ex, ey, &x, &y);
+  if (gtk_text_view_get_iter_at_location (GTK_TEXT_VIEW (text_view), &iter, x, y))
+    {
+      tags = gtk_text_iter_get_tags (&iter);
+      for (tagp = tags;  tagp != NULL;  tagp = tagp->next)
+        {
+          GtkTextTag *tag = tagp->data;
+          g_object_get (tag, "name", &tag_name, NULL);
+
+          if (g_strcmp0 (tag_name, "link") == 0)
+            {
+              hovering = TRUE;
+              g_free (tag_name);
+              break;
+            }
+          g_free (tag_name);
+        }
+      if (hovering)
+        {
+          g_autoptr (GdkCursor) cursor;
+          cursor = gdk_cursor_new_from_name (gtk_widget_get_display (text_view),
+                                             "pointer");
+          gdk_window_set_cursor (gtk_text_view_get_window (GTK_TEXT_VIEW (text_view), GTK_TEXT_WINDOW_TEXT), cursor);
+        }
+      else
+        {
+          g_autoptr (GdkCursor) cursor;
+          cursor = gdk_cursor_new_from_name (gtk_widget_get_display (text_view),
+                                             "text");
+          gdk_window_set_cursor (gtk_text_view_get_window (GTK_TEXT_VIEW (text_view), GTK_TEXT_WINDOW_TEXT), cursor);
+        }
+    }
+  return TRUE;
+}
+
+static gboolean
+on_hyperlink_clicked (GtkWidget *text_view,
+                      GdkEvent  *ev)
+{
+  GtkTextIter start, end, iter, end_iter, match_start, match_end;
+  GSList *tags = NULL, *tagp = NULL;
+  GtkTextBuffer *buffer;
+  gdouble ex, ey;
+  gint x, y;
+  gchar *tag_name, *link;
+  GError *error;
+
+  if (ev->type == GDK_BUTTON_RELEASE)
+    {
+      GdkEventButton *event;
+
+      event = (GdkEventButton *)ev;
+      if (event->button != GDK_BUTTON_PRIMARY)
+        return FALSE;
+
+      ex = event->x;
+      ey = event->y;
+    }
+  else if (ev->type == GDK_TOUCH_END)
+    {
+      GdkEventTouch *event;
+
+      event = (GdkEventTouch *)ev;
+
+      ex = event->x;
+      ey = event->y;
+    }
+  else
+    {
+      return FALSE;
+    }
+
+  buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (text_view));
+
+  /* we shouldn't follow a link if the user has selected something */
+  gtk_text_buffer_get_selection_bounds (buffer, &start, &end);
+  if (gtk_text_iter_get_offset (&start) != gtk_text_iter_get_offset (&end))
+    return FALSE;
+
+  gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (text_view),
+                                         GTK_TEXT_WINDOW_WIDGET,
+                                         ex, ey, &x, &y);
+
+  if (gtk_text_view_get_iter_at_location (GTK_TEXT_VIEW (text_view), &iter, x, y))
+    {
+      tags = gtk_text_iter_get_tags (&iter);
+
+      for (tagp = tags; tagp != NULL; tagp = tagp->next)
+        {
+          GtkTextTag *tag = tagp->data;
+
+          g_object_get (tag, "name", &tag_name, NULL);
+
+          if (g_strcmp0 (tag_name, "link"))
+            {
+              g_free (tag_name);
+              continue;
+            }
+
+          gtk_text_buffer_get_iter_at_line (buffer, &iter, gtk_text_iter_get_line (&iter));
+          end_iter = iter;
+          gtk_text_iter_forward_to_line_end (&end_iter);
+
+          if (gtk_text_iter_forward_search (&iter,
+                                            "(",
+                                            GTK_TEXT_SEARCH_TEXT_ONLY,
+                                            NULL,
+                                            &match_start,
+                                            NULL))
+            {
+              if (gtk_text_iter_forward_search (&iter,
+                                                ")",
+                                                GTK_TEXT_SEARCH_TEXT_ONLY,
+                                                &match_end,
+                                                NULL,
+                                                &end_iter))
+                {
+                  link = gtk_text_iter_get_text (&match_start, &match_end);
+
+                  if (gtk_show_uri_on_window (GTK_WINDOW (gtk_widget_get_toplevel (text_view)),
+                                              link,
+                                              GDK_CURRENT_TIME,
+                                              &error) == 0)
+                    {
+                      g_critical ("%s", error->message);
+                      g_error_free (error);
+
+                      return FALSE;
+                    }
+                }
+            }
+        }
+    }
+  return TRUE;
 }
 
 static void
@@ -473,9 +624,11 @@ gtd_task_row_dispose (GObject *object)
 {
   GtdTaskRow *self;
   GtdTask *task;
+//  GtkTextView *view;
 
   self = GTD_TASK_ROW (object);
   task = self->task;
+//  view = gtd_edit_pane_get_text_view (GTD_EDIT_PANE (self->edit_panel));
 
   if (task)
     {
@@ -483,6 +636,10 @@ gtd_task_row_dispose (GObject *object)
       g_signal_handlers_disconnect_by_func (task, complete_changed_cb, self);
 
       g_signal_handlers_disconnect_by_func (task, priority_changed_cb, self);
+/*
+      g_signal_handlers_disconnect_by_func (view, on_hyperlink_clicked, NULL);
+      g_signal_handlers_disconnect_by_func (view, on_hyperlink_hover, NULL);
+*/
     }
 
   G_OBJECT_CLASS (gtd_task_row_parent_class)->dispose (object);
@@ -942,4 +1099,28 @@ gtd_task_row_get_x_offset (GtdTaskRow *self)
     return gtk_widget_get_allocated_width (GTK_WIDGET (self)) - self->clicked_x;
   else
     return self->clicked_x;
+}
+
+void
+gtd_task_row_set_markup_renderer (GtdTaskRow         *row,
+                                  GtdMarkupRenderer **renderer)
+{
+  GtkTextView   *view;
+  GtkTextBuffer *buffer;
+
+  view = gtd_edit_pane_get_text_view (GTD_EDIT_PANE (row->edit_panel));
+  buffer = gtk_text_view_get_buffer (view);
+
+  *renderer = g_object_new (GTD_TYPE_MARKUP_RENDERER,
+                           "textbuffer",
+                           buffer,
+                           NULL);
+
+  gtd_markup_renderer_populate_tag_table (*renderer);
+  gtd_markup_renderer_render_markup (*renderer);
+
+  g_signal_connect (view, "event_after",
+                    G_CALLBACK (on_hyperlink_clicked), NULL);
+  g_signal_connect (view, "motion-notify-event",
+                    G_CALLBACK (on_hyperlink_hover), NULL);
 }

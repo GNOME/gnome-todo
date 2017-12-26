@@ -211,6 +211,8 @@ gtd_edit_pane_dispose (GObject *object)
 {
   GtdEditPane *self = (GtdEditPane *) object;
 
+//  g_clear_object (&self->renderer);
+
   if (self->task)
     gtd_edit_pane_set_task (GTD_EDIT_PANE (object), NULL);
 
@@ -386,8 +388,24 @@ gtd_edit_pane_set_task (GtdEditPane *self,
                                                        self->priority_combo,
                                                        "active",
                                                        G_BINDING_BIDIRECTIONAL);
+/*
+      self->renderer = gtd_markup_renderer_new ();
+      gtd_markup_renderer_set_buffer (self->renderer, buffer);
 
+      gtd_markup_renderer_render_markup (self->renderer);
+
+      g_signal_connect (self->notes_textview, "event_after",
+                        G_CALLBACK (on_hyperlink_clicked), NULL);
+
+      g_signal_connect (self->notes_textview, "motion-notify-event",
+                        G_CALLBACK (on_hyperlink_hover), NULL);*/
     }
 
   g_object_notify (G_OBJECT (self), "task");
+}
+
+GtkTextView*
+gtd_edit_pane_get_text_view (GtdEditPane *self)
+{
+  return self->notes_textview;
 }

@@ -117,6 +117,7 @@ gtd_application_show_about (GSimpleAction *simple,
   g_autoptr (GDateTime) date = NULL;
   GtdApplication *self;
   gint created_year = 2015;
+  gint modified_year = 2017;
 
   static const gchar *authors[] = {
     "Emmanuele Bassi <ebassi@gnome.org>",
@@ -145,7 +146,7 @@ gtd_application_show_about (GSimpleAction *simple,
   else
     {
       copyright = g_strdup_printf (_("Copyright \xC2\xA9 %1$d\xE2\x80\x93%2$d "
-                                     "The To Do authors"), created_year, g_date_time_get_year (date));
+                                     "The To Do authors"), created_year, modified_year);
     }
 
   gtk_show_about_dialog (GTK_WINDOW (self->window),

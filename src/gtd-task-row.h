@@ -43,6 +43,9 @@ void                      gtd_task_row_set_list_name_visible    (GtdTaskRow     
 void                      gtd_task_row_set_markup_renderer      (GtdTaskRow           *row,
                                                                  GtdMarkupRenderer   **renderer);
 
+void                      gtd_task_row_disconnect_render_signals (GtdTaskRow           *row,
+                                                                  GtdMarkupRenderer    *renderer);
+
 void                      gtd_task_row_set_due_date_visible     (GtdTaskRow          *row,
                                                                  gboolean             show_due_date);
 

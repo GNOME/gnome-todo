@@ -200,6 +200,7 @@ set_active_row (GtdTaskListView *self,
         {
           gtd_task_row_set_active (GTD_TASK_ROW (row), TRUE);
 
+          gtd_task_row_disconnect_render_signals (GTD_TASK_ROW (row), priv->renderer);
           g_clear_object (&priv->renderer);
           gtd_task_row_set_markup_renderer (GTD_TASK_ROW (row), &priv->renderer);
         }

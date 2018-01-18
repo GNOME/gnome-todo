@@ -259,6 +259,15 @@ on_hyperlink_clicked (GtkWidget *text_view,
 }
 
 static void
+on_text_changed (GtkTextBuffer *buffer,
+                 gpointer       user_data)
+{
+  GtdMarkupRenderer *renderer = GTD_MARKUP_RENDERER (user_data);
+
+  gtd_markup_renderer_render_markup (renderer);
+}
+
+static void
 set_cursor (GtkWidget   *widget,
             const gchar *cursor_name)
 {
@@ -624,11 +633,9 @@ gtd_task_row_dispose (GObject *object)
 {
   GtdTaskRow *self;
   GtdTask *task;
-//  GtkTextView *view;
 
   self = GTD_TASK_ROW (object);
   task = self->task;
-//  view = gtd_edit_pane_get_text_view (GTD_EDIT_PANE (self->edit_panel));
 
   if (task)
     {
@@ -636,10 +643,6 @@ gtd_task_row_dispose (GObject *object)
       g_signal_handlers_disconnect_by_func (task, complete_changed_cb, self);
 
       g_signal_handlers_disconnect_by_func (task, priority_changed_cb, self);
-/*
-      g_signal_handlers_disconnect_by_func (view, on_hyperlink_clicked, NULL);
-      g_signal_handlers_disconnect_by_func (view, on_hyperlink_hover, NULL);
-*/
     }
 
   G_OBJECT_CLASS (gtd_task_row_parent_class)->dispose (object);
@@ -1102,6 +1105,21 @@ gtd_task_row_get_x_offset (GtdTaskRow *self)
 }
 
 void
+gtd_task_row_disconnect_render_signals (GtdTaskRow        *row,
+                                        GtdMarkupRenderer *renderer)
+{
+  GtkTextView *view;
+  GtkTextBuffer *buffer;
+
+  view = gtd_edit_pane_get_text_view (GTD_EDIT_PANE (row->edit_panel));
+  buffer = gtk_text_view_get_buffer (view);
+
+  g_signal_handlers_disconnect_by_func (view, on_hyperlink_clicked, NULL);
+  g_signal_handlers_disconnect_by_func (view, on_hyperlink_hover, NULL);
+  g_signal_handlers_disconnect_by_func (buffer, on_text_changed, renderer);
+}
+
+void
 gtd_task_row_set_markup_renderer (GtdTaskRow         *row,
                                   GtdMarkupRenderer **renderer)
 {
@@ -1123,4 +1141,6 @@ gtd_task_row_set_markup_renderer (GtdTaskRow         *row,
                     G_CALLBACK (on_hyperlink_clicked), NULL);
   g_signal_connect (view, "motion-notify-event",
                     G_CALLBACK (on_hyperlink_hover), NULL);
+  g_signal_connect (buffer, "changed",
+                    G_CALLBACK (on_text_changed), *renderer);
 }

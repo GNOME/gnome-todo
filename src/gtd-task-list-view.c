@@ -542,9 +542,14 @@ gtd_task_list_view__clear_completed_tasks (GSimpleAction *simple,
   GtdTaskListView *view;
   GList *tasks;
   GList *l;
+  gchar *text;
+  GtdWindow *window;
+  GtdNotification *notification;
 
   view = GTD_TASK_LIST_VIEW (user_data);
   tasks = gtd_task_list_view_get_list (view);
+  text = g_strdup_printf (_("All tasks completed"));
+  window = GTD_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (view)));
 
   for (l = tasks; l != NULL; l = l->next)
     {
@@ -559,8 +564,13 @@ gtd_task_list_view__clear_completed_tasks (GSimpleAction *simple,
         }
     }
 
+  /* Notification about removal */
+  notification = gtd_notification_new (text, 7500.0);
+  gtd_window_notify (window, notification);
+
   gtd_task_list_view__update_done_label (view);
 
+  g_clear_pointer (&text, g_free);
   g_list_free (tasks);
 }
 

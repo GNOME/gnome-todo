@@ -1,5 +1,15 @@
 plugins_incs = [top_inc, src_inc]
 
+msgfmt_plugin_cmd = [
+  find_program('msgfmt'),
+  '--desktop',
+  '--keyword=Name',
+  '--keyword=Description',
+  '-d', po_dir,
+  '--template=@INPUT@',
+  '--output=@OUTPUT@'
+]
+
 plugins_ldflags = []
 plugins_libs = []
 plugins_confs = []

@@ -22,8 +22,15 @@ install_data(
 
 plugin_data = plugin_name + '.plugin'
 
-plugins_confs += configure_file(
-          input: plugin_data + '.in',
-         output: plugin_data,
+plugin_data_in = configure_file(
+  input: plugin_data + '.desktop.in.in',
+  output: plugin_data + '.in',
   configuration: plugins_conf
+)
+
+plugins_confs += custom_target(
+  plugin_data,
+  input: plugin_data_in,
+  output: plugin_data,
+  command: msgfmt_plugin_cmd
 )

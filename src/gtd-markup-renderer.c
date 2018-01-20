@@ -243,25 +243,6 @@ gtd_markup_renderer_init (GtdMarkupRenderer *self)
 void
 gtd_markup_renderer_populate_tag_table (GtdMarkupRenderer *self)
 {
-/*
-  GtkTextTagTable *table;
-
-  table = gtk_text_buffer_get_tag_table (self->buffer);
-
-  if (gtk_text_tag_table_get_size (table))
-    {
-      self->italic = gtk_text_tag_table_lookup (table, "italic");
-      self->bold = gtk_text_tag_table_lookup (table, "bold");
-      self->head_1 = gtk_text_tag_table_lookup (table, "head_1");
-      self->head_2 = gtk_text_tag_table_lookup (table, "head_2");
-      self->head_3 = gtk_text_tag_table_lookup (table, "head_3");
-      self->strikethrough = gtk_text_tag_table_lookup (table, "strikethrough");
-      self->list_indent = gtk_text_tag_table_lookup (table, "list_indent");
-      self->link = gtk_text_tag_table_lookup (table, "link");
-      self->link_text = gtk_text_tag_table_lookup (table, "link-text");
-      return;
-    }
-*/
   self->italic = gtk_text_buffer_create_tag (self->buffer,
                                              "italic",
                                              "style",
@@ -278,18 +259,24 @@ gtd_markup_renderer_populate_tag_table (GtdMarkupRenderer *self)
                                              "head_1",
                                              "weight",
                                              PANGO_WEIGHT_BOLD,
+                                             "scale",
+                                             PANGO_SCALE_XX_LARGE,
                                              NULL);
 
   self->head_2 = gtk_text_buffer_create_tag (self->buffer,
                                              "head_2",
                                              "weight",
                                              PANGO_WEIGHT_BOLD,
+                                             "scale",
+                                             PANGO_SCALE_SMALL,
                                              NULL);
 
   self->head_3 = gtk_text_buffer_create_tag (self->buffer,
                                              "head_3",
                                              "weight",
                                              PANGO_WEIGHT_BOLD,
+                                             "scale",
+                                             PANGO_SCALE_X_SMALL,
                                              NULL);
 
   self->strikethrough = gtk_text_buffer_create_tag (self->buffer,

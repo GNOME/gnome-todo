@@ -38,6 +38,8 @@ void                 gtd_markup_renderer_populate_tag_table      (GtdMarkupRende
 
 void                 gtd_markup_renderer_clear_markup            (GtdMarkupRenderer  *self);
 
+void                 gtd_markup_renderer_setup_callbacks (GtdMarkupRenderer  *self);
+
 G_END_DECLS
 
 #endif /* GTD_MARKUP_RENDERER_H */

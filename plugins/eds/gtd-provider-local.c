@@ -88,7 +88,7 @@ gtd_provider_local_create_source (GtdProviderEds *provider)
     {
       g_warning ("%s: %s: %s",
                  G_STRFUNC,
-                 _("Error creating new task list"),
+                 "Error creating new task list",
                  error->message);
 
       gtd_manager_emit_error_message (gtd_manager_get_default (),

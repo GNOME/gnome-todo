@@ -161,7 +161,7 @@ save_task_list_finished_cb (GObject      *source,
     {
       g_warning ("%s: %s: %s",
                  G_STRFUNC,
-                 _("Error saving task list"),
+                 "Error saving task list",
                  error->message);
       g_clear_error (&error);
     }

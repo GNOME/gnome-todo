@@ -105,7 +105,7 @@ emit_generic_error (GError *error)
 {
   g_warning ("%s: %s: %s",
              G_STRFUNC,
-             _("Error while opening Todo.txt"),
+             "Error while opening Todo.txt",
              error->message);
 
   gtd_manager_emit_error_message (gtd_manager_get_default (),
@@ -240,7 +240,7 @@ gtd_provider_todo_txt_load_tasks (GtdProviderTodoTxt *self)
         {
           g_warning ("%s: %s: %s",
                      G_STRFUNC,
-                     _("Error while reading a line from Todo.txt"),
+                     "Error while reading a line from Todo.txt",
                      error->message);
 
           gtd_manager_emit_error_message (gtd_manager_get_default (),

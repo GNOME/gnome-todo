@@ -22,7 +22,6 @@ plugins/eds/edit-pane.ui
 plugins/eds/gtd-plugin-eds.c
 plugins/eds/gtd-provider-eds.c
 plugins/eds/gtd-provider-local.c
-plugins/eds/gtd-task-list-eds.c
 plugins/scheduled-panel/gtd-panel-scheduled.c
 plugins/score/score/__init__.py
 plugins/today-panel/gtd-panel-today.c

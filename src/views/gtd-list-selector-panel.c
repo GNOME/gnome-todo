@@ -185,7 +185,7 @@ gtd_list_selector_panel_list_color_set (GtkColorChooser      *button,
 
   g_debug ("%s: %s: %s",
            G_STRFUNC,
-           _("Setting new color for task list"),
+           "Setting new color for task list",
            gtd_task_list_get_name (list));
 
   gtk_color_chooser_get_rgba (button, &new_color);

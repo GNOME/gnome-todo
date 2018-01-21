@@ -240,7 +240,7 @@ gtd_plugin_eds_goa_client_finish_cb (GObject      *client,
     {
       g_warning ("%s: %s: %s",
                  G_STRFUNC,
-                 _("Error loading GNOME Online Accounts"),
+                 "Error loading GNOME Online Accounts",
                  error->message);
 
       gtd_manager_emit_error_message (gtd_manager_get_default (),
@@ -271,7 +271,7 @@ gtd_plugin_eds_source_registry_finish_cb (GObject      *source_object,
   if (error)
     {
       g_warning ("%s: %s",
-                 _("Error loading Evolution-Data-Server backend"),
+                 "Error loading Evolution-Data-Server backend",
                  error->message);
 
       g_clear_error (&error);

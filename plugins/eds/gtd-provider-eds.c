@@ -161,7 +161,7 @@ gtd_provider_eds_fill_task_list (GObject      *client,
     {
       g_warning ("%s: %s: %s",
                  G_STRFUNC,
-                 _("Error fetching tasks from list"),
+                 "Error fetching tasks from list",
                  error->message);
 
       gtd_manager_emit_error_message (gtd_manager_get_default (),
@@ -199,7 +199,7 @@ gtd_provider_eds_on_client_connected (GObject      *source_object,
     {
       g_debug ("%s: %s (%s): %s",
                G_STRFUNC,
-               _("Failed to connect to task list"),
+               "Failed to connect to task list",
                e_source_get_uid (source),
                error->message);
 
@@ -255,7 +255,7 @@ gtd_provider_eds_on_client_connected (GObject      *source_object,
 
   g_debug ("%s: %s (%s)",
            G_STRFUNC,
-           _("Task list source successfully connected"),
+           "Task list source successfully connected",
            e_source_get_display_name (source));
 }
 
@@ -364,7 +364,7 @@ gtd_manager__invoke_authentication (GObject      *source_object,
     {
       g_warning ("%s: %s (%s): %s",
                  G_STRFUNC,
-                 _("Failed to prompt for credentials"),
+                 "Failed to prompt for credentials",
                  e_source_get_uid (source),
                  error->message);
     }
@@ -387,7 +387,7 @@ gtd_provider_local_credentials_prompt_done (GObject      *source_object,
     {
       g_warning ("%s: %s '%s': %s",
                  G_STRFUNC,
-                 _("Failed to prompt for credentials for"),
+                 "Failed to prompt for credentials for",
                  e_source_get_display_name (source),
                  error->message);
 
@@ -441,7 +441,7 @@ gtd_provider_eds_credentials_required (ESourceRegistry          *registry,
     {
       g_warning ("%s: %s '%s': %s",
                  G_STRFUNC,
-                 _("Authentication failure"),
+                 "Authentication failure",
                  e_source_get_display_name (source),
                  error->message);
     }
@@ -480,7 +480,7 @@ gtd_provider_eds_load_registry (GtdProviderEds  *provider)
 
   if (error != NULL)
     {
-      g_warning ("%s: %s", _("Error loading task manager"), error->message);
+      g_warning ("%s: %s", "Error loading task manager", error->message);
       g_error_free (error);
       return;
     }

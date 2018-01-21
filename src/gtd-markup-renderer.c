@@ -49,7 +49,7 @@ enum
 {
   PROP_0,
   PROP_BUF,
-  LAST_PROP 
+  LAST_PROP
 };
 
 static void
@@ -331,4 +331,22 @@ gtd_markup_renderer_render_markup (GtdMarkupRenderer *self)
   apply_markup_tag (self, self->list_indent, LIST, start, end, TRUE, FALSE);
 
   render_markup_links (self, start, end, self->link, self->link_text);
+}
+
+void
+gtd_markup_renderer_clear_markup (GtdMarkupRenderer *self)
+{
+  GtkTextTagTable *table;
+
+  table = gtk_text_buffer_get_tag_table (self->buffer);
+
+  gtk_text_tag_table_remove (table, self->italic);
+  gtk_text_tag_table_remove (table, self->bold);
+  gtk_text_tag_table_remove (table, self->head_1);
+  gtk_text_tag_table_remove (table, self->head_2);
+  gtk_text_tag_table_remove (table, self->head_3);
+  gtk_text_tag_table_remove (table, self->list_indent);
+  gtk_text_tag_table_remove (table, self->strikethrough);
+  gtk_text_tag_table_remove (table, self->link);
+  gtk_text_tag_table_remove (table, self->link_text);
 }

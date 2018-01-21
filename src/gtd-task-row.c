@@ -264,6 +264,8 @@ on_text_changed (GtkTextBuffer *buffer,
 {
   GtdMarkupRenderer *renderer = GTD_MARKUP_RENDERER (user_data);
 
+  gtd_markup_renderer_clear_markup (renderer);
+  gtd_markup_renderer_populate_tag_table (renderer);
   gtd_markup_renderer_render_markup (renderer);
 }
 

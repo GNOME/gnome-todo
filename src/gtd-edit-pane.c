@@ -211,6 +211,8 @@ gtd_edit_pane_dispose (GObject *object)
 {
   GtdEditPane *self = (GtdEditPane *) object;
 
+//  g_clear_object (&self->renderer);
+
   if (self->task)
     gtd_edit_pane_set_task (GTD_EDIT_PANE (object), NULL);
 
@@ -386,8 +388,12 @@ gtd_edit_pane_set_task (GtdEditPane *self,
                                                        self->priority_combo,
                                                        "active",
                                                        G_BINDING_BIDIRECTIONAL);
-
     }
-
   g_object_notify (G_OBJECT (self), "task");
+}
+
+GtkTextView*
+gtd_edit_pane_get_text_view (GtdEditPane *self)
+{
+  return self->notes_textview;
 }

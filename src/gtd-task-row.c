@@ -19,6 +19,7 @@
 #include "gtd-edit-pane.h"
 #include "gtd-expandable-entry.h"
 #include "gtd-manager.h"
+#include "gtd-markup-renderer.h"
 #include "gtd-provider.h"
 #include "gtd-rows-common-private.h"
 #include "gtd-task-row.h"
@@ -106,6 +107,7 @@ create_transient_row (GtdTaskRow *self)
 
   return GTK_WIDGET (new_row);
 }
+
 
 static void
 set_cursor (GtkWidget   *widget,
@@ -942,4 +944,22 @@ gtd_task_row_get_x_offset (GtdTaskRow *self)
     return gtk_widget_get_allocated_width (GTK_WIDGET (self)) - self->clicked_x;
   else
     return self->clicked_x;
+}
+
+void
+gtd_task_row_set_markup_renderer (GtdTaskRow         *row,
+                                  GtdMarkupRenderer **renderer)
+{
+  GtkTextView   *view;
+
+  view = gtd_edit_pane_get_text_view (GTD_EDIT_PANE (row->edit_panel));
+
+  *renderer = g_object_new (GTD_TYPE_MARKUP_RENDERER,
+                            "textview",
+                            view,
+                            NULL);
+
+  gtd_markup_renderer_populate_tag_table (*renderer);
+  gtd_markup_renderer_render_markup (*renderer);
+  gtd_markup_renderer_setup_callbacks (*renderer);
 }

@@ -37,6 +37,8 @@ GtdTask*             gtd_edit_pane_get_task                      (GtdEditPane   
 void                 gtd_edit_pane_set_task                      (GtdEditPane        *self,
                                                                   GtdTask            *task);
 
+GtkTextView*         gtd_edit_pane_get_text_view                 (GtdEditPane        *self);
+
 G_END_DECLS
 
 #endif /* GTD_EDIT_PANE_H */

@@ -410,7 +410,6 @@ gtd_markup_renderer_populate_tag_table (GtdMarkupRenderer *self)
   GtkTextBuffer *buffer;
 
   buffer = gtk_text_view_get_buffer (self->view);
-  g_warning ("Populating Tag Table");
 
   self->italic = gtk_text_buffer_create_tag (buffer,
                                              "italic",
@@ -445,7 +444,7 @@ gtd_markup_renderer_populate_tag_table (GtdMarkupRenderer *self)
                                              "weight",
                                              PANGO_WEIGHT_BOLD,
                                              "scale",
-                                             PANGO_SCALE_X_SMALL,
+                                             PANGO_SCALE_SMALL,
                                              NULL);
 
   self->strikethrough = gtk_text_buffer_create_tag (buffer,

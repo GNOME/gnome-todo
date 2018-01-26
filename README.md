@@ -1,6 +1,6 @@
 # GNOME To Do
 
-GNOME To Do is a simple, intuitive and yet powerfull application to manage your
+GNOME To Do is a simple, intuitive and yet powerful application to manage your
 personal tasks. It uses GNOME technologies and has complete integration with the
 GNOME desktop environment.
 

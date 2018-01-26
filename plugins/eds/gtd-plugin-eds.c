@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define G_LOG_DOMAIN "Evolution Data Server"
+#define G_LOG_DOMAIN "GtdPluginEds"
 
 #include "gtd-plugin-eds.h"
 #include "gtd-provider-goa.h"

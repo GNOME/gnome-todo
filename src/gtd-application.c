@@ -16,12 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
+#define G_LOG_DOMAIN "GtdApplication"
+
 #include "config.h"
-#endif
 
 #include "gtd-application.h"
 #include "gtd-initial-setup-window.h"
+#include "gtd-log.h"
 #include "gtd-manager.h"
 #include "gtd-manager-protected.h"
 #include "gtd-plugin-dialog.h"
@@ -67,7 +68,9 @@ static void           gtd_application_quit                        (GSimpleAction
 G_DEFINE_TYPE (GtdApplication, gtd_application, GTK_TYPE_APPLICATION)
 
 static GOptionEntry cmd_options[] = {
-  { "quit", 'q', 0, G_OPTION_ARG_NONE, NULL, N_("Quit GNOME To Do"), NULL }
+  { "quit", 'q', 0, G_OPTION_ARG_NONE, NULL, N_("Quit GNOME To Do"), NULL },
+  { "debug", 'd', 0, G_OPTION_ARG_NONE, NULL, N_("Enable debug messages"), NULL },
+  { NULL }
 };
 
 static const GActionEntry gtd_application_entries[] = {
@@ -298,6 +301,9 @@ gtd_application_command_line (GApplication            *app,
   GVariantDict *options;
 
   options = g_application_command_line_get_options_dict (command_line);
+
+  if (g_variant_dict_contains (options, "debug"))
+    gtd_log_init ();
 
   if (g_variant_dict_contains (options, "quit"))
     {

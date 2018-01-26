@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define G_LOG_DOMAIN "GtdListSelectorItem"
+
 #include "gtd-enum-types.h"
 #include "gtd-task-list.h"
 #include "gtd-list-selector-item.h"

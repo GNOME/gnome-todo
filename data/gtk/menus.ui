@@ -3,11 +3,6 @@
   <!-- interface-requires gtk+ 3.0 -->
   <menu id="app-menu">
     <section>
-      <item>
-        <attribute name="label" translatable="yes">New List…</attribute>
-        <attribute name="action">win.new-list</attribute>
-        <attribute name="accel">&lt;Primary&gt;n</attribute>
-      </item>
       <!--
       <item>
         <attribute name="label" translatable="yes">Change default storage location…</attribute>

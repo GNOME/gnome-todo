@@ -9,34 +9,34 @@ plugins_conf.set('VERSION', gnome_todo_version)
 
 subdir('eds')
 
-if get_option('enable-background-plugin')
+if get_option('background_plugin')
   subdir('background')
 endif
 
-if get_option('enable-dark-theme-plugin')
+if get_option('dark_theme_plugin')
   subdir('dark-theme')
 endif
 
-if get_option('enable-scheduled-panel-plugin')
+if get_option('scheduled_panel_plugin')
   subdir('scheduled-panel')
 endif
 
-if get_option('enable-score-plugin')
+if get_option('score_plugin')
   subdir('score')
 endif
 
-if get_option('enable-today-panel-plugin')
+if get_option('today_panel_plugin')
   subdir('today-panel')
 endif
 
-if get_option('enable-unscheduled-panel-plugin')
+if get_option('unscheduled_panel_plugin')
   subdir('unscheduled-panel')
 endif
 
-if get_option('enable-todo-txt-plugin')
+if get_option('todo_txt_plugin')
   subdir('todo-txt')
 endif
 
-if get_option('enable-todoist-plugin')
+if get_option('todoist_plugin')
   subdir('todoist')
 endif

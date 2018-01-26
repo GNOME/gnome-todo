@@ -37,6 +37,7 @@ revision = 0
 libversion = '@0@.@1@.@2@'.format(soversion, current, revision)
 
 gnome_todo_debug = get_option('buildtype').contains('debug')
+gnome_todo_tracing = get_option('tracing')
 
 cc = meson.get_compiler('c')
 
@@ -46,6 +47,7 @@ config_h.set_quoted('GETTEXT_PACKAGE', meson.project_name())
 
 # debug options
 config_h.set('GNOME_TODO_ENABLE_DEBUG', gnome_todo_debug)
+config_h.set('ENABLE_TRACING', gnome_todo_tracing)
 config_h.set('NDEBUG', not gnome_todo_debug)
 
 # package
@@ -179,7 +181,7 @@ subdir('src')
 subdir('data')
 subdir('po')
 
-enable_gtk_doc = get_option('enable-gtk-doc')
+enable_gtk_doc = get_option('gtk_doc')
 if enable_gtk_doc
   subdir('doc/reference')
 endif
@@ -194,13 +196,13 @@ output += '        global flags:  ' + ' '.join(compiler_flags) + ' '.join(get_op
 output += '        release:       ' + (not gnome_todo_debug).to_string() + '\n'
 output += '        documentation: ' + enable_gtk_doc.to_string() + '\n'
 output += '    Plugins:\n\n'
-output += '        Dark theme .............. ' + get_option('enable-dark-theme-plugin').to_string() + '\n'
-output += '        Run in Background ....... ' + get_option('enable-background-plugin').to_string() + '\n'
-output += '        Scheduled panel ......... ' + get_option('enable-scheduled-panel-plugin').to_string() + '\n'
-output += '        Score ................... ' + get_option('enable-score-plugin').to_string() + '\n'
-output += '        Today panel ............. ' + get_option('enable-today-panel-plugin').to_string() + '\n'
-output += '        Unscheduled panel ....... ' + get_option('enable-unscheduled-panel-plugin').to_string() + '\n'
-output += '        Todo.txt ................ ' + get_option('enable-todo-txt-plugin').to_string() + '\n'
-output += '        Todoist ................. ' + get_option('enable-todoist-plugin').to_string() + '\n'
+output += '        Dark theme .............. ' + get_option('dark_theme_plugin').to_string() + '\n'
+output += '        Run in Background ....... ' + get_option('background_plugin').to_string() + '\n'
+output += '        Scheduled panel ......... ' + get_option('scheduled_panel_plugin').to_string() + '\n'
+output += '        Score ................... ' + get_option('score_plugin').to_string() + '\n'
+output += '        Today panel ............. ' + get_option('today_panel_plugin').to_string() + '\n'
+output += '        Unscheduled panel ....... ' + get_option('unscheduled_panel_plugin').to_string() + '\n'
+output += '        Todo.txt ................ ' + get_option('todo_txt_plugin').to_string() + '\n'
+output += '        Todoist ................. ' + get_option('todoist_plugin').to_string() + '\n'
 output += '        Now type \'ninja -C ' + meson.build_root() + '\' to build ' + meson.project_name()
 message(output)

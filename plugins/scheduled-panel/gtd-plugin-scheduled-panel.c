@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define G_LOG_DOMAIN "Scheduled"
+#define G_LOG_DOMAIN "GtdPluginScheduledPanel"
 
 #include "gtd-panel-scheduled.h"
 

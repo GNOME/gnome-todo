@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define G_LOG_DOMAIN "GtdActivatable"
+
 #include "gtd-activatable.h"
 #include "gtd-panel.h"
 #include "gtd-provider.h"

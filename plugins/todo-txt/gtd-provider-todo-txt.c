@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define G_LOG_DOMAIN "GtdProviderTodoTxt"
+
 #include "gtd-provider-todo-txt.h"
 #include "gtd-plugin-todo-txt.h"
 #include "gtd-todo-txt-parser.h"

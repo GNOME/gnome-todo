@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define G_LOG_DOMAIN "GtdProviderPopover"
+
 #include "gtd-manager.h"
 #include "interfaces/gtd-provider.h"
 #include "gtd-provider-popover.h"

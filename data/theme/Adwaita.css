@@ -78,8 +78,9 @@ taskrow.priority-hight:dir(rtl)  { border-right: solid 6px #cc0000; padding-righ
 
 /* task title entry */
 taskrow entry                                      { border: none; background: none; }
-taskrow:not(.new-task-row) entry                   { border: solid 1px transparent; }
-taskrow:not(.new-task-row) entry:hover:not(:focus) { border: solid 1px @borders; }
+taskrow.new-task-row entry                         { padding: 0 18px;                }
+taskrow:not(.new-task-row) entry                   { border: solid 1px transparent;  }
+taskrow:not(.new-task-row) entry:hover:not(:focus) { border: solid 1px @borders;     }
 
 /* line-through complete tasks */
 taskrow.complete entry.title { text-decoration-line: line-through; }

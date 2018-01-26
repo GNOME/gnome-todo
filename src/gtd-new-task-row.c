@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define G_LOG_DOMAIN "GtdNewTaskRow"
+
 #include "gtd-manager.h"
 #include "gtd-new-task-row.h"
 #include "gtd-provider.h"

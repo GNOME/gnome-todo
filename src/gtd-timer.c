@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define G_LOG_DOMAIN "GtdTimer"
+
 #include "gtd-timer.h"
 
 #include <gio/gio.h>

@@ -4,6 +4,7 @@
 #
 # Jordi Mas i Hernàndez <jmas@softcatala.org>, 2015
 # Jordi Serratosa <jordis@softcatala.cat>, 2017.
+# Gil Forcada Codinachs <gil.gnome@gmail.com>, 2018.
 #
 # To Do -> Per fer
 # Backend -> dorsal
@@ -11,22 +12,21 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product=gnome-"
-"todo&keywords=I18N+L10N&component=General\n"
-"POT-Creation-Date: 2017-09-06 00:23+0000\n"
-"PO-Revision-Date: 2017-09-01 01:03+0200\n"
-"Last-Translator: Jordi Mas <jmas@softcaatala.org>\n"
-"Language-Team: \n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
+"POT-Creation-Date: 2018-01-19 00:56+0000\n"
+"PO-Revision-Date: 2018-01-22 00:15+0100\n"
+"Last-Translator: Gil Forcada Codinachs <gil.gnome@gmail.com>\n"
+"Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.11\n"
+"X-Generator: Gtranslator 2.91.6\n"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in:7
-#: data/org.gnome.Todo.desktop.in:3 src/gtd-application.c:152
-#: src/gtd-application.c:178 src/gtd-window.c:950 src/gtd-window.c:985
+#: data/org.gnome.Todo.desktop.in:3 src/gtd-application.c:154
+#: src/gtd-application.c:178 src/gtd-window.c:954 src/gtd-window.c:989
 msgid "To Do"
 msgstr "Per fer"
 
@@ -67,19 +67,15 @@ msgstr "Connectors disponibles pel GNOME Per fer"
 msgid "Visualizing tasks for today on GNOME To Do’s Today panel"
 msgstr "Visualització de tasques per avui al quadre d'avui del GNOME Per fer"
 
-#: data/gtk/menus.ui:7
-msgid "New List…"
-msgstr "Llista nova…"
-
-#: data/gtk/menus.ui:20 data/ui/plugin-dialog.ui:75
+#: data/gtk/menus.ui:15 data/ui/plugin-dialog.ui:75
 msgid "Extensions"
 msgstr "Extensions"
 
-#: data/gtk/menus.ui:27
+#: data/gtk/menus.ui:22
 msgid "_About"
 msgstr "_Quant a"
 
-#: data/gtk/menus.ui:31
+#: data/gtk/menus.ui:26
 msgid "_Quit"
 msgstr "_Surt"
 
@@ -157,59 +153,51 @@ msgstr "El selector de llista actual"
 msgid "The current list selector. Can be “grid” or “list”."
 msgstr "El selector de llista actual. Pot ser «graella» o «llista»."
 
-#: data/ui/edit-pane.ui:24 plugins/eds/edit-pane.ui:259
-msgctxt "taskdate"
-msgid "None"
-msgstr "Cap"
-
-#: data/ui/edit-pane.ui:94 plugins/eds/edit-pane.ui:43 src/gtd-window.c:546
-msgid "Details"
-msgstr "Detalls"
-
-#: data/ui/edit-pane.ui:125
+#: data/ui/edit-pane.ui:43
 msgid "_Notes"
 msgstr "_Notes"
 
-#: data/ui/edit-pane.ui:168
+#: data/ui/edit-pane.ui:92
 msgid "D_ue Date"
 msgstr "_Data de venciment"
 
-#: data/ui/edit-pane.ui:188
+#: data/ui/edit-pane.ui:110
+msgid "_Today"
+msgstr "_Avui"
+
+#: data/ui/edit-pane.ui:120
+msgid "To_morrow"
+msgstr "_Demà"
+
+#: data/ui/edit-pane.ui:168
 msgid "_Priority"
 msgstr "_Prioritat"
 
-#: data/ui/edit-pane.ui:208 plugins/eds/edit-pane.ui:195
+#: data/ui/edit-pane.ui:185 plugins/eds/edit-pane.ui:195
 msgctxt "taskpriority"
 msgid "None"
 msgstr "Cap"
 
-#: data/ui/edit-pane.ui:209 plugins/eds/edit-pane.ui:196
+#: data/ui/edit-pane.ui:186 plugins/eds/edit-pane.ui:196
 msgid "Low"
 msgstr "Baixa"
 
-#: data/ui/edit-pane.ui:210 plugins/eds/edit-pane.ui:197
+#: data/ui/edit-pane.ui:187 plugins/eds/edit-pane.ui:197
 msgid "Medium"
 msgstr "Mitjà"
 
-#: data/ui/edit-pane.ui:211 plugins/eds/edit-pane.ui:198
+#: data/ui/edit-pane.ui:188 plugins/eds/edit-pane.ui:198
 msgid "High"
 msgstr "Alta"
 
-#: data/ui/edit-pane.ui:222 data/ui/list-selector-panel.ui:93
+#: data/ui/edit-pane.ui:196 data/ui/list-selector-panel.ui:93
 msgid "_Delete"
 msgstr "_Suprimeix"
 
-#: data/ui/edit-pane.ui:246
-msgid "_Today"
-msgstr "_Avui"
-
-#: data/ui/edit-pane.ui:257
-msgid "To_morrow"
-msgstr "_Demà"
-
-#: data/ui/edit-pane.ui:268
-msgid "Next _Week"
-msgstr "_Propera setmana"
+#: data/ui/edit-pane.ui:242 plugins/eds/edit-pane.ui:259
+msgctxt "taskdate"
+msgid "None"
+msgstr "Cap"
 
 #: data/ui/initial-setup.ui:25
 msgid "Welcome"
@@ -219,8 +207,12 @@ msgstr "Benvinguts"
 msgid "Log in to online accounts to access your tasks"
 msgstr "Entreu als comptes en línia per accedir a les tasques"
 
+#: data/ui/initial-setup.ui:67
+msgid "To Do Setup"
+msgstr "Configuració del Per fer"
+
 #: data/ui/initial-setup.ui:70 data/ui/provider-popover.ui:43
-#: data/ui/window.ui:71
+#: data/ui/window.ui:74
 msgid "_Cancel"
 msgstr "_Cancel·la"
 
@@ -232,7 +224,7 @@ msgstr "_Fet"
 msgid "_Rename"
 msgstr "_Canvia el nom"
 
-#: data/ui/list-selector-panel.ui:119 src/views/gtd-list-selector-panel.c:470
+#: data/ui/list-selector-panel.ui:119 src/views/gtd-list-selector-panel.c:473
 msgid "Lists"
 msgstr "Llistes"
 
@@ -248,16 +240,16 @@ msgstr "Nom de la llista de tasques"
 msgid "_New List"
 msgstr "_Llista nova"
 
-#: data/ui/list-view.ui:111
+#: data/ui/list-view.ui:113
 msgid "Show or hide completed tasks"
 msgstr "Mostra o amaga les tasques completades"
 
-#: data/ui/list-view.ui:137 src/gtd-task-list-view.c:784
-#: src/gtd-task-list-view.c:789
+#: data/ui/list-view.ui:139 src/gtd-task-list-view.c:755
+#: src/gtd-task-list-view.c:760
 msgid "Done"
 msgstr "Fet"
 
-#: data/ui/new-task-row.ui:39
+#: data/ui/new-task-row.ui:29
 msgid "New task…"
 msgstr "Tasca nova…"
 
@@ -309,14 +301,14 @@ msgstr "Microsoft Exchange"
 msgid "Or you can just store your tasks on this computer"
 msgstr "O podeu simplement emmagatzemar les tasques en aquest PC"
 
-#: plugins/background/gtd-plugin-background.c:148
+#: plugins/background/gtd-plugin-background.c:150
 #, c-format
 msgid "%1$s and one more task"
 msgid_plural "%1$s and %2$d other tasks"
 msgstr[0] "%1$s i una tasca més"
 msgstr[1] "%1$s i %2$d altres tasques"
 
-#: plugins/background/gtd-plugin-background.c:247
+#: plugins/background/gtd-plugin-background.c:249
 #, c-format
 msgid "You have %d task for today"
 msgid_plural "You have %d tasks for today"
@@ -355,6 +347,10 @@ msgstr "Mostra les notificacions"
 msgid "When To Do runs, show a startup notification"
 msgstr "Quan s'executi Per fer, mostra una notificació d'inici"
 
+#: plugins/eds/edit-pane.ui:43 src/gtd-window.c:548
+msgid "Details"
+msgstr "Detalls"
+
 #: plugins/eds/edit-pane.ui:76
 msgid "Notes"
 msgstr "Notes"
@@ -379,77 +375,83 @@ msgstr "S'ha produït un error en carregar els comptes en línia del GNOME"
 msgid "Error loading Evolution-Data-Server backend"
 msgstr "S'ha produït un error en carregar el dorsal Evolution-Data-Server"
 
-#: plugins/eds/gtd-provider-eds.c:136 plugins/eds/gtd-provider-eds.c:140
+#: plugins/eds/gtd-provider-eds.c:164 plugins/eds/gtd-provider-eds.c:168
 msgid "Error fetching tasks from list"
 msgstr "S'ha produït un error en recuperar les tasques de la llista"
 
-#: plugins/eds/gtd-provider-eds.c:174 plugins/eds/gtd-provider-eds.c:179
+#: plugins/eds/gtd-provider-eds.c:202 plugins/eds/gtd-provider-eds.c:207
 msgid "Failed to connect to task list"
 msgstr "S'ha produït un error en connectar a la llista de tasques"
 
-#: plugins/eds/gtd-provider-eds.c:227
+#: plugins/eds/gtd-provider-eds.c:258
 msgid "Task list source successfully connected"
 msgstr "S'ha connectat la font de la llista de tasques"
 
-#: plugins/eds/gtd-provider-eds.c:336
+#: plugins/eds/gtd-provider-eds.c:367
 msgid "Failed to prompt for credentials"
 msgstr "S'ha produït un error en demanar les credencials"
 
-#: plugins/eds/gtd-provider-eds.c:359
+#: plugins/eds/gtd-provider-eds.c:390
 msgid "Failed to prompt for credentials for"
 msgstr "S'ha produït un error en demanar les credencials per"
 
-#: plugins/eds/gtd-provider-eds.c:413
+#: plugins/eds/gtd-provider-eds.c:444
 msgid "Authentication failure"
 msgstr "Ha fallat l'autenticació"
 
-#: plugins/eds/gtd-provider-eds.c:487
+#: plugins/eds/gtd-provider-eds.c:483
 msgid "Error loading task manager"
 msgstr "S'ha produït un error en carregar el gestor de tasques"
 
-#: plugins/eds/gtd-provider-eds.c:573 plugins/eds/gtd-provider-eds.c:581
-msgid "Error creating task"
-msgstr "S'ha produït un error en crear la tasca"
-
-#: plugins/eds/gtd-provider-eds.c:623 plugins/eds/gtd-provider-eds.c:627
-msgid "Error updating task"
-msgstr "S'ha produït un error en actualitzar la tasca"
-
-#: plugins/eds/gtd-provider-eds.c:661 plugins/eds/gtd-provider-eds.c:665
+#: plugins/eds/gtd-provider-eds.c:628 plugins/eds/gtd-provider-eds.c:737
 msgid "Error removing task"
 msgstr "S'ha produït un error en suprimir la tasca"
 
-#: plugins/eds/gtd-provider-eds.c:691 plugins/eds/gtd-provider-eds.c:695
+#: plugins/eds/gtd-provider-eds.c:686
+msgid "Error updating task"
+msgstr "S'ha produït un error en actualitzar la tasca"
+
+#: plugins/eds/gtd-provider-eds.c:777
 msgid "Error creating task list"
 msgstr "S'ha produït un error en crear una llista de tasques"
 
-#: plugins/eds/gtd-provider-eds.c:716 plugins/eds/gtd-provider-eds.c:720
+#: plugins/eds/gtd-provider-eds.c:795
+msgid "Error creating remote task list"
+msgstr "S'ha produït un error en crear una llista de tasques remota"
+
+#: plugins/eds/gtd-provider-eds.c:832
+msgid "Error updating task list"
+msgstr "S'ha produït un error en actualitzar la llista de tasques"
+
+#: plugins/eds/gtd-provider-eds.c:864
 msgid "Error removing task list"
 msgstr "S'ha produït un error en suprimir la llista de tasques"
 
-#: plugins/eds/gtd-provider-eds.c:779 plugins/eds/gtd-provider-eds.c:783
-#: plugins/eds/gtd-task-list-eds.c:69
-msgid "Error saving task list"
-msgstr "S'ha produït un error en desar la llista de tasques"
+#: plugins/eds/gtd-provider-eds.c:878
+msgid "Error removing remote task list"
+msgstr "S'ha produït un error en suprimir la llista de tasques remota"
 
-#: plugins/eds/gtd-provider-local.c:61
+#: plugins/eds/gtd-provider-local.c:50
 msgid "Local"
 msgstr "Local"
 
-#: plugins/eds/gtd-provider-local.c:67
+#: plugins/eds/gtd-provider-local.c:56
 msgid "On This Computer"
 msgstr "En aquest ordinador"
 
-#: plugins/eds/gtd-provider-local.c:134 plugins/eds/gtd-provider-local.c:138
+#: plugins/eds/gtd-provider-local.c:91 plugins/eds/gtd-provider-local.c:95
 msgid "Error creating new task list"
 msgstr "S'ha produït un error en crear una llista nova de tasques"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:93 src/gtd-edit-pane.c:217
-#: src/gtd-task-row.c:374
+#: plugins/eds/gtd-task-list-eds.c:164
+msgid "Error saving task list"
+msgstr "S'ha produït un error en desar la llista de tasques"
+
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:89 src/gtd-edit-pane.c:161
 msgid "No date set"
 msgstr "No s'ha establert cap data"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:101 src/gtd-task-row.c:352
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:97 src/gtd-task-row.c:402
 #, c-format
 msgid "Yesterday"
 msgid_plural "%d days ago"
@@ -457,28 +459,28 @@ msgstr[0] "Ahir"
 msgstr[1] "Fa %d dies"
 
 #. Setup a title
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:105
-#: plugins/score/score/__init__.py:95 plugins/today-panel/gtd-panel-today.c:132
-#: plugins/today-panel/gtd-panel-today.c:137
-#: plugins/today-panel/gtd-panel-today.c:271 src/gtd-task-row.c:344
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:101
+#: plugins/score/score/__init__.py:95 plugins/today-panel/gtd-panel-today.c:134
+#: plugins/today-panel/gtd-panel-today.c:139
+#: plugins/today-panel/gtd-panel-today.c:273 src/gtd-task-row.c:394
 msgid "Today"
 msgstr "Avui"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:109 src/gtd-task-row.c:348
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:105 src/gtd-task-row.c:398
 msgid "Tomorrow"
 msgstr "Demà"
 
 #. Setup a title
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:365
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:370
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:507
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:356
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:361
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:498
 msgid "Scheduled"
 msgstr "Planificat"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:512
-#: plugins/today-panel/gtd-panel-today.c:276
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:503
+#: plugins/today-panel/gtd-panel-today.c:278
 #: plugins/unscheduled-panel/unscheduled-panel/__init__.py:52
-#: src/views/gtd-list-selector-panel.c:716
+#: src/views/gtd-list-selector-panel.c:714
 msgid "Clear completed tasks…"
 msgstr "Neteja les tasques completades…"
 
@@ -486,29 +488,29 @@ msgstr "Neteja les tasques completades…"
 msgid "No task completed today"
 msgstr "No s'ha completat cap tasca avui"
 
-#: plugins/todoist/gtd-provider-todoist.c:117
+#: plugins/todoist/gtd-provider-todoist.c:130
 msgid "Todoist"
 msgstr "Todoist"
 
-#: plugins/todoist/gtd-provider-todoist.c:197
-#: plugins/todoist/gtd-provider-todoist.c:429
+#: plugins/todoist/gtd-provider-todoist.c:198
+#: plugins/todoist/gtd-provider-todoist.c:422
 msgid "Error loading Todoist tasks"
 msgstr "S'ha produït un error en carregar les tasques de Todoist"
 
-#: plugins/todoist/gtd-provider-todoist.c:212
+#: plugins/todoist/gtd-provider-todoist.c:213
 msgid "Error fetching Todoist account key"
 msgstr "S'ha produït un error en recollir la clau del compte de Todoist"
 
-#: plugins/todoist/gtd-provider-todoist.c:213
+#: plugins/todoist/gtd-provider-todoist.c:214
 msgid "Please ensure that Todoist account is correctly configured."
 msgstr "Assegureu-vos que el compte de Todoist està configurat correctament."
 
-#: plugins/todoist/gtd-provider-todoist.c:426
+#: plugins/todoist/gtd-provider-todoist.c:419
 #, c-format
 msgid "Bad status code (%d) received. Please check your connection."
 msgstr "S'ha rebut un codi d'estat erroni (%d). Comproveu la connexió."
 
-#: plugins/todoist/gtd-provider-todoist.c:961
+#: plugins/todoist/gtd-provider-todoist.c:1070
 #, c-format
 msgid "Todoist: %s"
 msgstr "Todoist: %s"
@@ -534,43 +536,43 @@ msgstr "Selecciona un fitxer Perfer.txt formatat:"
 msgid "Select a file"
 msgstr "Selecciona un fitxer"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:75
+#: plugins/todo-txt/gtd-provider-todo-txt.c:77
 msgid "Todo.txt"
 msgstr "Perfer.txt"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:81
+#: plugins/todo-txt/gtd-provider-todo-txt.c:83
 msgid "On the Todo.txt file"
 msgstr "Al fitxer Perfer.txt"
 
+#: plugins/todo-txt/gtd-provider-todo-txt.c:108
 #: plugins/todo-txt/gtd-provider-todo-txt.c:112
-#: plugins/todo-txt/gtd-provider-todo-txt.c:116
 msgid "Error while opening Todo.txt"
 msgstr "S'ha produït un error en obrir Perfer.txt"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:263
-#: plugins/todo-txt/gtd-provider-todo-txt.c:267
+#: plugins/todo-txt/gtd-provider-todo-txt.c:243
+#: plugins/todo-txt/gtd-provider-todo-txt.c:247
 msgid "Error while reading a line from Todo.txt"
 msgstr "S'ha produït un error en llegir Perfer.txt"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:384
+#: plugins/todo-txt/gtd-provider-todo-txt.c:367
 msgid "Error while opening the file monitor. Todo.txt will not be monitored"
 msgstr ""
 "S'ha produït un error en obrir el fitxer de monitorització. Perfer.txt no "
 "serà monitoritzat."
 
-#: plugins/todo-txt/gtd-todo-txt-parser.c:309
+#: plugins/todo-txt/gtd-todo-txt-parser.c:306
 msgid "Incorrect date"
 msgstr "Data incorrecta"
 
-#: plugins/todo-txt/gtd-todo-txt-parser.c:310
+#: plugins/todo-txt/gtd-todo-txt-parser.c:307
 msgid "Please make sure the date in Todo.txt is valid."
 msgstr "Assegureu-vos que la data al fitxer Perfer.txt és vàlida."
 
-#: plugins/todo-txt/gtd-todo-txt-parser.c:341
+#: plugins/todo-txt/gtd-todo-txt-parser.c:338
 msgid "Unrecognized token in a Todo.txt line"
 msgstr "Testimoni no reconegut en una línia del Perfer.txt"
 
-#: plugins/todo-txt/gtd-todo-txt-parser.c:342
+#: plugins/todo-txt/gtd-todo-txt-parser.c:339
 msgid ""
 "To Do cannot recognize some tags in your Todo.txt file. Some tasks may not "
 "be loaded"
@@ -578,11 +580,11 @@ msgstr ""
 "PerFer no pot reconèixer algunes etiquetes al fitxer Perfer.txt. Potser no "
 "es carreguen algunes tasques"
 
-#: plugins/todo-txt/gtd-todo-txt-parser.c:353
+#: plugins/todo-txt/gtd-todo-txt-parser.c:350
 msgid "No task list found for some tasks"
 msgstr "No s'ha trobat la llista de tasques per algunes tasques"
 
-#: plugins/todo-txt/gtd-todo-txt-parser.c:354
+#: plugins/todo-txt/gtd-todo-txt-parser.c:351
 msgid ""
 "Some of the tasks in your Todo.txt file do not have a task list. To Do "
 "supports tasks with a task list. Please add a list to all your tasks"
@@ -611,126 +613,143 @@ msgstr "No programat"
 msgid "Unscheduled (%d)"
 msgstr "No programades (%d)"
 
-#: src/gtd-application.c:142
-#, c-format
-msgid "Copyright © %d The To Do authors"
-msgstr "Copyright © %d els autors del Per fer"
+#: src/gtd-application.c:71
+msgid "Quit GNOME To Do"
+msgstr "Surt del GNOME Per fer"
 
-#: src/gtd-application.c:147
-#, c-format
-msgid "Copyright © %d–%d The To Do authors"
-msgstr "Copyright © %d–%d els autors del Per fer"
+#: src/gtd-application.c:72
+msgid "Enable debug messages"
+msgstr "Habilita els missatges de depuració"
 
-#: src/gtd-application.c:159
+#: src/gtd-application.c:144
+#, c-format
+msgid "Copyright © %1$d The To Do authors"
+msgstr "Copyright © %1$d els autors del Per fer"
+
+#: src/gtd-application.c:149
+#, c-format
+msgid "Copyright © %1$d–%2$d The To Do authors"
+msgstr "Copyright © %1$d–%2$d els autors del Per fer"
+
+#: src/gtd-application.c:161
 msgid "translator-credits"
 msgstr "Jordi Mas i Hernàndez <jmas@softcatala.org>, 2015-2017"
 
-#: src/gtd-empty-list-widget.c:49
+#: src/gtd-empty-list-widget.c:51
 msgid "No more tasks left"
 msgstr "No hi ha més tasques"
 
-#: src/gtd-empty-list-widget.c:50
+#: src/gtd-empty-list-widget.c:52
 msgid "Nothing else to do here"
 msgstr "No hi ha més tasques a fer aquí"
 
-#: src/gtd-empty-list-widget.c:51
+#: src/gtd-empty-list-widget.c:53
 msgid "You made it!"
 msgstr "Ho heu aconseguit!"
 
-#: src/gtd-empty-list-widget.c:52
+#: src/gtd-empty-list-widget.c:54
 msgid "Looks like there’s nothing else left here"
 msgstr "Sembla que no hi ha més tasques a fer aquí"
 
-#: src/gtd-empty-list-widget.c:57
+#: src/gtd-empty-list-widget.c:59
 msgid "Get some rest now"
 msgstr "Descanseu una mica"
 
-#: src/gtd-empty-list-widget.c:58
+#: src/gtd-empty-list-widget.c:60
 msgid "Enjoy the rest of your day"
 msgstr "Gaudiu de la resta del dia"
 
-#: src/gtd-empty-list-widget.c:59
+#: src/gtd-empty-list-widget.c:61
 msgid "Good job!"
 msgstr "Bona feina!"
 
-#: src/gtd-empty-list-widget.c:60
+#: src/gtd-empty-list-widget.c:62
 msgid "Meanwhile, spread the love"
 msgstr "Mentrestant, repartiu amor"
 
-#: src/gtd-empty-list-widget.c:61
+#: src/gtd-empty-list-widget.c:63
 msgid "Working hard is always rewarded"
 msgstr "Treballar de valent sempre té recompensa"
 
-#: src/gtd-empty-list-widget.c:72
+#: src/gtd-empty-list-widget.c:74
 msgid "No tasks found"
 msgstr "No s'han trobat tasques"
 
-#: src/gtd-empty-list-widget.c:73
+#: src/gtd-empty-list-widget.c:75
 msgid "You can add tasks using the <b>+</b> above"
 msgstr "Podeu afegir tasques utilitzant <b>+</b> a sobre"
 
-#: src/gtd-plugin-dialog-row.c:95
+#: src/gtd-plugin-dialog-row.c:97
 msgid "Error loading plugin"
 msgstr "S'ha produït un error en carregar connector"
 
-#: src/gtd-plugin-dialog-row.c:95
+#: src/gtd-plugin-dialog-row.c:97
 msgid "Error unloading plugin"
 msgstr "S'ha produït un error en descarregar connector"
 
-#: src/gtd-task-list-view.c:612
+#: src/gtd-task-list-view.c:615
 msgid "Removing this task will also remove its subtasks. Remove anyway?"
 msgstr ""
 "Si se suprimeix aquesta tasca també se suprimiran les seves subtasques. "
 "Voleu suprimir-la?"
 
-#: src/gtd-task-list-view.c:615
+#: src/gtd-task-list-view.c:618
 msgid "Once removed, the tasks cannot be recovered."
 msgstr "Un cop suprimides, les llistes de tasques no es poden recuperar."
 
-#: src/gtd-task-list-view.c:618 src/views/gtd-list-selector-panel.c:391
+#: src/gtd-task-list-view.c:621 src/views/gtd-list-selector-panel.c:394
 msgid "Cancel"
 msgstr "Cancel·la"
 
-#: src/gtd-task-list-view.c:620
+#: src/gtd-task-list-view.c:623
 msgid "Remove"
 msgstr "Suprimeix"
 
-#: src/gtd-task-list-view.c:669
+#: src/gtd-task-list-view.c:671
 #, c-format
 msgid "Task <b>%s</b> removed"
 msgstr "S'ha suprimit la tasca <b>%s</b>"
 
-#: src/gtd-task-list-view.c:699
+#: src/gtd-task-list-view.c:695
 msgid "Undo"
 msgstr "Desfés"
 
-#: src/gtd-window.c:818
+#: src/gtd-window.c:822
 msgid "Loading your task lists…"
 msgstr "S'està carregant la llista de tasques…"
 
-#: src/gtd-window.c:944
+#: src/gtd-window.c:948
 msgid "Click a task list to select"
 msgstr "Fes clic a la tasca per seleccionar-la"
 
-#: src/views/gtd-list-selector-grid-item.c:234
+#: src/views/gtd-list-selector-grid-item.c:236
 msgid "No tasks"
 msgstr "Sense tasques"
 
-#: src/views/gtd-list-selector-panel.c:185
+#: src/views/gtd-list-selector-panel.c:188
 msgid "Setting new color for task list"
 msgstr "S'està establint el nou color per la llista de tasques"
 
-#: src/views/gtd-list-selector-panel.c:384
+#: src/views/gtd-list-selector-panel.c:387
 msgid "Remove the selected task lists?"
 msgstr "Voleu suprimir les llistes de tasques seleccionades?"
 
-#: src/views/gtd-list-selector-panel.c:387
+#: src/views/gtd-list-selector-panel.c:390
 msgid "Once removed, the task lists cannot be recovered."
 msgstr "Un cop suprimides, les llistes de tasques no es poden recuperar."
 
-#: src/views/gtd-list-selector-panel.c:399
+#: src/views/gtd-list-selector-panel.c:402
 msgid "Remove task lists"
 msgstr "Suprimeix la llista de tasques"
+
+#~ msgid "New List…"
+#~ msgstr "Llista nova…"
+
+#~ msgid "Next _Week"
+#~ msgstr "_Propera setmana"
+
+#~ msgid "Error creating task"
+#~ msgstr "S'ha produït un error en crear la tasca"
 
 #~ msgid "Todoist Plugin for GNOME To Do"
 #~ msgstr "Connector del Todoist pel GNOME Per fer"

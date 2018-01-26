@@ -35,6 +35,18 @@ struct _GtdProviderEdsClass
 {
   GtdObjectClass parent;
 
+  const gchar*       (*get_id)                                   (GtdProviderEds     *self);
+
+  const gchar*       (*get_name)                                 (GtdProviderEds     *self);
+
+  const gchar*       (*get_description)                          (GtdProviderEds     *self);
+
+  gboolean           (*get_enabled)                              (GtdProviderEds     *self);
+
+  GIcon*             (*get_icon)                                 (GtdProviderEds     *self);
+
+  ESource*           (*create_source)                            (GtdProviderEds     *self);
+
   gboolean           (*should_load_source)                       (GtdProviderEds     *provider,
                                                                   ESource            *source);
 };
@@ -42,34 +54,6 @@ struct _GtdProviderEdsClass
 GtdProviderEds*      gtd_provider_eds_new                        (ESourceRegistry    *registry);
 
 ESourceRegistry*     gtd_provider_eds_get_registry               (GtdProviderEds     *local);
-
-void                 gtd_provider_eds_create_task                (GtdProviderEds     *provider,
-                                                                  GtdTask            *task);
-
-void                 gtd_provider_eds_update_task                (GtdProviderEds     *provider,
-                                                                  GtdTask            *task);
-
-void                 gtd_provider_eds_remove_task                (GtdProviderEds     *provider,
-                                                                  GtdTask            *task);
-
-void                 gtd_provider_eds_create_task_list           (GtdProviderEds     *provider,
-                                                                  GtdTaskList        *list);
-
-void                 gtd_provider_eds_update_task_list           (GtdProviderEds     *provider,
-                                                                  GtdTaskList        *list);
-
-void                 gtd_provider_eds_remove_task_list           (GtdProviderEds     *provider,
-                                                                  GtdTaskList        *list);
-
-GList*               gtd_provider_eds_get_task_lists             (GtdProviderEds     *provider);
-
-GtdTaskList*         gtd_provider_eds_get_default_task_list      (GtdProviderEds     *provider);
-
-void                 gtd_provider_eds_set_default_task_list      (GtdProviderEds     *provider,
-                                                                  GtdTaskList        *list);
-
-GtdTask*             gtd_provider_eds_generate_task              (GtdProviderEds     *self);
-
 G_END_DECLS
 
 #endif /* GTD_PROVIDER_EDS_H */

@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define G_LOG_DOMAIN "GtdTaskListEds"
+
 #include "gtd-task-eds.h"
 #include "gtd-task-list-eds.h"
 

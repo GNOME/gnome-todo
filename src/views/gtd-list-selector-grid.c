@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define G_LOG_DOMAIN "GtdListSelectorGrid"
+
 #include "interfaces/gtd-provider.h"
 #include "gtd-list-selector.h"
 #include "gtd-list-selector-grid.h"

@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define G_LOG_DOMAIN "GtdPanelToday"
+
 #include "gnome-todo.h"
 #include "gtd-panel-today.h"
 

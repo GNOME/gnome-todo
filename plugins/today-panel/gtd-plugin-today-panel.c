@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define G_LOG_DOMAIN "Today"
+#define G_LOG_DOMAIN "GtdPluginTodayPanel"
 
 #include "gtd-panel-today.h"
 #include "gtd-plugin-today-panel.h"

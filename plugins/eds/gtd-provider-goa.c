@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define G_LOG_DOMAIN "GtdProviderGoa"
+
 #include "gtd-provider-eds.h"
 #include "gtd-provider-goa.h"
 
@@ -31,169 +33,56 @@ struct _GtdProviderGoa
   gchar                  *id;
 };
 
-static void          gtd_provider_iface_init                     (GtdProviderInterface *iface);
-
-G_DEFINE_TYPE_WITH_CODE (GtdProviderGoa, gtd_provider_goa, GTD_TYPE_PROVIDER_EDS,
-                         G_IMPLEMENT_INTERFACE (GTD_TYPE_PROVIDER,
-                                                gtd_provider_iface_init))
+G_DEFINE_TYPE (GtdProviderGoa, gtd_provider_goa, GTD_TYPE_PROVIDER_EDS)
 
 enum {
   PROP_0,
   PROP_ACCOUNT,
-  PROP_DEFAULT_TASKLIST,
-  PROP_DESCRIPTION,
-  PROP_ENABLED,
-  PROP_ICON,
-  PROP_ID,
-  PROP_NAME,
   N_PROPS
 };
 
 /*
- * GtdProviderInterface implementation
+ * GtdProviderEds overrides
  */
-static const gchar*
-gtd_provider_goa_get_id (GtdProvider *provider)
-{
-  GtdProviderGoa *self;
 
-  self = GTD_PROVIDER_GOA (provider);
+static const gchar*
+gtd_provider_goa_get_id (GtdProviderEds *provider)
+{
+  GtdProviderGoa *self = GTD_PROVIDER_GOA (provider);
 
   return self->id;
 }
 
 static const gchar*
-gtd_provider_goa_get_name (GtdProvider *provider)
+gtd_provider_goa_get_name (GtdProviderEds *provider)
 {
-  GtdProviderGoa *self;
-
-  self = GTD_PROVIDER_GOA (provider);
+  GtdProviderGoa *self = GTD_PROVIDER_GOA (provider);
 
   return goa_account_get_provider_name (self->account);
 }
 
 static const gchar*
-gtd_provider_goa_get_description (GtdProvider *provider)
+gtd_provider_goa_get_description (GtdProviderEds *provider)
 {
-  GtdProviderGoa *self;
-
-  self = GTD_PROVIDER_GOA (provider);
+  GtdProviderGoa *self = GTD_PROVIDER_GOA (provider);
 
   return goa_account_get_identity (self->account);
 }
 
-
 static gboolean
-gtd_provider_goa_get_enabled (GtdProvider *provider)
+gtd_provider_goa_get_enabled (GtdProviderEds *provider)
 {
-  GtdProviderGoa *self;
-
-  self = GTD_PROVIDER_GOA (provider);
+  GtdProviderGoa *self = GTD_PROVIDER_GOA (provider);
 
   return !goa_account_get_calendar_disabled (self->account);
 }
 
 static GIcon*
-gtd_provider_goa_get_icon (GtdProvider *provider)
+gtd_provider_goa_get_icon (GtdProviderEds *provider)
 {
-  GtdProviderGoa *self;
-
-  self = GTD_PROVIDER_GOA (provider);
+  GtdProviderGoa *self = GTD_PROVIDER_GOA (provider);
 
   return self->icon;
-}
-
-static void
-gtd_provider_goa_create_task (GtdProvider *provider,
-                              GtdTask     *task)
-{
-  gtd_provider_eds_create_task (GTD_PROVIDER_EDS (provider), task);
-}
-
-static void
-gtd_provider_goa_update_task (GtdProvider *provider,
-                              GtdTask     *task)
-{
-  gtd_provider_eds_update_task (GTD_PROVIDER_EDS (provider), task);
-}
-
-static void
-gtd_provider_goa_remove_task (GtdProvider *provider,
-                              GtdTask     *task)
-{
-  gtd_provider_eds_remove_task (GTD_PROVIDER_EDS (provider), task);
-}
-
-static void
-gtd_provider_goa_create_task_list (GtdProvider *provider,
-                                   GtdTaskList *list)
-{
-  gtd_provider_eds_create_task_list (GTD_PROVIDER_EDS (provider), list);
-
-  g_signal_emit_by_name (provider, "list-added", list);
-}
-
-static void
-gtd_provider_goa_update_task_list (GtdProvider *provider,
-                                   GtdTaskList *list)
-{
-  gtd_provider_eds_update_task_list (GTD_PROVIDER_EDS (provider), list);
-
-  g_signal_emit_by_name (provider, "list-changed", list);
-}
-
-static void
-gtd_provider_goa_remove_task_list (GtdProvider *provider,
-                                   GtdTaskList *list)
-{
-  gtd_provider_eds_remove_task_list (GTD_PROVIDER_EDS (provider), list);
-
-  g_signal_emit_by_name (provider, "list-removed", list);
-}
-
-static GList*
-gtd_provider_goa_get_task_lists (GtdProvider *provider)
-{
-  return gtd_provider_eds_get_task_lists (GTD_PROVIDER_EDS (provider));
-}
-
-static GtdTaskList*
-gtd_provider_goa_get_default_task_list (GtdProvider *provider)
-{
-  return gtd_provider_eds_get_default_task_list (GTD_PROVIDER_EDS (provider));
-}
-
-static void
-gtd_provider_goa_set_default_task_list (GtdProvider *provider,
-                                        GtdTaskList *list)
-{
-  gtd_provider_eds_set_default_task_list (GTD_PROVIDER_EDS (provider), list);
-}
-
-static GtdTask*
-gtd_provider_goa_generate_task (GtdProvider *provider)
-{
-  return gtd_provider_eds_generate_task (GTD_PROVIDER_EDS (provider));
-}
-
-static void
-gtd_provider_iface_init (GtdProviderInterface *iface)
-{
-  iface->get_id = gtd_provider_goa_get_id;
-  iface->get_name = gtd_provider_goa_get_name;
-  iface->get_description = gtd_provider_goa_get_description;
-  iface->get_enabled = gtd_provider_goa_get_enabled;
-  iface->get_icon = gtd_provider_goa_get_icon;
-  iface->create_task = gtd_provider_goa_create_task;
-  iface->update_task = gtd_provider_goa_update_task;
-  iface->remove_task = gtd_provider_goa_remove_task;
-  iface->create_task_list = gtd_provider_goa_create_task_list;
-  iface->update_task_list = gtd_provider_goa_update_task_list;
-  iface->remove_task_list = gtd_provider_goa_remove_task_list;
-  iface->get_task_lists = gtd_provider_goa_get_task_lists;
-  iface->get_default_task_list = gtd_provider_goa_get_default_task_list;
-  iface->set_default_task_list = gtd_provider_goa_set_default_task_list;
-  iface->generate_task = gtd_provider_goa_generate_task;
 }
 
 static void
@@ -228,6 +117,11 @@ gtd_provider_goa_set_account (GtdProviderGoa *provider,
     }
 }
 
+
+/*
+ * GObject overrides
+ */
+
 static void
 gtd_provider_goa_finalize (GObject *object)
 {
@@ -248,37 +142,12 @@ gtd_provider_goa_get_property (GObject    *object,
                                GParamSpec *pspec)
 {
   GtdProviderGoa *self = GTD_PROVIDER_GOA (object);
-  GtdProvider *provider = GTD_PROVIDER (object);
 
   switch (prop_id)
     {
 
     case PROP_ACCOUNT:
       g_value_set_object (value, self->account);
-      break;
-
-    case PROP_DEFAULT_TASKLIST:
-      g_value_set_object (value, gtd_provider_goa_get_default_task_list (provider));
-      break;
-
-    case PROP_DESCRIPTION:
-      g_value_set_string (value, gtd_provider_goa_get_description (provider));
-      break;
-
-    case PROP_ENABLED:
-      g_value_set_boolean (value, gtd_provider_goa_get_enabled (provider));
-      break;
-
-    case PROP_ICON:
-      g_value_set_object (value, gtd_provider_goa_get_icon (provider));
-      break;
-
-    case PROP_ID:
-      g_value_set_string (value, gtd_provider_goa_get_id (provider));
-      break;
-
-    case PROP_NAME:
-      g_value_set_string (value, gtd_provider_goa_get_name (provider));
       break;
 
     default:
@@ -298,10 +167,6 @@ gtd_provider_goa_set_property (GObject      *object,
     {
     case PROP_ACCOUNT:
       gtd_provider_goa_set_account (self, g_value_get_object (value));
-      break;
-
-    case PROP_DEFAULT_TASKLIST:
-      gtd_provider_goa_set_default_task_list (GTD_PROVIDER (self), g_value_get_object (value));
       break;
 
     default:
@@ -358,18 +223,16 @@ gtd_provider_goa_class_init (GtdProviderGoaClass *klass)
   GtdProviderEdsClass *eds_class = GTD_PROVIDER_EDS_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+  eds_class->get_id = gtd_provider_goa_get_id;
+  eds_class->get_name = gtd_provider_goa_get_name;
+  eds_class->get_description = gtd_provider_goa_get_description;
+  eds_class->get_enabled = gtd_provider_goa_get_enabled;
+  eds_class->get_icon = gtd_provider_goa_get_icon;
   eds_class->should_load_source = gtd_provider_goa_should_load_source;
 
   object_class->finalize = gtd_provider_goa_finalize;
   object_class->get_property = gtd_provider_goa_get_property;
   object_class->set_property = gtd_provider_goa_set_property;
-
-  g_object_class_override_property (object_class, PROP_DEFAULT_TASKLIST, "default-task-list");
-  g_object_class_override_property (object_class, PROP_DESCRIPTION, "description");
-  g_object_class_override_property (object_class, PROP_ENABLED, "enabled");
-  g_object_class_override_property (object_class, PROP_ICON, "icon");
-  g_object_class_override_property (object_class, PROP_ID, "id");
-  g_object_class_override_property (object_class, PROP_NAME, "name");
 
   g_object_class_install_property (object_class,
                                    PROP_ACCOUNT,

@@ -32,7 +32,7 @@ struct _GtdMarkupRenderer
 {
   GObject              parent_instance;
 
-  GtkTextView         *view;
+  GtkTextBuffer       *buffer;
 
   /* Tags */
   GtkTextTag          *italic;
@@ -44,166 +44,109 @@ struct _GtdMarkupRenderer
   GtkTextTag          *strikethrough;
   GtkTextTag          *link;
   GtkTextTag          *link_text;
+
+  gboolean             rendering;
 };
 
 G_DEFINE_TYPE (GtdMarkupRenderer, gtd_markup_renderer, G_TYPE_OBJECT)
 
-enum
+static void
+populate_tag_table (GtdMarkupRenderer *self)
 {
-  PROP_0,
-  PROP_TEXT_VIEW,
-  LAST_PROP
-};
+  self->italic = gtk_text_buffer_create_tag (self->buffer,
+                                             "italic",
+                                             "style",
+                                             PANGO_STYLE_ITALIC,
+                                             NULL);
 
-static gboolean
-on_hyperlink_hover (GtkWidget      *text_view,
-                    GdkEventMotion *event)
-{
-  GSList *tags = NULL, *tagp = NULL;
-  GtkTextIter iter;
-  gboolean hovering = FALSE;
-  gdouble ex, ey;
-  gint x, y;
-  gchar *tag_name;
+  self->bold = gtk_text_buffer_create_tag (self->buffer,
+                                           "bold",
+                                           "weight",
+                                           PANGO_WEIGHT_BOLD,
+                                           NULL);
 
-  gdk_event_get_coords ((GdkEvent *)event, &ex, &ey);
-  gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (text_view),
-                                         GTK_TEXT_WINDOW_WIDGET,
-                                         ex, ey, &x, &y);
-  if (gtk_text_view_get_iter_at_location (GTK_TEXT_VIEW (text_view), &iter, x, y))
-    {
-      tags = gtk_text_iter_get_tags (&iter);
-      for (tagp = tags;  tagp != NULL;  tagp = tagp->next)
-        {
-          GtkTextTag *tag = tagp->data;
-          g_object_get (tag, "name", &tag_name, NULL);
+  self->head_1 = gtk_text_buffer_create_tag (self->buffer,
+                                             "head_1",
+                                             "weight",
+                                             PANGO_WEIGHT_BOLD,
+                                             "scale",
+                                             PANGO_SCALE_XX_LARGE,
+                                             NULL);
 
-          if (g_strcmp0 (tag_name, "link") == 0)
-            {
-              hovering = TRUE;
-              g_free (tag_name);
-              break;
-            }
-          g_free (tag_name);
-        }
-      if (hovering)
-        {
-          g_autoptr (GdkCursor) cursor;
-          cursor = gdk_cursor_new_from_name (gtk_widget_get_display (text_view),
-                                             "pointer");
-          gdk_window_set_cursor (gtk_text_view_get_window (GTK_TEXT_VIEW (text_view), GTK_TEXT_WINDOW_TEXT), cursor);
-        }
-      else
-        {
-          g_autoptr (GdkCursor) cursor;
-          cursor = gdk_cursor_new_from_name (gtk_widget_get_display (text_view),
-                                             "text");
-          gdk_window_set_cursor (gtk_text_view_get_window (GTK_TEXT_VIEW (text_view), GTK_TEXT_WINDOW_TEXT), cursor);
-        }
-    }
-  return TRUE;
+  self->head_2 = gtk_text_buffer_create_tag (self->buffer,
+                                             "head_2",
+                                             "weight",
+                                             PANGO_WEIGHT_BOLD,
+                                             "scale",
+                                             PANGO_SCALE_SMALL,
+                                             NULL);
+
+  self->head_3 = gtk_text_buffer_create_tag (self->buffer,
+                                             "head_3",
+                                             "weight",
+                                             PANGO_WEIGHT_BOLD,
+                                             "scale",
+                                             PANGO_SCALE_SMALL,
+                                             NULL);
+
+  self->strikethrough = gtk_text_buffer_create_tag (self->buffer,
+                                                    "strikethrough",
+                                                    "strikethrough",
+                                                    TRUE,
+                                                    NULL);
+
+  self->list_indent = gtk_text_buffer_create_tag (self->buffer,
+                                                  "list-indent",
+                                                  "indent",
+                                                  20,
+                                                  NULL);
+
+  self->link = gtk_text_buffer_create_tag (self->buffer,
+                                           "link",
+                                           "foreground",
+                                           "blue",
+                                           "underline",
+                                           PANGO_UNDERLINE_SINGLE,
+                                           NULL);
+
+  self->link_text = gtk_text_buffer_create_tag (self->buffer,
+                                                "link-text",
+                                                "weight",
+                                                PANGO_WEIGHT_BOLD,
+                                                "foreground",
+                                                "#555F61",
+                                                NULL);
 }
 
-static gboolean
-on_hyperlink_clicked (GtkWidget *text_view,
-                      GdkEvent  *ev)
+static void
+get_tags_from_table (GtdMarkupRenderer *self)
 {
-  GtkTextIter start, end, iter, end_iter, match_start, match_end;
-  GSList *tags = NULL, *tagp = NULL;
-  GtkTextBuffer *buffer;
-  gdouble ex, ey;
-  gint x, y;
-  gchar *tag_name, *link;
-  GError *error;
+  GtkTextTagTable *table;
 
-  if (ev->type == GDK_BUTTON_RELEASE)
-    {
-      GdkEventButton *event;
+  table = gtk_text_buffer_get_tag_table (self->buffer);
 
-      event = (GdkEventButton *)ev;
-      if (event->button != GDK_BUTTON_PRIMARY)
-        return FALSE;
-
-      ex = event->x;
-      ey = event->y;
-    }
-  else if (ev->type == GDK_TOUCH_END)
-    {
-      GdkEventTouch *event;
-
-      event = (GdkEventTouch *)ev;
-
-      ex = event->x;
-      ey = event->y;
-    }
-  else
-    {
-      return FALSE;
-    }
-
-  buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (text_view));
-
-  /* we shouldn't follow a link if the user has selected something */
-  gtk_text_buffer_get_selection_bounds (buffer, &start, &end);
-  if (gtk_text_iter_get_offset (&start) != gtk_text_iter_get_offset (&end))
-    return FALSE;
-
-  gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (text_view),
-                                         GTK_TEXT_WINDOW_WIDGET,
-                                         ex, ey, &x, &y);
-
-  if (gtk_text_view_get_iter_at_location (GTK_TEXT_VIEW (text_view), &iter, x, y))
-    {
-      tags = gtk_text_iter_get_tags (&iter);
-
-      for (tagp = tags; tagp != NULL; tagp = tagp->next)
-        {
-          GtkTextTag *tag = tagp->data;
-
-          g_object_get (tag, "name", &tag_name, NULL);
-
-          if (g_strcmp0 (tag_name, "link"))
-            {
-              g_free (tag_name);
-              continue;
-            }
-
-          gtk_text_buffer_get_iter_at_line (buffer, &iter, gtk_text_iter_get_line (&iter));
-          end_iter = iter;
-          gtk_text_iter_forward_to_line_end (&end_iter);
-
-          if (gtk_text_iter_forward_search (&iter,
-                                            "(",
-                                            GTK_TEXT_SEARCH_TEXT_ONLY,
-                                            NULL,
-                                            &match_start,
-                                            NULL))
-            {
-              if (gtk_text_iter_forward_search (&iter,
-                                                ")",
-                                                GTK_TEXT_SEARCH_TEXT_ONLY,
-                                                &match_end,
-                                                NULL,
-                                                &end_iter))
-                {
-                  link = gtk_text_iter_get_text (&match_start, &match_end);
-
-                  if (gtk_show_uri_on_window (GTK_WINDOW (gtk_widget_get_toplevel (text_view)),
-                                              link,
-                                              GDK_CURRENT_TIME,
-                                              &error) == 0)
-                    {
-                      g_critical ("%s", error->message);
-                      g_error_free (error);
-
-                      return FALSE;
-                    }
-                }
-            }
-        }
-    }
-  return TRUE;
+  self->italic = gtk_text_tag_table_lookup (table, "italic");
+  self->bold = gtk_text_tag_table_lookup (table, "bold");
+  self->head_1 = gtk_text_tag_table_lookup (table, "head_1");
+  self->head_2 = gtk_text_tag_table_lookup (table, "head_2");
+  self->head_3 = gtk_text_tag_table_lookup (table, "head_3");
+  self->strikethrough = gtk_text_tag_table_lookup (table, "strikethrough");
+  self->list_indent = gtk_text_tag_table_lookup (table, "list-indent");
+  self->link = gtk_text_tag_table_lookup (table, "link");
+  self->link_text = gtk_text_tag_table_lookup (table, "link-text");
 }
+
+static void
+clear_markup (GtdMarkupRenderer *self)
+{
+  GtkTextIter start, end;
+
+  gtk_text_buffer_get_start_iter (self->buffer, &start);
+  gtk_text_buffer_get_end_iter (self->buffer, &end);
+
+  gtk_text_buffer_remove_all_tags (self->buffer, &start, &end);
+}
+
 
 static void
 on_text_changed (GtkTextBuffer *buffer,
@@ -211,8 +154,7 @@ on_text_changed (GtkTextBuffer *buffer,
 {
   GtdMarkupRenderer *renderer = GTD_MARKUP_RENDERER (user_data);
 
-  gtd_markup_renderer_clear_markup (renderer);
-  gtd_markup_renderer_render_markup (renderer);
+  gtd_markup_renderer_render_markup (renderer, TRUE);
 }
 
 static void
@@ -222,11 +164,9 @@ render_markup_links (GtdMarkupRenderer *self,
                      GtkTextTag        *link_tag,
                      GtkTextTag        *link_text_tag)
 {
-  GtkTextBuffer *buffer;
   GtkTextIter iter, end_iter;
   GtkTextIter tmp_iter, tmp_end_iter;
 
-  buffer = gtk_text_view_get_buffer (self->view);
   end_iter = start;
 
   while (gtk_text_iter_forward_search (&end_iter, "(",
@@ -239,7 +179,7 @@ render_markup_links (GtdMarkupRenderer *self,
                                         NULL, &end_iter,
                                         &end))
         {
-          gtk_text_buffer_apply_tag (buffer, link_tag,
+          gtk_text_buffer_apply_tag (self->buffer, link_tag,
                                      &iter, &end_iter);
 
           if (gtk_text_iter_backward_search (&iter, "]",
@@ -252,7 +192,7 @@ render_markup_links (GtdMarkupRenderer *self,
                                                  NULL, &tmp_end_iter,
                                                  &start))
                 {
-                  gtk_text_buffer_apply_tag (buffer, link_text_tag,
+                  gtk_text_buffer_apply_tag (self->buffer, link_text_tag,
                                              &tmp_end_iter, &tmp_iter);
                 }
             }
@@ -269,12 +209,10 @@ apply_markup_tag (GtdMarkupRenderer *self,
                   gboolean           pre,
                   gboolean           suf)
 {
-  GtkTextBuffer *buffer;
   GtkTextIter iter, end_iter, match, end_match, match1;
   int line_count;
   int i;
 
-  buffer = gtk_text_view_get_buffer(self->view);
   iter = start;
 
   if (pre && suf)
@@ -289,7 +227,7 @@ apply_markup_tag (GtdMarkupRenderer *self,
                                             &match1, &iter,
                                             &end))
             {
-              gtk_text_buffer_apply_tag (buffer, tag, &match, &iter);
+              gtk_text_buffer_apply_tag (self->buffer, tag, &match, &iter);
             }
             else
               break;
@@ -297,10 +235,10 @@ apply_markup_tag (GtdMarkupRenderer *self,
     }
   else if (pre && !suf)
     {
-      line_count = gtk_text_buffer_get_line_count (buffer);
+      line_count = gtk_text_buffer_get_line_count (self->buffer);
       for (i = 0; i < line_count; i++)
         {
-          gtk_text_buffer_get_iter_at_line (buffer, &iter, i);
+          gtk_text_buffer_get_iter_at_line (self->buffer, &iter, i);
           end_iter = iter;
           gtk_text_iter_forward_to_line_end (&end_iter);
 
@@ -309,48 +247,9 @@ apply_markup_tag (GtdMarkupRenderer *self,
                                             &match, NULL,
                                             &end_iter))
             {
-              gtk_text_buffer_apply_tag (buffer, tag, &match, &end_iter);
+              gtk_text_buffer_apply_tag (self->buffer, tag, &match, &end_iter);
             }
         }
-    }
-}
-
-static void
-gtd_markup_renderer_set_property (GObject      *object,
-                                  guint         prop_id,
-                                  const GValue *value,
-                                  GParamSpec   *pspec)
-{
-  GtdMarkupRenderer *self = GTD_MARKUP_RENDERER (object);
-
-  switch (prop_id)
-    {
-    case PROP_TEXT_VIEW:
-      g_set_object (&self->view, GTK_TEXT_VIEW (g_value_get_object (value)));
-      g_object_ref (self->view);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-    }
-}
-
-static void
-gtd_markup_renderer_get_property (GObject    *object,
-                                  guint       prop_id,
-                                  GValue     *value,
-                                  GParamSpec *pspec)
-{
-  GtdMarkupRenderer *self = GTD_MARKUP_RENDERER (object);
-
-  switch (prop_id)
-    {
-    case PROP_TEXT_VIEW:
-      g_value_set_object (value, self->view);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
     }
 }
 
@@ -358,17 +257,8 @@ static void
 gtd_markup_renderer_dispose (GObject *object)
 {
   GtdMarkupRenderer *self = GTD_MARKUP_RENDERER (object);
-  GtkTextBuffer *buffer;
 
-  buffer = gtk_text_view_get_buffer (self->view);
-
-  gtd_markup_renderer_clear_markup (self);
-
-  g_signal_handlers_disconnect_by_func (self->view, on_hyperlink_clicked, NULL);
-  g_signal_handlers_disconnect_by_func (self->view, on_hyperlink_hover, NULL);
-  g_signal_handlers_disconnect_by_func (buffer, on_text_changed, self);
-
-  g_clear_object (&self->view);
+  clear_markup (self);
 
   G_OBJECT_CLASS (gtd_markup_renderer_parent_class)->dispose(object);
 }
@@ -378,19 +268,7 @@ gtd_markup_renderer_class_init (GtdMarkupRendererClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->set_property = gtd_markup_renderer_set_property;
-  object_class->get_property = gtd_markup_renderer_get_property;
   object_class->dispose = gtd_markup_renderer_dispose;
-
-  g_object_class_install_property (
-          object_class,
-          PROP_TEXT_VIEW,
-          g_param_spec_object ("textview",
-                               "TextView",
-                               "The TextView to render markdown on",
-                               GTK_TYPE_TEXT_VIEW,
-                               G_PARAM_WRITABLE | G_PARAM_CONSTRUCT));
-
 }
 
 GtdMarkupRenderer*
@@ -402,89 +280,40 @@ gtd_markup_renderer_new (void)
 void
 gtd_markup_renderer_init (GtdMarkupRenderer *self)
 {
+  self->rendering = FALSE;
 }
 
 void
-gtd_markup_renderer_populate_tag_table (GtdMarkupRenderer *self)
+gtd_markup_renderer_set_buffer (GtdMarkupRenderer *self,
+                                GtkTextBuffer     *buffer)
 {
-  GtkTextBuffer *buffer;
+  if (self->rendering)
+    {
+      self->rendering = FALSE;
+      g_signal_handlers_disconnect_by_func (self->buffer, on_text_changed, self);
+    }
 
-  buffer = gtk_text_view_get_buffer (self->view);
-
-  self->italic = gtk_text_buffer_create_tag (buffer,
-                                             "italic",
-                                             "style",
-                                             PANGO_STYLE_ITALIC,
-                                             NULL);
-
-  self->bold = gtk_text_buffer_create_tag (buffer,
-                                           "bold",
-                                           "weight",
-                                           PANGO_WEIGHT_BOLD,
-                                           NULL);
-
-  self->head_1 = gtk_text_buffer_create_tag (buffer,
-                                             "head_1",
-                                             "weight",
-                                             PANGO_WEIGHT_BOLD,
-                                             "scale",
-                                             PANGO_SCALE_XX_LARGE,
-                                             NULL);
-
-  self->head_2 = gtk_text_buffer_create_tag (buffer,
-                                             "head_2",
-                                             "weight",
-                                             PANGO_WEIGHT_BOLD,
-                                             "scale",
-                                             PANGO_SCALE_SMALL,
-                                             NULL);
-
-  self->head_3 = gtk_text_buffer_create_tag (buffer,
-                                             "head_3",
-                                             "weight",
-                                             PANGO_WEIGHT_BOLD,
-                                             "scale",
-                                             PANGO_SCALE_SMALL,
-                                             NULL);
-
-  self->strikethrough = gtk_text_buffer_create_tag (buffer,
-                                                    "strikethrough",
-                                                    "strikethrough",
-                                                    TRUE,
-                                                    NULL);
-
-  self->list_indent = gtk_text_buffer_create_tag (buffer,
-                                                  "list-indent",
-                                                  "indent",
-                                                  50,
-                                                  NULL);
-
-  self->link = gtk_text_buffer_create_tag (buffer,
-                                           "link",
-                                           "foreground",
-                                           "blue",
-                                           "underline",
-                                           PANGO_UNDERLINE_SINGLE,
-                                           NULL);
-
-  self->link_text = gtk_text_buffer_create_tag (buffer,
-                                                "link-text",
-                                                "weight",
-                                                PANGO_WEIGHT_BOLD,
-                                                "foreground",
-                                                "#555F61",
-                                                NULL);
+  self->buffer = buffer;
+  g_signal_connect (self->buffer, "changed",
+                    G_CALLBACK (on_text_changed), self);
 }
 
 void
-gtd_markup_renderer_render_markup (GtdMarkupRenderer *self)
+gtd_markup_renderer_render_markup (GtdMarkupRenderer *self,
+                                   gboolean           re_render)
 {
-  GtkTextBuffer *buffer;
   GtkTextIter start, end;
 
-  buffer = gtk_text_view_get_buffer (self->view);
-  gtk_text_buffer_get_start_iter (buffer, &start);
-  gtk_text_buffer_get_end_iter (buffer, &end);
+  if (re_render)
+    {
+      get_tags_from_table (self);
+      clear_markup (self);
+    }
+  else
+    populate_tag_table (self);
+
+  gtk_text_buffer_get_start_iter (self->buffer, &start);
+  gtk_text_buffer_get_end_iter (self->buffer, &end);
 
   apply_markup_tag (self, self->bold, BOLD_1, start, end, TRUE, TRUE);
   apply_markup_tag (self, self->bold, BOLD_2, start, end, TRUE, TRUE);
@@ -501,33 +330,6 @@ gtd_markup_renderer_render_markup (GtdMarkupRenderer *self)
   apply_markup_tag (self, self->list_indent, LIST, start, end, TRUE, FALSE);
 
   render_markup_links (self, start, end, self->link, self->link_text);
-}
 
-void
-gtd_markup_renderer_setup_callbacks (GtdMarkupRenderer *self)
-{
-  GtkTextBuffer *buffer;
-
-  buffer = gtk_text_view_get_buffer (self->view);
-
-  g_signal_connect (self->view, "event_after",
-                    G_CALLBACK (on_hyperlink_clicked), NULL);
-  g_signal_connect (self->view, "motion-notify-event",
-                    G_CALLBACK (on_hyperlink_hover), NULL);
-  g_signal_connect (buffer, "changed",
-                    G_CALLBACK (on_text_changed), self);
-}
-
-void
-gtd_markup_renderer_clear_markup (GtdMarkupRenderer *self)
-{
-  GtkTextBuffer *buffer;
-  GtkTextIter start, end;
-
-  buffer = gtk_text_view_get_buffer (self->view);
-
-  gtk_text_buffer_get_start_iter (buffer, &start);
-  gtk_text_buffer_get_end_iter (buffer, &end);
-
-  gtk_text_buffer_remove_all_tags (buffer, &start, &end);
+  self->rendering = TRUE;
 }

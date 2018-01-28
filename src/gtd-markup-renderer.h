@@ -29,16 +29,11 @@ G_DECLARE_FINAL_TYPE (GtdMarkupRenderer, gtd_markup_renderer, GTD, MARKUP_RENDER
 
 GtdMarkupRenderer*   gtd_markup_renderer_new                     (void);
 
-void                 gtd_markup_renderer_set_buffer              (GtdMarkupRenderer  *self,
-                                                                  GtkTextBuffer      *buffer);
+void                 gtd_markup_renderer_set_buffer              (GtdMarkupRenderer *self,
+                                                                  GtkTextBuffer *buffer);
 
-void                 gtd_markup_renderer_render_markup           (GtdMarkupRenderer  *self);
-
-void                 gtd_markup_renderer_populate_tag_table      (GtdMarkupRenderer  *self);
-
-void                 gtd_markup_renderer_clear_markup            (GtdMarkupRenderer  *self);
-
-void                 gtd_markup_renderer_setup_callbacks (GtdMarkupRenderer  *self);
+void                 gtd_markup_renderer_render_markup           (GtdMarkupRenderer  *self,
+                                                                  gboolean            re_render);
 
 G_END_DECLS
 

@@ -386,7 +386,9 @@ gtd_edit_pane_set_task (GtdEditPane *self,
                                                        self->priority_combo,
                                                        "active",
                                                        G_BINDING_BIDIRECTIONAL);
+
     }
+
   g_object_notify (G_OBJECT (self), "task");
 }
 

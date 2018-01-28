@@ -185,9 +185,7 @@ set_active_row (GtdTaskListView *self,
   if (priv->active_row)
     {
       if (GTD_IS_TASK_ROW (priv->active_row))
-        {
-          gtd_task_row_set_active (GTD_TASK_ROW (priv->active_row), FALSE);
-        }
+        gtd_task_row_set_active (GTD_TASK_ROW (priv->active_row), FALSE);
       else
         gtd_new_task_row_set_active (GTD_NEW_TASK_ROW (priv->active_row), FALSE);
     }
@@ -200,8 +198,7 @@ set_active_row (GtdTaskListView *self,
         {
           gtd_task_row_set_active (GTD_TASK_ROW (row), TRUE);
 
-          g_clear_object (&priv->renderer);
-          gtd_task_row_set_markup_renderer (GTD_TASK_ROW (row), &priv->renderer);
+          gtd_task_row_set_markup_renderer (GTD_TASK_ROW (row), priv->renderer);
         }
       else
         gtd_new_task_row_set_active (GTD_NEW_TASK_ROW (row), TRUE);
@@ -1140,6 +1137,8 @@ gtd_task_list_view_finalize (GObject *object)
   g_clear_pointer (&priv->default_date, g_date_time_unref);
   g_clear_pointer (&priv->list, g_list_free);
 
+  g_clear_object (&priv->renderer);
+
   G_OBJECT_CLASS (gtd_task_list_view_parent_class)->finalize (object);
 }
 
@@ -1661,6 +1660,8 @@ gtd_task_list_view_init (GtdTaskListView *self)
                      NULL,
                      0,
                      GDK_ACTION_MOVE);
+
+  self->priv->renderer = gtd_markup_renderer_new ();
 }
 
 /**

@@ -62,6 +62,7 @@ sources = files(
   'gtd-edit-pane.c',
   'gtd-empty-list-widget.c',
   'gtd-initial-setup-window.c',
+  'gtd-markup-renderer.c',
   'gtd-new-task-row.c',
   'gtd-object.c',
   'gtd-plugin-dialog.c',

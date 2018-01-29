@@ -391,3 +391,9 @@ gtd_edit_pane_set_task (GtdEditPane *self,
 
   g_object_notify (G_OBJECT (self), "task");
 }
+
+GtkTextView*
+gtd_edit_pane_get_text_view (GtdEditPane *self)
+{
+  return self->notes_textview;
+}

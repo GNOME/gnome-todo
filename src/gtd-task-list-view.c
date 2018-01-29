@@ -21,6 +21,7 @@
 #include "gtd-empty-list-widget.h"
 #include "gtd-task-list-view.h"
 #include "gtd-manager.h"
+#include "gtd-markup-renderer.h"
 #include "gtd-new-task-row.h"
 #include "gtd-notification.h"
 #include "gtd-provider.h"
@@ -83,6 +84,9 @@ typedef struct
   GList                 *list;
   GtdTaskList           *task_list;
   GDateTime             *default_date;
+
+  /* Markup renderer*/
+  GtdMarkupRenderer     *renderer;
 
   /* DnD autoscroll */
   guint                  scroll_timeout_id;
@@ -191,7 +195,11 @@ set_active_row (GtdTaskListView *self,
   if (row)
     {
       if (GTD_IS_TASK_ROW (row))
-        gtd_task_row_set_active (GTD_TASK_ROW (row), TRUE);
+        {
+          gtd_task_row_set_active (GTD_TASK_ROW (row), TRUE);
+
+          gtd_task_row_set_markup_renderer (GTD_TASK_ROW (row), priv->renderer);
+        }
       else
         gtd_new_task_row_set_active (GTD_NEW_TASK_ROW (row), TRUE);
 
@@ -1120,7 +1128,15 @@ create_task_cb (GtdTaskRow  *row,
   gtd_task_list_save_task (list, task);
   gtd_manager_create_task (gtd_manager_get_default (), task);
 }
+static void
+gtd_task_list_view_dispose (GObject *object)
+{
+  GtdTaskListViewPrivate *priv = GTD_TASK_LIST_VIEW (object)->priv;
 
+  g_clear_object (&priv->renderer);
+
+  G_OBJECT_CLASS (gtd_task_list_view_parent_class)->dispose (object);
+}
 static void
 gtd_task_list_view_finalize (GObject *object)
 {
@@ -1510,6 +1526,7 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   object_class->finalize = gtd_task_list_view_finalize;
+  object_class->dispose = gtd_task_list_view_dispose;
   object_class->constructed = gtd_task_list_view_constructed;
   object_class->get_property = gtd_task_list_view_get_property;
   object_class->set_property = gtd_task_list_view_set_property;
@@ -1650,6 +1667,8 @@ gtd_task_list_view_init (GtdTaskListView *self)
                      NULL,
                      0,
                      GDK_ACTION_MOVE);
+
+  self->priv->renderer = gtd_markup_renderer_new ();
 }
 
 /**

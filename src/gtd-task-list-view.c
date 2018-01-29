@@ -21,6 +21,7 @@
 #include "gtd-empty-list-widget.h"
 #include "gtd-task-list-view.h"
 #include "gtd-manager.h"
+#include "gtd-markup-renderer.h"
 #include "gtd-new-task-row.h"
 #include "gtd-notification.h"
 #include "gtd-provider.h"
@@ -83,6 +84,9 @@ typedef struct
   GList                 *list;
   GtdTaskList           *task_list;
   GDateTime             *default_date;
+
+  /* Markup renderer*/
+  GtdMarkupRenderer     *renderer;
 
   /* DnD autoscroll */
   guint                  scroll_timeout_id;
@@ -181,9 +185,15 @@ set_active_row (GtdTaskListView *self,
   if (priv->active_row)
     {
       if (GTD_IS_TASK_ROW (priv->active_row))
-        gtd_task_row_set_active (GTD_TASK_ROW (priv->active_row), FALSE);
+        {
+          gtd_markup_renderer_reset (priv->renderer);
+
+          gtd_task_row_set_active (GTD_TASK_ROW (priv->active_row), FALSE);
+        }
       else
-        gtd_new_task_row_set_active (GTD_NEW_TASK_ROW (priv->active_row), FALSE);
+        {
+          gtd_new_task_row_set_active (GTD_NEW_TASK_ROW (priv->active_row), FALSE);
+        }
     }
 
   priv->active_row = row;
@@ -191,7 +201,11 @@ set_active_row (GtdTaskListView *self,
   if (row)
     {
       if (GTD_IS_TASK_ROW (row))
-        gtd_task_row_set_active (GTD_TASK_ROW (row), TRUE);
+        {
+          gtd_task_row_set_active (GTD_TASK_ROW (row), TRUE);
+
+          gtd_task_row_set_markup_renderer (GTD_TASK_ROW (row), priv->renderer);
+        }
       else
         gtd_new_task_row_set_active (GTD_NEW_TASK_ROW (row), TRUE);
 
@@ -696,6 +710,7 @@ remove_task_cb (GtdTaskRow      *row,
 
   gtd_window_notify (window, notification);
 
+
   /* Clear the active row */
   set_active_row (self, NULL);
 
@@ -885,8 +900,14 @@ static void
 destroy_task_row (GtdTaskListView *self,
                   GtdTaskRow      *row)
 {
+  GtdTaskListViewPrivate *priv;
+
+  priv = gtd_task_list_view_get_instance_private (self);
+
   g_signal_handlers_disconnect_by_func (row, task_row_entered_cb, self);
   g_signal_handlers_disconnect_by_func (row, task_row_exited_cb, self);
+
+  gtd_markup_renderer_reset (priv->renderer);
 
   if (GTK_WIDGET (row) == self->priv->active_row)
     set_active_row (self, NULL);
@@ -1128,6 +1149,7 @@ gtd_task_list_view_finalize (GObject *object)
 
   g_clear_pointer (&priv->default_date, g_date_time_unref);
   g_clear_pointer (&priv->list, g_list_free);
+  g_clear_object (&priv->renderer);
 
   G_OBJECT_CLASS (gtd_task_list_view_parent_class)->finalize (object);
 }
@@ -1650,6 +1672,8 @@ gtd_task_list_view_init (GtdTaskListView *self)
                      NULL,
                      0,
                      GDK_ACTION_MOVE);
+
+  self->priv->renderer = gtd_markup_renderer_new ();
 }
 
 /**
@@ -1832,6 +1856,11 @@ gtd_task_list_view_set_task_list (GtdTaskListView *view,
                                             gtd_task_list_view__color_changed,
                                             view);
     }
+
+  /*
+   * Reset renderer for new Task List
+   */
+  gtd_markup_renderer_reset (priv->renderer);
 
   priv->task_list = list;
 

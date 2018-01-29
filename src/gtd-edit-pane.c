@@ -20,6 +20,7 @@
 
 #include "gtd-edit-pane.h"
 #include "gtd-manager.h"
+#include "gtd-markdown-renderer.h"
 #include "gtd-task.h"
 #include "gtd-task-list.h"
 
@@ -218,6 +219,150 @@ on_trap_textview_clicks_cb (GtkWidget   *textview,
   return GDK_EVENT_STOP;
 }
 
+static gboolean
+on_hyperlink_hover_cb (GtkTextView    *text_view,
+                       GdkEventMotion *event)
+{
+  g_autoptr (GdkCursor) cursor = NULL;
+  GdkDisplay *display = NULL;
+  GtkTextIter iter;
+  gboolean hovering;
+  gdouble ex, ey;
+  gint x, y;
+
+  gdk_event_get_coords ((GdkEvent *)event, &ex, &ey);
+  gtk_text_view_window_to_buffer_coords (text_view, GTK_TEXT_WINDOW_WIDGET, ex, ey, &x, &y);
+
+  hovering = FALSE;
+
+  if (gtk_text_view_get_iter_at_location (text_view, &iter, x, y))
+    {
+      GSList *tags = NULL;
+      GSList *l = NULL;
+
+      tags = gtk_text_iter_get_tags (&iter);
+
+      for (l = tags; l; l = l->next)
+        {
+          g_autofree gchar *tag_name = NULL;
+          GtkTextTag *tag;
+
+          tag = l->data;
+
+          g_object_get (tag, "name", &tag_name, NULL);
+
+          if (g_strcmp0 (tag_name, "url") == 0)
+            {
+              hovering = TRUE;
+              break;
+            }
+        }
+    }
+
+  display = gtk_widget_get_display (GTK_WIDGET (text_view));
+  cursor = gdk_cursor_new_from_name (display, hovering ? "pointer" : "text");
+
+  gdk_window_set_cursor (gtk_text_view_get_window (text_view, GTK_TEXT_WINDOW_TEXT), cursor);
+
+  return GDK_EVENT_STOP;
+}
+
+static gboolean
+on_hyperlink_clicked_cb (GtkTextView *text_view,
+                         GdkEvent    *event)
+{
+  GtkTextBuffer *buffer;
+  GtkTextIter end_iter;
+  GtkTextIter iter;
+  GSList *tags = NULL;
+  GSList *l = NULL;
+  gdouble ex;
+  gdouble ey;
+  gint x;
+  gint y;
+
+  /* Ignore events that are not button or touch release */
+  if (event->type != GDK_BUTTON_RELEASE && event->type != GDK_TOUCH_END)
+    return GDK_EVENT_PROPAGATE;
+
+  if (event->type == GDK_BUTTON_RELEASE)
+    {
+      GdkEventButton *event_button;
+
+      event_button = (GdkEventButton *)event;
+      if (event_button->button != GDK_BUTTON_PRIMARY)
+        return GDK_EVENT_PROPAGATE;
+
+      ex = event_button->x;
+      ey = event_button->y;
+    }
+  else if (event->type == GDK_TOUCH_END)
+    {
+      GdkEventTouch *event_touch;
+
+      event_touch = (GdkEventTouch *)event;
+
+      ex = event_touch->x;
+      ey = event_touch->y;
+    }
+
+  buffer = gtk_text_view_get_buffer (text_view);
+
+  /* We shouldn't follow a link if the user has selected something */
+  if (gtk_text_buffer_get_has_selection (buffer))
+    return GDK_EVENT_PROPAGATE;
+
+  gtk_text_view_window_to_buffer_coords (text_view, GTK_TEXT_WINDOW_WIDGET, ex, ey, &x, &y);
+
+  if (!gtk_text_view_get_iter_at_location (text_view, &iter, x, y))
+    return GDK_EVENT_PROPAGATE;
+
+  tags = gtk_text_iter_get_tags (&iter);
+
+  for (l = tags; l; l = l->next)
+    {
+      g_autoptr (GError) error = NULL;
+      g_autofree gchar *tag_name = NULL;
+      g_autofree gchar *url = NULL;
+      GtkTextIter url_start;
+      GtkTextIter url_end;
+      GtkTextTag *tag;
+      GtkWindow *window;
+
+      tag = l->data;
+
+      g_object_get (tag, "name", &tag_name, NULL);
+
+      if (g_strcmp0 (tag_name, "url") != 0)
+        continue;
+
+      gtk_text_buffer_get_iter_at_line (buffer, &iter, gtk_text_iter_get_line (&iter));
+      end_iter = iter;
+      gtk_text_iter_forward_to_line_end (&end_iter);
+
+      /* Find the beginning... */
+      if (!gtk_text_iter_forward_search (&iter, "(", GTK_TEXT_SEARCH_TEXT_ONLY, NULL, &url_start, NULL))
+        continue;
+
+      /* ... and the end of the URL */
+      if (!gtk_text_iter_forward_search (&iter, ")", GTK_TEXT_SEARCH_TEXT_ONLY, &url_end, NULL, &end_iter))
+        continue;
+
+      url = gtk_text_iter_get_text (&url_start, &url_end);
+      window = GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (text_view)));
+
+      gtk_show_uri_on_window (window, url, GDK_CURRENT_TIME, &error);
+
+      if (error)
+        {
+          g_warning ("%s", error->message);
+          return GDK_EVENT_PROPAGATE;
+        }
+    }
+
+  return GDK_EVENT_STOP;
+}
+
 
 /*
  * GObject overrides
@@ -348,6 +493,8 @@ gtd_edit_pane_class_init (GtdEditPaneClass *klass)
 
   gtk_widget_class_bind_template_callback (widget_class, on_date_selected_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_delete_button_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_hyperlink_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_hyperlink_hover_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_no_date_button_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_priority_changed_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_text_buffer_changed_cb);
@@ -433,4 +580,18 @@ gtd_edit_pane_set_task (GtdEditPane *self,
     }
 
   g_object_notify (G_OBJECT (self), "task");
+}
+
+void
+gtd_edit_pane_set_markdown_renderer (GtdEditPane         *self,
+                                     GtdMarkdownRenderer *renderer)
+{
+  GtkTextBuffer *buffer;
+
+  g_assert (GTD_IS_EDIT_PANE (self));
+  g_assert (GTD_IS_MARKDOWN_RENDERER (renderer));
+
+  buffer = gtk_text_view_get_buffer (self->notes_textview);
+
+  gtd_markdown_renderer_add_buffer (renderer, buffer);
 }

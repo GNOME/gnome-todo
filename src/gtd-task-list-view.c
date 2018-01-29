@@ -1128,7 +1128,15 @@ create_task_cb (GtdTaskRow  *row,
   gtd_task_list_save_task (list, task);
   gtd_manager_create_task (gtd_manager_get_default (), task);
 }
+static void
+gtd_task_list_view_dispose (GObject *object)
+{
+  GtdTaskListViewPrivate *priv = GTD_TASK_LIST_VIEW (object)->priv;
 
+  g_clear_object (&priv->renderer);
+
+  G_OBJECT_CLASS (gtd_task_list_view_parent_class)->dispose (object);
+}
 static void
 gtd_task_list_view_finalize (GObject *object)
 {
@@ -1136,8 +1144,6 @@ gtd_task_list_view_finalize (GObject *object)
 
   g_clear_pointer (&priv->default_date, g_date_time_unref);
   g_clear_pointer (&priv->list, g_list_free);
-
-  g_clear_object (&priv->renderer);
 
   G_OBJECT_CLASS (gtd_task_list_view_parent_class)->finalize (object);
 }
@@ -1520,6 +1526,7 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   object_class->finalize = gtd_task_list_view_finalize;
+  object_class->dispose = gtd_task_list_view_dispose;
   object_class->constructed = gtd_task_list_view_constructed;
   object_class->get_property = gtd_task_list_view_get_property;
   object_class->set_property = gtd_task_list_view_set_property;

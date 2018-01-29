@@ -209,9 +209,7 @@ apply_markup_tag (GtdMarkupRenderer *self,
                   gboolean           pre,
                   gboolean           suf)
 {
-  GtkTextIter iter, end_iter, match, end_match, match1;
-  int line_count;
-  int i;
+  GtkTextIter iter, match, end_match, match1;
 
   iter = start;
 
@@ -235,40 +233,23 @@ apply_markup_tag (GtdMarkupRenderer *self,
     }
   else if (pre && !suf)
     {
-      line_count = gtk_text_buffer_get_line_count (self->buffer);
-      for (i = 0; i < line_count; i++)
+      while (gtk_text_iter_forward_search (&iter, symbol,
+                                           GTK_TEXT_SEARCH_TEXT_ONLY,
+                                           &match, NULL, &end))
         {
-          gtk_text_buffer_get_iter_at_line (self->buffer, &iter, i);
-          end_iter = iter;
-          gtk_text_iter_forward_to_line_end (&end_iter);
-
-          if (gtk_text_iter_forward_search (&iter, symbol,
+          if (gtk_text_iter_forward_search (&match, "\n",
                                             GTK_TEXT_SEARCH_TEXT_ONLY,
-                                            &match, NULL,
-                                            &end_iter))
+                                            NULL, &iter, &end))
             {
-              gtk_text_buffer_apply_tag (self->buffer, tag, &match, &end_iter);
+              gtk_text_buffer_apply_tag (self->buffer, tag, &match, &iter);
             }
         }
     }
 }
 
 static void
-gtd_markup_renderer_dispose (GObject *object)
-{
-  GtdMarkupRenderer *self = GTD_MARKUP_RENDERER (object);
-
-  clear_markup (self);
-
-  G_OBJECT_CLASS (gtd_markup_renderer_parent_class)->dispose(object);
-}
-
-static void
 gtd_markup_renderer_class_init (GtdMarkupRendererClass *klass)
 {
-  GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-  object_class->dispose = gtd_markup_renderer_dispose;
 }
 
 GtdMarkupRenderer*
@@ -296,6 +277,8 @@ gtd_markup_renderer_set_buffer (GtdMarkupRenderer *self,
   self->buffer = buffer;
   g_signal_connect (self->buffer, "changed",
                     G_CALLBACK (on_text_changed), self);
+
+  self->rendering = TRUE;
 }
 
 void
@@ -330,6 +313,4 @@ gtd_markup_renderer_render_markup (GtdMarkupRenderer *self,
   apply_markup_tag (self, self->list_indent, LIST, start, end, TRUE, FALSE);
 
   render_markup_links (self, start, end, self->link, self->link_text);
-
-  self->rendering = TRUE;
 }

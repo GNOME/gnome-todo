@@ -31,6 +31,7 @@ typedef struct _GtdDoneButton           GtdDoneButton;
 typedef struct _GtdInitialSetupWindow   GtdInitialSetupWindow;
 typedef struct _GtdListView             GtdListView;
 typedef struct _GtdManager              GtdManager;
+typedef struct _GtdMarkdownRenderer     GtdMarkdownRenderer;
 typedef struct _GtdNotification         GtdNotification;
 typedef struct _GtdNotificationWidget   GtdNotificationWidget;
 typedef struct _GtdObject               GtdObject;

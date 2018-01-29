@@ -30,7 +30,8 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (GtdTaskRow, gtd_task_row, GTD, TASK_ROW, GtkListBoxRow)
 
-GtkWidget*                gtd_task_row_new                      (GtdTask             *task);
+GtkWidget*                gtd_task_row_new                      (GtdTask             *task,
+                                                                 GtdMarkdownRenderer *renderer);
 
 GtdTask*                  gtd_task_row_get_task                 (GtdTaskRow          *row);
 

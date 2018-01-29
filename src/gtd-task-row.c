@@ -22,6 +22,7 @@
 #include "gtd-edit-pane.h"
 #include "gtd-expandable-entry.h"
 #include "gtd-manager.h"
+#include "gtd-markdown-renderer.h"
 #include "gtd-provider.h"
 #include "gtd-rows-common-private.h"
 #include "gtd-task-row.h"
@@ -61,6 +62,8 @@ struct _GtdTaskRow
 
   /* data */
   GtdTask            *task;
+
+  GtdMarkdownRenderer *renderer;
 
   gint                update_title_timeout_id;
   gboolean            active;
@@ -104,6 +107,7 @@ enum
 {
   PROP_0,
   PROP_HANDLE_SUBTASKS,
+  PROP_RENDERER,
   PROP_TASK,
   LAST_PROP
 };
@@ -177,7 +181,7 @@ create_transient_row (GtdTaskRow *self)
 {
   GtdTaskRow *new_row;
 
-  new_row = GTD_TASK_ROW (gtd_task_row_new (self->task));
+  new_row = GTD_TASK_ROW (gtd_task_row_new (self->task, self->renderer));
   gtk_revealer_set_transition_duration (new_row->revealer, 0);
   gtk_revealer_set_reveal_child (new_row->revealer, TRUE);
 
@@ -540,7 +544,6 @@ on_task_title_changed_cb (GtdTaskRow *self)
   GTD_EXIT;
 }
 
-
 /*
  * GtkWidget overrides
  */
@@ -616,6 +619,10 @@ gtd_task_row_get_property (GObject    *object,
       g_value_set_boolean (value, self->handle_subtasks);
       break;
 
+    case PROP_RENDERER:
+      g_value_set_object (value, self->renderer);
+      break;
+
     case PROP_TASK:
       g_value_set_object (value, self->task);
       break;
@@ -637,6 +644,11 @@ gtd_task_row_set_property (GObject      *object,
     {
     case PROP_HANDLE_SUBTASKS:
       gtd_task_row_set_handle_subtasks (self, g_value_get_boolean (value));
+      break;
+
+    case PROP_RENDERER:
+      self->renderer = g_value_get_object (value);
+      gtd_edit_pane_set_markdown_renderer (GTD_EDIT_PANE (self->edit_panel), self->renderer);
       break;
 
     case PROP_TASK:
@@ -677,6 +689,20 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
                                 "Whether the row adapts to the task's subtasks",
                                 TRUE,
                                 G_PARAM_READWRITE));
+
+  /**
+   * GtdTaskRow::renderer:
+   *
+   * The internal markdown renderer.
+   */
+  g_object_class_install_property (
+          object_class,
+          PROP_RENDERER,
+          g_param_spec_object ("renderer",
+                               "Renderer",
+                               "Renderer",
+                               GTD_TYPE_MARKDOWN_RENDERER,
+                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_PRIVATE | G_PARAM_STATIC_STRINGS));
 
   /**
    * GtdTaskRow::task:
@@ -793,10 +819,12 @@ gtd_task_row_init (GtdTaskRow *self)
 }
 
 GtkWidget*
-gtd_task_row_new (GtdTask *task)
+gtd_task_row_new (GtdTask             *task,
+                  GtdMarkdownRenderer *renderer)
 {
   return g_object_new (GTD_TYPE_TASK_ROW,
                        "task", task,
+                       "renderer", renderer,
                        NULL);
 }
 

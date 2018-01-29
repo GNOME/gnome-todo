@@ -25,6 +25,7 @@
 #include "gtd-empty-list-widget.h"
 #include "gtd-task-list-view.h"
 #include "gtd-manager.h"
+#include "gtd-markdown-renderer.h"
 #include "gtd-new-task-row.h"
 #include "gtd-notification.h"
 #include "gtd-provider.h"
@@ -86,6 +87,9 @@ typedef struct
   GList                 *list;
   GtdTaskList           *task_list;
   GDateTime             *default_date;
+
+  /* Markup renderer*/
+  GtdMarkdownRenderer   *renderer;
 
   /* DnD autoscroll */
   guint                  scroll_timeout_id;
@@ -320,7 +324,7 @@ add_task_row (GtdTaskListView *self,
   GtdTaskListViewPrivate *priv = self->priv;
   GtkWidget *new_row;
 
-  new_row = gtd_task_row_new (task);
+  new_row = gtd_task_row_new (task, priv->renderer);
 
   g_object_bind_property (self,
                           "handle-subtasks",
@@ -480,8 +484,8 @@ remove_task_row (GtdTaskListView *view,
 {
   GtdTaskRow *row;
 
-  g_return_if_fail (GTD_IS_TASK_LIST_VIEW (view));
-  g_return_if_fail (GTD_IS_TASK (task));
+  g_assert (GTD_IS_TASK_LIST_VIEW (view));
+  g_assert (GTD_IS_TASK (task));
 
   row = get_row_for_task (view, task);
 
@@ -686,6 +690,7 @@ on_remove_task_row_cb (GtdTaskRow      *row,
                                          data);
 
   gtd_window_notify (window, notification);
+
 
   /* Clear the active row */
   set_active_row (self, NULL);
@@ -1298,6 +1303,7 @@ gtd_task_list_view_finalize (GObject *object)
 
   g_clear_pointer (&priv->default_date, g_date_time_unref);
   g_clear_pointer (&priv->list, g_list_free);
+  g_clear_object (&priv->renderer);
 
   G_OBJECT_CLASS (gtd_task_list_view_parent_class)->finalize (object);
 }
@@ -1582,6 +1588,8 @@ gtd_task_list_view_init (GtdTaskListView *self)
                      NULL,
                      0,
                      GDK_ACTION_MOVE);
+
+  self->priv->renderer = gtd_markdown_renderer_new ();
 }
 
 /**

@@ -19,6 +19,7 @@
 #define G_LOG_DOMAIN "GtdTaskListView"
 
 #include "gtd-dnd-row.h"
+#include "gtd-done-button.h"
 #include "gtd-edit-pane.h"
 #include "gtd-empty-list-widget.h"
 #include "gtd-task-list-view.h"

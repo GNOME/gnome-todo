@@ -19,6 +19,7 @@
 #define G_LOG_DOMAIN "GtdTaskListView"
 
 #include "gtd-dnd-row.h"
+#include "gtd-done-button.h"
 #include "gtd-edit-pane.h"
 #include "gtd-empty-list-widget.h"
 #include "gtd-task-list-view.h"
@@ -1523,6 +1524,7 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
   g_type_ensure (GTD_TYPE_TASK_ROW);
   g_type_ensure (GTD_TYPE_DND_ROW);
   g_type_ensure (GTD_TYPE_EMPTY_LIST_WIDGET);
+  g_type_ensure (GTD_TYPE_DONE_BUTTON);
 
   /**
    * GtdTaskListView::color:

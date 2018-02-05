@@ -58,6 +58,7 @@ sources = files(
   'views/gtd-list-selector-list.c',
   'views/gtd-list-selector-list-item.c',
   'views/gtd-list-selector-panel.c',
+  'widgets/gtd-done-button.c',
   'widgets/gtd-expandable-entry.c',
   'gtd-application.c',
   'gtd-dnd-row.c',

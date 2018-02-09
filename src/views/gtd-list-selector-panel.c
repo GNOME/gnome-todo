@@ -158,15 +158,26 @@ gtd_list_selector_panel_select_button_toggled (GtkToggleButton      *button,
   gtd_window_set_mode (window, mode);
 }
 
-
+gboolean search_bar_connect_first_time = TRUE;
 static gboolean
 gtd_list_selector_panel_on_key_press_event (GtdListSelectorPanel *panel,
                                             GdkEvent             *event,
                                             GtkSearchBar         *bar)
 {
-  if (g_strcmp0 (gtk_stack_get_visible_child_name (GTK_STACK (panel)), "lists") == 0)
+  if (gtk_widget_is_visible ((GtkWidget*)panel))
     {
-      return gtk_search_bar_handle_event (bar, event);
+      GtdWindow *window = GTD_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (panel)));
+      gboolean ret = gtk_search_bar_handle_event (bar, event);
+
+      if(search_bar_connect_first_time){
+        g_signal_connect (window,
+                        "key-press-event",
+                        G_CALLBACK (gtd_list_selector_panel_on_key_press_event),
+                        bar);
+        search_bar_connect_first_time = FALSE;
+      }
+
+      return ret;
     }
 
   return FALSE;

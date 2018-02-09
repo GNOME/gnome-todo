@@ -1,4 +1,4 @@
-#73/* gtd-list-selector-list-item.c
+/* gtd-list-selector-list-item.c
  *
  * Copyright (C) 2016 Georges Basile Stavracas Neto <georges.stavracas@gmail.com>
  *

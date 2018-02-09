@@ -91,6 +91,8 @@ enum {
   N_PROPS
 };
 
+gboolean search_bar_connect_first_time = TRUE;
+
 static void
 gtd_list_selector_panel_set_view (GtdListSelectorPanel    *self,
                                   GtdListSelectorViewType  view)
@@ -158,7 +160,7 @@ gtd_list_selector_panel_select_button_toggled (GtkToggleButton      *button,
   gtd_window_set_mode (window, mode);
 }
 
-gboolean search_bar_connect_first_time = TRUE;
+
 static gboolean
 gtd_list_selector_panel_on_key_press_event (GtdListSelectorPanel *panel,
                                             GdkEvent             *event,

@@ -24,7 +24,13 @@ gi.require_version('Peas', '1.0')
 
 from gi.repository import Gio, GLib, GObject, Gtd, Gtk, Peas
 
-from gettext import gettext as _
+try:
+    import gettext
+    gettext.bindtextdomain('gnome-todo')
+    gettext.textdomain('gnome-todo')
+    _ = gettext.gettext
+except:
+    _ = lambda s: s
 
 
 class UnscheduledPanel(Gtk.Box, Gtd.Panel):

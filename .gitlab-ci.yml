@@ -10,6 +10,5 @@ before_script:
 build-todo:
   stage: build
   script:
-  - ./configure
-  - make
-  - make install
+  - meson _build
+  - ninja -C _build install

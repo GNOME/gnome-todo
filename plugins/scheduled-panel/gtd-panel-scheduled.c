@@ -92,9 +92,18 @@ get_string_for_date (GDateTime *dt,
 
   get_date_offset (dt, &days_diff, &years_diff);
 
-  if (days_diff < 0)
+  if (days_diff < -1)
     {
-      str = g_strdup_printf (g_dngettext (NULL, "Yesterday", "%d days ago", -days_diff), -days_diff);
+      /* Translators: This message will never be used with '1 day ago'
+       * but the singular form is required because some languages do not
+       * have plurals, some languages reuse the singular form for numbers
+       * like 21, 31, 41, etc.
+       */
+      str = g_strdup_printf (g_dngettext (NULL, "%d day ago", "%d days ago", -days_diff), -days_diff);
+    }
+  else if (days_diff == -1)
+    {
+      str = g_strdup (_("Yesterday"));
     }
   else if (days_diff == 0)
     {

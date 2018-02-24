@@ -49,6 +49,12 @@ void                      gtd_window_set_custom_title     (GtdWindow            
                                                            const gchar           *title,
                                                            const gchar           *subtitle);
 
+void                      gtd_window_open_event_by_uuid   (GtdWindow             *self,
+                                                           gchar                 *uuid);
+
+void                      gtd_log_task_info_from_uuid     (GtdManager *manager,
+                                                           GtdTaskList *list,
+                                                           gpointer uuid);
 G_END_DECLS
 
 #endif /* GTD_WINDOW_H */

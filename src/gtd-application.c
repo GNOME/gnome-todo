@@ -36,10 +36,11 @@
 #include <girepository.h>
 #include <glib/gi18n.h>
 
-
 struct _GtdApplication
 {
   GtkApplication         application;
+
+  gchar                 *uuid;
 
   GtkWidget             *window;
   GtkWidget             *plugin_dialog;
@@ -71,6 +72,7 @@ G_DEFINE_TYPE (GtdApplication, gtd_application, GTK_TYPE_APPLICATION)
 static GOptionEntry cmd_options[] = {
   { "quit", 'q', 0, G_OPTION_ARG_NONE, NULL, N_("Quit GNOME To Do"), NULL },
   { "debug", 'd', 0, G_OPTION_ARG_NONE, NULL, N_("Enable debug messages"), NULL },
+  { "uuid", 'u', 0, G_OPTION_ARG_STRING, NULL, N_("Open Todo showing the passed task"), NULL },
   { NULL }
 };
 
@@ -88,7 +90,6 @@ gtd_application_activate_action (GSimpleAction *simple,
                                  gpointer       user_data)
 {
   GtdApplication *self = GTD_APPLICATION (user_data);
-
   gtk_widget_show (self->window);
   gtk_window_present (GTK_WINDOW (self->window));
 }
@@ -235,11 +236,20 @@ run_initial_setup (GtdApplication *application)
 static void
 gtd_application_activate (GApplication *application)
 {
+  GtdApplication *self;
+
   GTD_ENTRY;
+
+  self = GTD_APPLICATION (application);
 
   /* FIXME: the initial setup is disabled for the 3.18 release because
    * we can't create tasklists on GOA accounts.
    */
+  if (self->uuid != NULL)
+    {
+      gtd_window_open_event_by_uuid (GTD_WINDOW (self->window), self->uuid);
+      g_clear_pointer (&self->uuid, g_free);
+    }
   run_window (GTD_APPLICATION (application));
 
   GTD_EXIT;
@@ -295,11 +305,24 @@ gtd_application_startup (GApplication *application)
   GTD_EXIT;
 }
 
+void
+gtd_application_set_uuid (GtdApplication *self,
+                          gchar    *app_uuid)
+{
+  g_return_if_fail (GTD_IS_APPLICATION (self));
+
+  g_free (self->uuid);
+  self->uuid = g_strdup (app_uuid);
+}
+
 static gint
 gtd_application_command_line (GApplication            *app,
                               GApplicationCommandLine *command_line)
 {
   GVariantDict *options;
+  GVariant *option;
+  gchar* uuid = NULL;
+  gsize length;
 
   options = g_application_command_line_get_options_dict (command_line);
 
@@ -308,7 +331,15 @@ gtd_application_command_line (GApplication            *app,
       g_application_quit (app);
       return 0;
     }
+  if (g_variant_dict_contains (options, "uuid"))
+    {
+      option = g_variant_dict_lookup_value (options, "uuid", G_VARIANT_TYPE_STRING);
+      uuid = g_variant_get_string (option, &length);
 
+      gtd_application_set_uuid (GTD_APPLICATION (app), uuid);
+
+      g_variant_unref (option);
+    }
   g_application_activate (app);
 
   return 0;
@@ -353,3 +384,4 @@ gtd_application_init (GtdApplication *self)
 {
   g_application_add_main_option_entries (G_APPLICATION (self), cmd_options);
 }
+

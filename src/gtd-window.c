@@ -103,6 +103,36 @@ typedef struct
   gchar     *secondary_text;
 } ErrorData;
 
+void
+gtd_log_task_info_from_uuid (GtdManager *manager,
+                               GtdTaskList *list,
+                               gpointer uuid)
+{
+  //FIXME: uuid is not passed properly. it logs as empty string or non-ascii characters. Also crashes sometimes.
+  g_debug("%s", uuid);
+  GtdTask *task;
+  GList *tasks = gtd_task_list_get_tasks(list);
+  GList *l;
+  for (l = tasks; l != NULL; l = l->next)
+    {
+      task = l->data;
+      if(g_strcmp0(gtd_object_get_uid(task), uuid) == 0){
+        g_info("Found task: ");
+        g_info(gtd_task_get_title(task));
+      }
+    }
+}
+
+void
+gtd_window_open_event_by_uuid (GtdWindow   *self,
+                               gchar *uuid)
+{
+  g_signal_connect (self->priv->manager,
+                    "list-added",
+                    G_CALLBACK (gtd_log_task_info_from_uuid),
+                    (gpointer) uuid);
+}
+
 static void
 add_widgets (GtdWindow *window,
              GtkWidget *container_start,

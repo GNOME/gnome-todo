@@ -18,7 +18,6 @@
 
 #define G_LOG_DOMAIN "GtdTodoTxtParser"
 
-#include "gtd-debug.h"
 #include "gtd-todo-txt-parser.c"
 #include "gtd-provider-todo-txt.h"
 

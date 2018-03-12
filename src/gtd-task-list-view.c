@@ -786,6 +786,18 @@ on_task_row_exited_cb (GtdTaskListView *self,
     }
 }
 
+static gboolean
+on_task_list_task_add_completed_cb (GtdTaskListView *self)
+{
+  GtkAdjustment *vadjustment;
+  GtdTaskListViewPrivate *priv = self->priv;
+
+  vadjustment = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (priv->scrolled_window));
+  gtk_adjustment_set_value (vadjustment, gtk_adjustment_get_upper (vadjustment));
+
+  return G_SOURCE_REMOVE;
+}
+
 static void
 on_task_list_task_added_cb (GtdTaskList     *list,
                             GtdTask         *task,
@@ -796,6 +808,8 @@ on_task_list_task_added_cb (GtdTaskList     *list,
   GTD_ENTRY;
 
   add_task (self, task);
+
+  g_timeout_add(205, (GSourceFunc) on_task_list_task_add_completed_cb, self);
 
   /* Also add to the list of current tasks */
   priv->list = g_list_prepend (priv->list, task);

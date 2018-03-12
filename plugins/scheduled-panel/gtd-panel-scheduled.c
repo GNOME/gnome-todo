@@ -530,6 +530,7 @@ gtd_panel_scheduled_init (GtdPanelScheduled *self)
                                     (GtdTaskListViewSortFunc) gtd_panel_scheduled_sort_func,
                                     self);
 
+
   gtk_widget_show_all (GTK_WIDGET (self));
 }
 

@@ -76,6 +76,7 @@ enum
   PANEL_REMOVED,
   PROVIDER_ADDED,
   PROVIDER_REMOVED,
+  PROVIDER_CHANGED,
   NUM_SIGNALS
 };
 
@@ -556,8 +557,34 @@ gtd_manager_class_init (GtdManagerClass *klass)
                                             G_TYPE_NONE,
                                             1,
                                             GTD_TYPE_PROVIDER);
+
+  /**
+   * GtdManager::provider-changed:
+   * @manager: a #GtdManager
+   * @provider: a #GtdProvider
+   *
+   * The ::provider-changed signal is emmited after something on a #GtdProvider
+   * object changes.
+   */
+  signals[PROVIDER_CHANGED] = g_signal_new ("provider-changed",
+                                            GTD_TYPE_MANAGER,
+                                            G_SIGNAL_RUN_LAST,
+                                            0,
+                                            NULL,
+                                            NULL,
+                                            NULL,
+                                            G_TYPE_NONE,
+                                            1,
+                                            GTD_TYPE_PROVIDER);
 }
 
+static void
+gtd_manager__provider_changed (GtdPluginManager *plugin_manager,
+                               GtdProvider      *provider,
+                               GtdManager       *self)
+{
+  g_signal_emit (self, signals[PROVIDER_CHANGED], 0, provider);
+}
 
 static void
 gtd_manager_init (GtdManager *self)
@@ -865,6 +892,10 @@ gtd_manager_load_plugins (GtdManager *self)
   g_signal_connect (self->plugin_manager,
                     "provider-unregistered",
                     G_CALLBACK (on_provider_removed_cb),
+                    self);
+  g_signal_connect (self->plugin_manager,
+                    "provider-changed",
+                    G_CALLBACK (gtd_manager__provider_changed),
                     self);
 
   gtd_plugin_manager_load_plugins (self->plugin_manager);

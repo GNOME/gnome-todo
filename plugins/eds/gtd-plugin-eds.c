@@ -46,6 +46,7 @@ struct _GtdPluginEds
 
   /* Providers */
   GList                  *providers;
+  GObject                *providers_notified;
 };
 
 enum
@@ -63,6 +64,42 @@ const gchar *supported_accounts[] = {
 };
 
 static void          gtd_activatable_iface_init                  (GtdActivatableInterface  *iface);
+
+static void
+gtd_plugin_eds_goa_account_changed_cb (GoaClient    *client,
+                                       GoaObject    *object,
+                                       GtdPluginEds *self)
+{
+  GList *l;
+  GoaAccount *account;
+  gboolean attention_needed;
+
+  account = goa_object_peek_account (object);
+
+  attention_needed = goa_account_get_attention_needed (account);
+  if(!attention_needed) return;
+
+  for (l = self->providers; l != NULL; l = l->next)
+    {
+      if (!GTD_IS_PROVIDER_GOA(l->data) || account != gtd_provider_goa_get_account (l->data)) continue;
+
+      GoaObject *provider_notified;
+      const gchar *id;
+
+      id = goa_account_get_id (account);
+      provider_notified = g_object_get_data (self->providers_notified, id);
+
+      if (provider_notified)
+        {
+         g_object_steal_data (self->providers_notified, id);
+        }
+      else
+        {
+         g_signal_emit_by_name (self, "provider-changed", l->data);
+         g_object_set_data (self->providers_notified, g_strdup (id), l->data);
+        }
+    }
+}
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (GtdPluginEds, gtd_plugin_eds, G_TYPE_OBJECT,
                                 0,
@@ -231,7 +268,7 @@ gtd_plugin_eds_goa_client_finish_cb (GObject      *client,
       self->providers = g_list_append (self->providers, provider);
 
       g_signal_emit_by_name (self, "provider-added", provider);
-
+      gtd_plugin_eds_goa_account_changed_cb (goa_client, object, self);	
       g_object_unref (account);
     }
 
@@ -240,16 +277,17 @@ gtd_plugin_eds_goa_client_finish_cb (GObject      *client,
                     "account-added",
                     G_CALLBACK (gtd_plugin_eds_goa_account_added_cb),
                     user_data);
-
   g_signal_connect (goa_client,
                     "account-removed",
                     G_CALLBACK (gtd_plugin_eds_goa_account_removed_cb),
                     user_data);
-
+  g_signal_connect (goa_client,
+                    "account-changed",
+                    G_CALLBACK (gtd_plugin_eds_goa_account_changed_cb),
+                    user_data);       
+  
   g_list_free_full (accounts, g_object_unref);
 }
-
-
 
 static void
 gtd_plugin_eds_source_registry_finish_cb (GObject      *source_object,

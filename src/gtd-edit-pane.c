@@ -107,7 +107,20 @@ update_date_widgets (GtdEditPane *self)
 
   g_signal_handlers_unblock_by_func (self->calendar, on_date_selected_cb, self);
 
-  gtk_label_set_label (self->date_label, text ? text : _("No date set"));
+  GList *panels, *l;
+  gint unscheduled = 0;
+  panels = gtd_manager_get_panels (gtd_manager_get_default ());
+
+  for( l = panels; l != NULL; l = l->next)
+    {
+      if (g_strcmp0 (gtd_panel_get_panel_name (l->data), "unscheduled-panel")) 
+        unscheduled = 1;
+    }
+ 
+  if (!unscheduled) 
+    gtk_label_set_label (self->date_label, text ? text : _("No date set"));
+  else 
+    gtk_label_set_label (self->date_label, text ? text : _(""));
 
   g_free (text);
 }

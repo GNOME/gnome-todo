@@ -1,14 +1,66 @@
-image: fedora:26
-stages:
-  - build
+variables:
+  GIT_SUBMODULE_STRATEGY: normal
 
-before_script:
-  - dnf install -y gcc meson ninja-build gettext gtk-doc glib2-devel gtk3-devel
-    gnome-online-accounts-devel libpeas-devel evolution-data-server-devel
-    rest-devel json-glib-devel
 
-build-todo:
-  stage: build
+.build_template: &distro_build
   script:
-  - meson _build
-  - ninja -C _build install
+    - meson _build
+    - ninja -C _build install
+
+stages:
+   - build
+   - flatpak
+
+
+##################
+# Fedora Rawhide #
+##################
+
+fedora:rawhide:
+    image: fedora:rawhide
+    stage: build
+
+    before_script:
+      - dnf install -y gcc meson ninja-build gettext gtk-doc glib2-devel gtk3-devel
+        gnome-online-accounts-devel libpeas-devel evolution-data-server-devel
+        rest-devel json-glib-devel
+
+    <<: *distro_build
+
+
+
+################
+# Ubuntu Devel #
+################
+
+ubuntu:devel:
+    image: ubuntu:devel
+    stage: build
+    before_script:
+    # Ubuntu requires running update to fetch metadata and find packges
+    - apt update
+    - apt install -y gcc meson gettext gtk-doc-tools libglib2.0-dev git libgtk-3-dev
+                     libgoa-1.0-dev libpeas-dev libecal1.2-dev libedataserver1.2-dev
+                     librest-dev libjson-glib-dev
+    <<: *distro_build
+
+
+
+##################
+# Flatpak Bundle #
+##################
+
+flatpak:master:
+    image: registry.gitlab.com/alatiera/gnome-nightly-oci/gnome-master:latest
+    stage: flatpak
+    script:
+    - flatpak-builder --repo=repo app org.gnome.Todo.json
+    - flatpak build-bundle repo gnome-todo-$CI_COMMIT_REF_SLUG.flatpak --runtime-repo=https://sdk.gnome.org/gnome-nightly.flatpakrepo org.gnome.TodoDevel
+    artifacts:
+        paths:
+        - gnome-todo-$CI_COMMIT_REF_SLUG.flatpak
+        - _build/meson-logs/meson-log.txt
+        expire_in: 3 days
+    cache:
+        paths:
+        - .flatpak-builder/cache

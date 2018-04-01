@@ -28,4 +28,7 @@ gchar*               gtd_str_replace                             (const gchar   
                                                                   const gchar        *search,
                                                                   const gchar        *replacement);
 
+gint                 gtd_collate_compare_strings                 (const gchar        *string_a,
+                                                                  const gchar        *string_b);
+
 G_END_DECLS

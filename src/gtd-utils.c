@@ -93,3 +93,16 @@ gtd_str_replace (const gchar *source,
 
   return new_string;
 }
+
+gint
+gtd_collate_compare_strings (const gchar *string_a,
+                             const gchar *string_b)
+{
+  g_autofree gchar *collated_a = NULL;
+  g_autofree gchar *collated_b = NULL;
+
+  collated_a = g_utf8_collate_key (string_a, -1);
+  collated_b = g_utf8_collate_key (string_b, -1);
+
+  return g_strcmp0 (collated_a, collated_b);
+}

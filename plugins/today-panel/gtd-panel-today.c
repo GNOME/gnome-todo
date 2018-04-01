@@ -29,6 +29,7 @@ struct _GtdPanelToday
 
   GtkWidget          *view;
   GMenu              *menu;
+  GIcon              *icon;
 
   gint                day_change_callback_id;
 
@@ -49,6 +50,7 @@ G_DEFINE_TYPE_EXTENDED (GtdPanelToday, gtd_panel_today, GTK_TYPE_BOX,
 
 enum {
   PROP_0,
+  PROP_ICON,
   PROP_MENU,
   PROP_NAME,
   PROP_TITLE,
@@ -173,6 +175,12 @@ gtd_panel_today_get_menu (GtdPanel *panel)
   return GTD_PANEL_TODAY (panel)->menu;
 }
 
+static GIcon*
+gtd_panel_today_get_icon (GtdPanel *panel)
+{
+  return g_object_ref (GTD_PANEL_TODAY (panel)->icon);
+}
+
 static void
 gtd_panel_iface_init (GtdPanelInterface *iface)
 {
@@ -180,6 +188,7 @@ gtd_panel_iface_init (GtdPanelInterface *iface)
   iface->get_panel_title = gtd_panel_today_get_panel_title;
   iface->get_header_widgets = gtd_panel_today_get_header_widgets;
   iface->get_menu = gtd_panel_today_get_menu;
+  iface->get_icon = gtd_panel_today_get_icon;
 }
 
 static void
@@ -187,6 +196,7 @@ gtd_panel_today_finalize (GObject *object)
 {
   GtdPanelToday *self = (GtdPanelToday *)object;
 
+  g_clear_object (&self->icon);
   g_clear_object (&self->menu);
   g_clear_pointer (&self->title, g_free);
   g_clear_pointer (&self->task_list, g_list_free);
@@ -204,6 +214,10 @@ gtd_panel_today_get_property (GObject    *object,
 
   switch (prop_id)
     {
+    case PROP_ICON:
+      g_value_set_object (value, self->icon);
+      break;
+
     case PROP_MENU:
       g_value_set_object (value, NULL);
       break;
@@ -239,6 +253,7 @@ gtd_panel_today_class_init (GtdPanelTodayClass *klass)
   object_class->get_property = gtd_panel_today_get_property;
   object_class->set_property = gtd_panel_today_set_property;
 
+  g_object_class_override_property (object_class, PROP_ICON, "icon");
   g_object_class_override_property (object_class, PROP_MENU, "menu");
   g_object_class_override_property (object_class, PROP_NAME, "name");
   g_object_class_override_property (object_class, PROP_TITLE, "title");
@@ -249,6 +264,8 @@ gtd_panel_today_init (GtdPanelToday *self)
 {
   GtdManager *manager;
   GDateTime *now;
+
+  self->icon = g_themed_icon_new ("daytime-sunset-symbolic");
 
   /* Connect to GtdManager::list-* signals to update the title */
   manager = gtd_manager_get_default ();

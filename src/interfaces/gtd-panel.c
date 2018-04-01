@@ -46,6 +46,19 @@ G_DEFINE_INTERFACE (GtdPanel, gtd_panel, GTK_TYPE_WIDGET)
 static void
 gtd_panel_default_init (GtdPanelInterface *iface)
 {
+
+  /**
+   * GtdPanel::icon:
+   *
+   * The icon of the panel.
+   */
+  g_object_interface_install_property (iface,
+                                       g_param_spec_object ("icon",
+                                                            "Icon of the panel",
+                                                            "The icon of the panel",
+                                                            G_TYPE_ICON,
+                                                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
   /**
    * GtdPanel::name:
    *
@@ -159,4 +172,21 @@ gtd_panel_get_menu (GtdPanel *panel)
   g_return_val_if_fail (GTD_PANEL_GET_IFACE (panel)->get_menu, NULL);
 
   return GTD_PANEL_GET_IFACE (panel)->get_menu (panel);
+}
+
+/**
+ * gtd_panel_get_icon:
+ * @self: a #GtdPanel
+ *
+ * Retrieves the icon of @self.
+ *
+ * Returns: (transfer full)(nullable): a #GIcon
+ */
+GIcon*
+gtd_panel_get_icon (GtdPanel *self)
+{
+  g_return_val_if_fail (GTD_IS_PANEL (self), NULL);
+  g_return_val_if_fail (GTD_PANEL_GET_IFACE (self)->get_icon, NULL);
+
+  return GTD_PANEL_GET_IFACE (self)->get_icon (self);
 }

@@ -40,6 +40,8 @@ struct _GtdPanelInterface
   GList*             (*get_header_widgets)                 (GtdPanel        *panel);
 
   const GMenu*       (*get_menu)                           (GtdPanel        *panel);
+
+  GIcon*            (*get_icon)                            (GtdPanel        *self);
 };
 
 const gchar*         gtd_panel_get_panel_name                    (GtdPanel           *panel);
@@ -49,6 +51,8 @@ const gchar*         gtd_panel_get_panel_title                   (GtdPanel      
 GList*               gtd_panel_get_header_widgets                (GtdPanel           *panel);
 
 const GMenu*         gtd_panel_get_menu                          (GtdPanel           *panel);
+
+GIcon*               gtd_panel_get_icon                          (GtdPanel           *self);
 
 G_END_DECLS
 

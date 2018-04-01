@@ -57,7 +57,6 @@ struct _GtdWindow
   GtkWidget          *gear_menu_button;
   GtkHeaderBar       *headerbar;
   GtkStack           *stack;
-  GtkStackSwitcher   *stack_switcher;
 
   GtdNotificationWidget *notification_widget;
 
@@ -670,7 +669,6 @@ gtd_window_class_init (GtdWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, headerbar);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, notification_widget);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, stack);
-  gtk_widget_class_bind_template_child (widget_class, GtdWindow, stack_switcher);
 
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, extension_box_end);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, extension_box_start);
@@ -795,7 +793,6 @@ gtd_window_set_mode (GtdWindow     *self,
       else
         {
           gtk_style_context_remove_class (context, "selection-mode");
-          gtk_header_bar_set_custom_title (self->headerbar, GTK_WIDGET (self->stack_switcher));
           gtk_header_bar_set_title (self->headerbar, _("To Do"));
         }
 
@@ -828,6 +825,5 @@ gtd_window_set_custom_title (GtdWindow   *self,
   else
     {
       gtk_header_bar_set_title (self->headerbar, _("To Do"));
-      gtk_header_bar_set_custom_title (self->headerbar, GTK_WIDGET (self->stack_switcher));
     }
 }

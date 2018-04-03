@@ -21,6 +21,7 @@
 #include "gtd-provider.h"
 #include "gtd-task.h"
 #include "gtd-task-list.h"
+#include "gtd-utils.h"
 
 /**
  * SECTION:gtd-provider
@@ -426,4 +427,32 @@ gtd_provider_set_default_task_list (GtdProvider *provider,
   g_return_if_fail (GTD_PROVIDER_GET_IFACE (provider)->set_default_task_list);
 
   return GTD_PROVIDER_GET_IFACE (provider)->set_default_task_list (provider, list);
+}
+
+/**
+ * gtd_provider_compare:
+ * @a: a #GtdProvider
+ * @b: a #GtdProvider
+ *
+ * Compares @a and @b. The sorting criteria is internal and
+ * may change.
+ *
+ * Returns: -1 if @a comes before @b, 1 for the oposite, and
+ * 0 if they're equal
+ */
+gint
+gtd_provider_compare (GtdProvider *a,
+                      GtdProvider *b)
+{
+  gint result;
+
+  g_return_val_if_fail (GTD_IS_PROVIDER (a), 0);
+  g_return_val_if_fail (GTD_IS_PROVIDER (b), 0);
+
+  result = gtd_collate_compare_strings (gtd_provider_get_name (a), gtd_provider_get_name (b));
+
+  if (result != 0)
+    return result;
+
+  return gtd_collate_compare_strings (gtd_provider_get_description (a), gtd_provider_get_description (b));
 }

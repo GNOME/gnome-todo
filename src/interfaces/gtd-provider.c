@@ -103,6 +103,18 @@ gtd_provider_default_init (GtdProviderInterface *iface)
                                                             G_PARAM_READABLE));
 
   /**
+   * GtdProvider::provider-type:
+   *
+   * The type of the #GtdProvider.
+   */
+  g_object_interface_install_property (iface,
+                                       g_param_spec_string ("provider-type",
+                                                            "Type of the provider",
+                                                            "The type of the provider",
+                                                            NULL,
+                                                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+  /**
    * GtdProvider::description:
    *
    * The description of the #GtdProvider, e.g. the account user
@@ -217,6 +229,26 @@ gtd_provider_get_name (GtdProvider *provider)
   g_return_val_if_fail (GTD_PROVIDER_GET_IFACE (provider)->get_name, NULL);
 
   return GTD_PROVIDER_GET_IFACE (provider)->get_name (provider);
+}
+
+/**
+ * gtd_provider_get_provider_type:
+ * @provider: a #GtdProvider
+ *
+ * Retrieves the type of the @provider. This should return the
+ * same value, regardless of the account name.
+ *
+ * For example: "todoist", "todo-txt" or "google"
+ *
+ * Returns: (transfer none): the type of the @provider
+ */
+const gchar*
+gtd_provider_get_provider_type (GtdProvider *provider)
+{
+  g_return_val_if_fail (GTD_IS_PROVIDER (provider), NULL);
+  g_return_val_if_fail (GTD_PROVIDER_GET_IFACE (provider)->get_name, NULL);
+
+  return GTD_PROVIDER_GET_IFACE (provider)->get_provider_type (provider);
 }
 
 /**

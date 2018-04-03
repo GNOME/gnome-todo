@@ -68,6 +68,7 @@ enum
   PROP_ICON,
   PROP_ID,
   PROP_NAME,
+  PROP_PROVIDER_TYPE,
   PROP_SOURCE,
   LAST_PROP
 };
@@ -396,6 +397,12 @@ gtd_provider_todo_txt_get_name (GtdProvider *provider)
 }
 
 static const gchar*
+gtd_provider_todo_txt_get_provider_type (GtdProvider *provider)
+{
+  return "todo-txt";
+}
+
+static const gchar*
 gtd_provider_todo_txt_get_description (GtdProvider *provider)
 {
   return _("On the Todo.txt file");
@@ -530,6 +537,7 @@ gtd_provider_iface_init (GtdProviderInterface *iface)
 {
   iface->get_id = gtd_provider_todo_txt_get_id;
   iface->get_name = gtd_provider_todo_txt_get_name;
+  iface->get_provider_type = gtd_provider_todo_txt_get_provider_type;
   iface->get_description = gtd_provider_todo_txt_get_description;
   iface->get_enabled = gtd_provider_todo_txt_get_enabled;
   iface->get_icon = gtd_provider_todo_txt_get_icon;
@@ -594,6 +602,10 @@ gtd_provider_todo_txt_get_property (GObject    *object,
       g_value_set_string (value, gtd_provider_todo_txt_get_name (provider));
       break;
 
+    case PROP_PROVIDER_TYPE:
+      g_value_set_string (value, gtd_provider_todo_txt_get_provider_type (provider));
+      break;
+
     case PROP_SOURCE:
       g_value_set_object (value, GTD_PROVIDER_TODO_TXT (provider)->source_file);
       break;
@@ -646,6 +658,7 @@ gtd_provider_todo_txt_class_init (GtdProviderTodoTxtClass *klass)
   g_object_class_override_property (object_class, PROP_ICON, "icon");
   g_object_class_override_property (object_class, PROP_ID, "id");
   g_object_class_override_property (object_class, PROP_NAME, "name");
+  g_object_class_override_property (object_class, PROP_PROVIDER_TYPE, "provider-type");
 }
 
 static void

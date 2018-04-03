@@ -47,13 +47,19 @@ gtd_provider_local_get_id (GtdProviderEds *provider)
 static const gchar*
 gtd_provider_local_get_name (GtdProviderEds *provider)
 {
-  return _("Local");
+  return _("On This Computer");
+}
+
+static const gchar*
+gtd_provider_local_get_provider_type (GtdProviderEds *provider)
+{
+  return "local";
 }
 
 static const gchar*
 gtd_provider_local_get_description (GtdProviderEds *provider)
 {
-  return _("On This Computer");
+  return "";
 }
 
 static gboolean
@@ -119,6 +125,7 @@ gtd_provider_local_class_init (GtdProviderLocalClass *klass)
 
   eds_class->get_id = gtd_provider_local_get_id;
   eds_class->get_name = gtd_provider_local_get_name;
+  eds_class->get_provider_type = gtd_provider_local_get_provider_type;
   eds_class->get_description = gtd_provider_local_get_description;
   eds_class->get_enabled = gtd_provider_local_get_enabled;
   eds_class->get_icon = gtd_provider_local_get_icon;

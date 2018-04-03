@@ -45,13 +45,16 @@ G_DEFINE_TYPE_EXTENDED (GtdPanelScheduled, gtd_panel_scheduled, GTK_TYPE_BOX,
                         G_IMPLEMENT_INTERFACE (GTD_TYPE_PANEL,
                                                gtd_panel_iface_init))
 
-#define GTD_PANEL_SCHEDULED_NAME "panel-scheduled"
+#define GTD_PANEL_SCHEDULED_NAME     "panel-scheduled"
+#define GTD_PANEL_SCHEDULED_PRIORITY 500
 
-enum {
+enum
+{
   PROP_0,
   PROP_ICON,
   PROP_MENU,
   PROP_NAME,
+  PROP_PRIORITY,
   PROP_TITLE,
   N_PROPS
 };
@@ -400,6 +403,12 @@ gtd_panel_scheduled_get_icon (GtdPanel *panel)
   return g_object_ref (GTD_PANEL_SCHEDULED (panel)->icon);
 }
 
+static guint32
+gtd_panel_scheduled_get_priority (GtdPanel *panel)
+{
+  return GTD_PANEL_SCHEDULED_PRIORITY;
+}
+
 static void
 gtd_panel_iface_init (GtdPanelInterface *iface)
 {
@@ -408,6 +417,7 @@ gtd_panel_iface_init (GtdPanelInterface *iface)
   iface->get_header_widgets = gtd_panel_scheduled_get_header_widgets;
   iface->get_menu = gtd_panel_scheduled_get_menu;
   iface->get_icon = gtd_panel_scheduled_get_icon;
+  iface->get_priority = gtd_panel_scheduled_get_priority;
 }
 
 static void
@@ -445,6 +455,10 @@ gtd_panel_scheduled_get_property (GObject    *object,
       g_value_set_string (value, GTD_PANEL_SCHEDULED_NAME);
       break;
 
+    case PROP_PRIORITY:
+      g_value_set_uint (value, GTD_PANEL_SCHEDULED_PRIORITY);
+      break;
+
     case PROP_TITLE:
       g_value_set_string (value, self->title);
       break;
@@ -475,6 +489,7 @@ gtd_panel_scheduled_class_init (GtdPanelScheduledClass *klass)
   g_object_class_override_property (object_class, PROP_ICON, "icon");
   g_object_class_override_property (object_class, PROP_MENU, "menu");
   g_object_class_override_property (object_class, PROP_NAME, "name");
+  g_object_class_override_property (object_class, PROP_PRIORITY, "priority");
   g_object_class_override_property (object_class, PROP_TITLE, "title");
 }
 

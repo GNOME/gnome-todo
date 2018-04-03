@@ -67,6 +67,7 @@ enum
   PROP_ICON,
   PROP_ID,
   PROP_NAME,
+  PROP_PROVIDER_TYPE,
   PROP_REGISTRY,
   N_PROPS
 };
@@ -493,6 +494,14 @@ gtd_provider_eds_get_name (GtdProvider *provider)
 }
 
 static const gchar*
+gtd_provider_eds_get_provider_type (GtdProvider *provider)
+{
+  g_return_val_if_fail (GTD_IS_PROVIDER_EDS (provider), NULL);
+
+  return GTD_PROVIDER_EDS_CLASS (G_OBJECT_GET_CLASS (provider))->get_provider_type (GTD_PROVIDER_EDS (provider));
+}
+
+static const gchar*
 gtd_provider_eds_get_description (GtdProvider *provider)
 {
   g_return_val_if_fail (GTD_IS_PROVIDER_EDS (provider), NULL);
@@ -763,6 +772,7 @@ gtd_provider_iface_init (GtdProviderInterface *iface)
 {
   iface->get_id = gtd_provider_eds_get_id;
   iface->get_name = gtd_provider_eds_get_name;
+  iface->get_provider_type = gtd_provider_eds_get_provider_type;
   iface->get_description = gtd_provider_eds_get_description;
   iface->get_enabled = gtd_provider_eds_get_enabled;
   iface->get_icon = gtd_provider_eds_get_icon;
@@ -901,6 +911,10 @@ gtd_provider_eds_get_property (GObject    *object,
       g_value_set_string (value, gtd_provider_eds_get_name (provider));
       break;
 
+    case PROP_PROVIDER_TYPE:
+      g_value_set_string (value, gtd_provider_eds_get_provider_type (provider));
+      break;
+
     case PROP_REGISTRY:
       g_value_set_object (value, priv->source_registry);
       break;
@@ -951,6 +965,7 @@ gtd_provider_eds_class_init (GtdProviderEdsClass *klass)
   g_object_class_override_property (object_class, PROP_ICON, "icon");
   g_object_class_override_property (object_class, PROP_ID, "id");
   g_object_class_override_property (object_class, PROP_NAME, "name");
+  g_object_class_override_property (object_class, PROP_PROVIDER_TYPE, "provider-type");
 
   g_object_class_install_property (object_class,
                                    PROP_REGISTRY,

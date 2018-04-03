@@ -40,6 +40,8 @@ struct _GtdProviderInterface
 
   const gchar*       (*get_name)                                 (GtdProvider        *provider);
 
+  const gchar*       (*get_provider_type)                        (GtdProvider        *provider);
+
   const gchar*       (*get_description)                          (GtdProvider        *provider);
 
   gboolean           (*get_enabled)                              (GtdProvider        *provider);
@@ -80,6 +82,8 @@ struct _GtdProviderInterface
 const gchar*         gtd_provider_get_id                         (GtdProvider        *provider);
 
 const gchar*         gtd_provider_get_name                       (GtdProvider        *provider);
+
+const gchar*         gtd_provider_get_provider_type              (GtdProvider        *provider);
 
 const gchar*         gtd_provider_get_description                (GtdProvider        *provider);
 

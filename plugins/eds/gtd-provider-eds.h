@@ -39,6 +39,8 @@ struct _GtdProviderEdsClass
 
   const gchar*       (*get_name)                                 (GtdProviderEds     *self);
 
+  const gchar*       (*get_provider_type)                        (GtdProviderEds     *self);
+
   const gchar*       (*get_description)                          (GtdProviderEds     *self);
 
   gboolean           (*get_enabled)                              (GtdProviderEds     *self);

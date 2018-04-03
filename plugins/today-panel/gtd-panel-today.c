@@ -46,13 +46,16 @@ G_DEFINE_TYPE_EXTENDED (GtdPanelToday, gtd_panel_today, GTK_TYPE_BOX,
                                                gtd_panel_iface_init))
 
 
-#define GTD_PANEL_TODAY_NAME "panel-today"
+#define GTD_PANEL_TODAY_NAME     "panel-today"
+#define GTD_PANEL_TODAY_PRIORITY 1000
 
-enum {
+enum
+{
   PROP_0,
   PROP_ICON,
   PROP_MENU,
   PROP_NAME,
+  PROP_PRIORITY,
   PROP_TITLE,
   N_PROPS
 };
@@ -181,6 +184,12 @@ gtd_panel_today_get_icon (GtdPanel *panel)
   return g_object_ref (GTD_PANEL_TODAY (panel)->icon);
 }
 
+static guint32
+gtd_panel_today_get_priority (GtdPanel *panel)
+{
+  return GTD_PANEL_TODAY_PRIORITY;
+}
+
 static void
 gtd_panel_iface_init (GtdPanelInterface *iface)
 {
@@ -189,6 +198,7 @@ gtd_panel_iface_init (GtdPanelInterface *iface)
   iface->get_header_widgets = gtd_panel_today_get_header_widgets;
   iface->get_menu = gtd_panel_today_get_menu;
   iface->get_icon = gtd_panel_today_get_icon;
+  iface->get_priority = gtd_panel_today_get_priority;
 }
 
 static void
@@ -226,6 +236,10 @@ gtd_panel_today_get_property (GObject    *object,
       g_value_set_string (value, GTD_PANEL_TODAY_NAME);
       break;
 
+    case PROP_PRIORITY:
+      g_value_set_uint (value, GTD_PANEL_TODAY_PRIORITY);
+      break;
+
     case PROP_TITLE:
       g_value_set_string (value, self->title);
       break;
@@ -256,6 +270,7 @@ gtd_panel_today_class_init (GtdPanelTodayClass *klass)
   g_object_class_override_property (object_class, PROP_ICON, "icon");
   g_object_class_override_property (object_class, PROP_MENU, "menu");
   g_object_class_override_property (object_class, PROP_NAME, "name");
+  g_object_class_override_property (object_class, PROP_PRIORITY, "priority");
   g_object_class_override_property (object_class, PROP_TITLE, "title");
 }
 

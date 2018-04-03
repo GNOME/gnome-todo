@@ -37,6 +37,11 @@
  * in the headerbar according to the #GtkWidget:halign property. See
  * gtd_panel_get_header_widgets() for a detailed explanation.
  *
+ * The #GtdPanel:icon and #GtdPanel:priority properties are used by
+ * the sidebar. The former is used to display the icon, and the latter
+ * is used to determine the position of the panel relative to the
+ * others panels.
+ *
  * At last, a #GtdPanel implementation may provide a #GMenu that will
  * be appended to the window menu.
  */
@@ -72,6 +77,20 @@ gtd_panel_default_init (GtdPanelInterface *iface)
                                                             "The identifier name of the panel",
                                                             NULL,
                                                             G_PARAM_READABLE));
+
+  /**
+   * GtdPanel::priority:
+   *
+   * The priority of the panel.
+   */
+  g_object_interface_install_property (iface,
+                                       g_param_spec_uint ("priority",
+                                                          "Priority of the panel",
+                                                          "The priority of the panel",
+                                                          0,
+                                                          G_MAXUINT32,
+                                                          0,
+                                                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
   /**
    * GtdPanel::title:
@@ -189,4 +208,22 @@ gtd_panel_get_icon (GtdPanel *self)
   g_return_val_if_fail (GTD_PANEL_GET_IFACE (self)->get_icon, NULL);
 
   return GTD_PANEL_GET_IFACE (self)->get_icon (self);
+}
+
+/**
+ * gtd_panel_get_priority:
+ * @self: a #GtdPanel
+ *
+ * Retrieves the priority of @self. This value is used to
+ * determine the position of the panel in the sidebar.
+ *
+ * Returns: the priority of @self
+ */
+guint32
+gtd_panel_get_priority (GtdPanel *self)
+{
+  g_return_val_if_fail (GTD_IS_PANEL (self), 0);
+  g_return_val_if_fail (GTD_PANEL_GET_IFACE (self)->get_priority, 0);
+
+  return GTD_PANEL_GET_IFACE (self)->get_priority (self);
 }

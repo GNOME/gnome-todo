@@ -114,6 +114,9 @@ GtdTaskList*         gtd_provider_get_default_task_list          (GtdProvider   
 void                 gtd_provider_set_default_task_list          (GtdProvider        *provider,
                                                                   GtdTaskList        *list);
 
+gint                 gtd_provider_compare                        (GtdProvider        *a,
+                                                                  GtdProvider        *b);
+
 G_END_DECLS
 
 #endif /* GTD_PROVIDER_H */

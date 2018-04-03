@@ -93,6 +93,19 @@ gtd_panel_default_init (GtdPanelInterface *iface)
                                                           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
   /**
+   * GtdPanel::subtitle:
+   *
+   * The subtitle of the panel. It usually is the counter of not
+   * completed tasks.
+   */
+  g_object_interface_install_property (iface,
+                                       g_param_spec_string ("subtitle",
+                                                            "The subtitle of the panel",
+                                                            "The user-visible subtitle of the panel",
+                                                            NULL,
+                                                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+  /**
    * GtdPanel::title:
    *
    * The user-visible title of the panel. It is used as the #GtkStack
@@ -226,4 +239,21 @@ gtd_panel_get_priority (GtdPanel *self)
   g_return_val_if_fail (GTD_PANEL_GET_IFACE (self)->get_priority, 0);
 
   return GTD_PANEL_GET_IFACE (self)->get_priority (self);
+}
+
+/**
+ * gtd_panel_get_subtitle:
+ * @panel: a #GtdPanel
+ *
+ * Retrieves the subtitle of @panel
+ *
+ * Returns: (transfer full): the subtitle of @panel
+ */
+gchar*
+gtd_panel_get_subtitle (GtdPanel *self)
+{
+  g_return_val_if_fail (GTD_IS_PANEL (self), NULL);
+  g_return_val_if_fail (GTD_PANEL_GET_IFACE (self)->get_icon, NULL);
+
+  return GTD_PANEL_GET_IFACE (self)->get_subtitle (self);
 }

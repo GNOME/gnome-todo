@@ -32,7 +32,6 @@ struct _GtdPanelScheduled
   GMenu              *menu;
   GIcon              *icon;
 
-  gchar              *title;
   guint               number_of_tasks;
   GList              *task_list;
   GtkWidget          *view;
@@ -55,6 +54,7 @@ enum
   PROP_MENU,
   PROP_NAME,
   PROP_PRIORITY,
+  PROP_SUBTITLE,
   PROP_TITLE,
   N_PROPS
 };
@@ -355,14 +355,7 @@ gtd_panel_scheduled_count_tasks (GtdPanelScheduled *panel)
     {
       panel->number_of_tasks = number_of_tasks;
 
-      /* Update title */
-      g_clear_pointer (&panel->title, g_free);
-      if (number_of_tasks == 0)
-        panel->title = g_strdup (_("Scheduled"));
-      else
-        panel->title = g_strdup_printf ("%s (%d)", _("Scheduled"), panel->number_of_tasks);
-
-      g_object_notify (G_OBJECT (panel), "title");
+      g_object_notify (G_OBJECT (panel), "subtitle");
     }
 
   gtd_task_list_view_invalidate (GTD_TASK_LIST_VIEW (panel->view));
@@ -382,7 +375,7 @@ gtd_panel_scheduled_get_panel_name (GtdPanel *panel)
 static const gchar*
 gtd_panel_scheduled_get_panel_title (GtdPanel *panel)
 {
-  return GTD_PANEL_SCHEDULED (panel)->title;
+  return _("Scheduled");
 }
 
 static GList*
@@ -409,6 +402,14 @@ gtd_panel_scheduled_get_priority (GtdPanel *panel)
   return GTD_PANEL_SCHEDULED_PRIORITY;
 }
 
+static gchar*
+gtd_panel_scheduled_get_subtitle (GtdPanel *panel)
+{
+  GtdPanelScheduled *self = GTD_PANEL_SCHEDULED (panel);
+
+  return g_strdup_printf ("%d", self->number_of_tasks);
+}
+
 static void
 gtd_panel_iface_init (GtdPanelInterface *iface)
 {
@@ -418,6 +419,7 @@ gtd_panel_iface_init (GtdPanelInterface *iface)
   iface->get_menu = gtd_panel_scheduled_get_menu;
   iface->get_icon = gtd_panel_scheduled_get_icon;
   iface->get_priority = gtd_panel_scheduled_get_priority;
+  iface->get_subtitle = gtd_panel_scheduled_get_subtitle;
 }
 
 static void
@@ -427,7 +429,6 @@ gtd_panel_scheduled_finalize (GObject *object)
 
   g_clear_object (&self->icon);
   g_clear_object (&self->menu);
-  g_clear_pointer (&self->title, g_free);
   g_clear_pointer (&self->task_list, g_list_free);
 
   G_OBJECT_CLASS (gtd_panel_scheduled_parent_class)->finalize (object);
@@ -459,8 +460,12 @@ gtd_panel_scheduled_get_property (GObject    *object,
       g_value_set_uint (value, GTD_PANEL_SCHEDULED_PRIORITY);
       break;
 
+    case PROP_SUBTITLE:
+      g_value_take_string (value, gtd_panel_get_subtitle (GTD_PANEL (self)));
+      break;
+
     case PROP_TITLE:
-      g_value_set_string (value, self->title);
+      g_value_set_string (value, gtd_panel_get_panel_title (GTD_PANEL (self)));
       break;
 
     default:
@@ -490,6 +495,7 @@ gtd_panel_scheduled_class_init (GtdPanelScheduledClass *klass)
   g_object_class_override_property (object_class, PROP_MENU, "menu");
   g_object_class_override_property (object_class, PROP_NAME, "name");
   g_object_class_override_property (object_class, PROP_PRIORITY, "priority");
+  g_object_class_override_property (object_class, PROP_SUBTITLE, "subtitle");
   g_object_class_override_property (object_class, PROP_TITLE, "title");
 }
 
@@ -522,9 +528,6 @@ gtd_panel_scheduled_init (GtdPanelScheduled *self)
                             "update",
                             G_CALLBACK (gtd_panel_scheduled_count_tasks),
                             self);
-
-  /* Setup a title */
-  self->title = g_strdup (_("Scheduled"));
 
   /* Menu */
   self->menu = g_menu_new ();

@@ -44,6 +44,8 @@ struct _GtdPanelInterface
   GIcon*            (*get_icon)                            (GtdPanel        *self);
 
   guint32           (*get_priority)                        (GtdPanel        *self);
+
+  gchar*            (*get_subtitle)                        (GtdPanel        *self);
 };
 
 const gchar*         gtd_panel_get_panel_name                    (GtdPanel           *panel);
@@ -57,6 +59,8 @@ const GMenu*         gtd_panel_get_menu                          (GtdPanel      
 GIcon*               gtd_panel_get_icon                          (GtdPanel           *self);
 
 guint32              gtd_panel_get_priority                      (GtdPanel           *self);
+
+gchar*               gtd_panel_get_subtitle                      (GtdPanel           *self);
 
 G_END_DECLS
 

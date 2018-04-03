@@ -33,7 +33,6 @@ struct _GtdPanelToday
 
   gint                day_change_callback_id;
 
-  gchar              *title;
   guint               number_of_tasks;
   GList              *task_list;
 };
@@ -56,6 +55,7 @@ enum
   PROP_MENU,
   PROP_NAME,
   PROP_PRIORITY,
+  PROP_SUBTITLE,
   PROP_TITLE,
   N_PROPS
 };
@@ -132,20 +132,7 @@ gtd_panel_today_count_tasks (GtdPanelToday *panel)
     {
       panel->number_of_tasks = number_of_tasks;
 
-      /* Update title */
-      g_clear_pointer (&panel->title, g_free);
-      if (number_of_tasks == 0)
-        {
-          panel->title = g_strdup (_("Today"));
-        }
-      else
-        {
-          panel->title = g_strdup_printf ("%s (%d)",
-                                          _("Today"),
-                                          panel->number_of_tasks);
-        }
-
-      g_object_notify (G_OBJECT (panel), "title");
+      g_object_notify (G_OBJECT (panel), "subtitle");
     }
 
   g_list_free (tasklists);
@@ -163,7 +150,7 @@ gtd_panel_today_get_panel_name (GtdPanel *panel)
 static const gchar*
 gtd_panel_today_get_panel_title (GtdPanel *panel)
 {
-  return GTD_PANEL_TODAY (panel)->title;
+  return _("Today");
 }
 
 static GList*
@@ -190,6 +177,14 @@ gtd_panel_today_get_priority (GtdPanel *panel)
   return GTD_PANEL_TODAY_PRIORITY;
 }
 
+static gchar*
+gtd_panel_today_get_subtitle (GtdPanel *panel)
+{
+  GtdPanelToday *self = GTD_PANEL_TODAY (panel);
+
+  return g_strdup_printf ("%d", self->number_of_tasks);
+}
+
 static void
 gtd_panel_iface_init (GtdPanelInterface *iface)
 {
@@ -199,6 +194,7 @@ gtd_panel_iface_init (GtdPanelInterface *iface)
   iface->get_menu = gtd_panel_today_get_menu;
   iface->get_icon = gtd_panel_today_get_icon;
   iface->get_priority = gtd_panel_today_get_priority;
+  iface->get_subtitle = gtd_panel_today_get_subtitle;
 }
 
 static void
@@ -208,7 +204,6 @@ gtd_panel_today_finalize (GObject *object)
 
   g_clear_object (&self->icon);
   g_clear_object (&self->menu);
-  g_clear_pointer (&self->title, g_free);
   g_clear_pointer (&self->task_list, g_list_free);
 
   G_OBJECT_CLASS (gtd_panel_today_parent_class)->finalize (object);
@@ -240,8 +235,12 @@ gtd_panel_today_get_property (GObject    *object,
       g_value_set_uint (value, GTD_PANEL_TODAY_PRIORITY);
       break;
 
+    case PROP_SUBTITLE:
+      g_value_take_string (value, gtd_panel_get_subtitle (GTD_PANEL (self)));
+      break;
+
     case PROP_TITLE:
-      g_value_set_string (value, self->title);
+      g_value_set_string (value, gtd_panel_get_panel_title (GTD_PANEL (self)));
       break;
 
     default:
@@ -271,6 +270,7 @@ gtd_panel_today_class_init (GtdPanelTodayClass *klass)
   g_object_class_override_property (object_class, PROP_MENU, "menu");
   g_object_class_override_property (object_class, PROP_NAME, "name");
   g_object_class_override_property (object_class, PROP_PRIORITY, "priority");
+  g_object_class_override_property (object_class, PROP_SUBTITLE, "subtitle");
   g_object_class_override_property (object_class, PROP_TITLE, "title");
 }
 
@@ -300,9 +300,6 @@ gtd_panel_today_init (GtdPanelToday *self)
                             "list-changed",
                             G_CALLBACK (gtd_panel_today_count_tasks),
                             self);
-
-  /* Setup a title */
-  self->title = g_strdup (_("Today"));
 
   /* Menu */
   self->menu = g_menu_new ();

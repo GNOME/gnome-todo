@@ -141,6 +141,7 @@ on_client_connected_cb (GObject      *source_object,
                                       error->message,
                                       NULL,
                                       NULL);
+      gtd_object_pop_loading (GTD_OBJECT (self));
       return;
     }
 
@@ -180,6 +181,7 @@ on_source_added_cb (GtdProviderEds *provider,
    * The pop_loading() is actually emited by GtdTaskListEds, after the
    * ECalClientView sends the :complete signal.
    */
+  gtd_object_push_loading (GTD_OBJECT (provider));
   gtd_object_push_loading (GTD_OBJECT (gtd_manager_get_default ()));
 
   e_cal_client_connect (source,
@@ -982,8 +984,6 @@ gtd_provider_eds_init (GtdProviderEds *self)
   GtdProviderEdsPrivate *priv = gtd_provider_eds_get_instance_private (self);
 
   priv->cancellable = g_cancellable_new ();
-
-  gtd_object_push_loading (GTD_OBJECT (self));
 }
 
 GtdProviderEds*

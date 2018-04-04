@@ -280,7 +280,7 @@ gtd_panel_today_init (GtdPanelToday *self)
   GtdManager *manager;
   GDateTime *now;
 
-  self->icon = g_themed_icon_new ("daytime-sunset-symbolic");
+  self->icon = g_themed_icon_new ("weather-clear-symbolic");
 
   /* Connect to GtdManager::list-* signals to update the title */
   manager = gtd_manager_get_default ();

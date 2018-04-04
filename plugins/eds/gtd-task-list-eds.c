@@ -264,7 +264,7 @@ on_view_completed_cb (ECalClientView *view,
                       const GError   *error,
                       GtdTaskList    *self)
 {
-  g_autoptr (ECalClient) client = NULL;
+  GtdProvider *provider;
 
   gtd_object_pop_loading (GTD_OBJECT (gtd_manager_get_default ()));
   gtd_object_pop_loading (GTD_OBJECT (self));
@@ -281,10 +281,13 @@ on_view_completed_cb (ECalClientView *view,
       return;
     }
 
-  client = e_cal_client_view_ref_client (view);
+  provider = gtd_task_list_get_provider (self);
+
+  /* The provider is loading one less tasklist now */
+  gtd_object_pop_loading (GTD_OBJECT (provider));
 
   /* Emit LIST_ADDED signal */
-  g_signal_emit_by_name (gtd_task_list_get_provider (self), "list-added", self);
+  g_signal_emit_by_name (provider, "list-added", self);
 }
 
 static void

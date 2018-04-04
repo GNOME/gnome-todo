@@ -727,7 +727,7 @@ gtd_provider_eds_get_task_lists (GtdProvider *provider)
 {
   GtdProviderEdsPrivate *priv = gtd_provider_eds_get_instance_private (GTD_PROVIDER_EDS (provider));
 
-  return priv->task_lists;
+  return g_list_copy (priv->task_lists);
 }
 
 static GtdTaskList*

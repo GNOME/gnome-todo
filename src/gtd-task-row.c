@@ -258,22 +258,25 @@ gtd_task_row_set_task (GtdTaskRow *row,
        * sync the initial state of the priority icon.
        */
       on_priority_changed_cb (row, NULL, G_OBJECT (task));
-      g_signal_connect_swapped (task,
-                                "notify::priority",
-                                G_CALLBACK (on_priority_changed_cb),
-                                row);
+      g_signal_connect_object (task,
+                               "notify::priority",
+                               G_CALLBACK (on_priority_changed_cb),
+                               row,
+                               G_CONNECT_SWAPPED);
 
       on_complete_changed_cb (row, NULL, task);
-      g_signal_connect_swapped (task,
-                                "notify::complete",
-                                G_CALLBACK (on_complete_changed_cb),
-                                row);
+      g_signal_connect_object (task,
+                               "notify::complete",
+                               G_CALLBACK (on_complete_changed_cb),
+                               row,
+                               G_CONNECT_SWAPPED);
 
       on_depth_changed_cb (row, NULL, task);
-      g_signal_connect_swapped (task,
-                                "notify::depth",
-                                G_CALLBACK (on_depth_changed_cb),
-                                row);
+      g_signal_connect_object (task,
+                               "notify::depth",
+                               G_CALLBACK (on_depth_changed_cb),
+                               row,
+                               G_CONNECT_SWAPPED);
 
       g_signal_handlers_unblock_by_func (row->done_check, on_complete_check_toggled_cb, row);
       g_signal_handlers_unblock_by_func (row->title_entry, on_task_changed_cb, row);
@@ -852,9 +855,13 @@ gtd_task_row_set_due_date_visible (GtdTaskRow *row,
  * Runs a nifty animation to reveal @row.
  */
 void
-gtd_task_row_reveal (GtdTaskRow *row)
+gtd_task_row_reveal (GtdTaskRow *row,
+                     gboolean    animated)
 {
   g_return_if_fail (GTD_IS_TASK_ROW (row));
+
+  if (!animated)
+    gtk_revealer_set_transition_duration (row->revealer, 0);
 
   gtk_revealer_set_reveal_child (row->revealer, TRUE);
 }
@@ -870,8 +877,7 @@ gtd_task_row_destroy (GtdTaskRow *self)
 {
   g_return_if_fail (GTD_IS_TASK_ROW (self));
 
-  gtk_revealer_set_reveal_child (self->revealer, FALSE);
-  g_signal_connect_swapped (self->revealer, "notify::child-revealed", G_CALLBACK (gtk_widget_destroy), self);
+  gtk_widget_destroy (GTK_WIDGET (self));
 }
 
 gboolean

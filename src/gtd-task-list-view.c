@@ -80,9 +80,11 @@ typedef struct
   gboolean               show_due_date;
   gboolean               show_list_name;
   gboolean               handle_subtasks;
-  GList                 *list;
+  GHashTable            *tasks;
   GtdTaskList           *task_list;
   GDateTime             *default_date;
+
+  guint                  idle_handler_id;
 
   /* Markup renderer*/
   GtdMarkdownRenderer   *renderer;
@@ -119,11 +121,31 @@ struct _GtdTaskListView
   GtdTaskListViewPrivate *priv;
 };
 
+typedef enum
+{
+  GTD_IDLE_STATE_STARTED,
+  GTD_IDLE_STATE_LOADING,
+  GTD_IDLE_STATE_COMPLETE,
+  GTD_IDLE_STATE_FINISHED,
+} GtdIdleState;
+
+typedef struct
+{
+  GtdTaskListView      *self;
+  GtdIdleState          state;
+  GPtrArray            *added;
+  GPtrArray            *removed;
+  guint32               current_item;
+} GtdIdleData;
+
+#define BATCH_SIZE                   30
 #define COLOR_TEMPLATE               "viewport {background-color: %s;}"
 #define DND_SCROLL_OFFSET            24 //px
 #define LUMINANCE(c)                 (0.299 * c->red + 0.587 * c->green + 0.114 * c->blue)
 #define TASK_REMOVED_NOTIFICATION_ID "task-removed-id"
 
+
+static gboolean      idle_process_items_cb                       (gpointer            data);
 
 static void          on_clear_completed_tasks_activated_cb       (GSimpleAction      *simple,
                                                                   GVariant           *parameter,
@@ -175,6 +197,37 @@ typedef gboolean     (*IterateSubtaskFunc)                       (GtdTaskListVie
 /*
  * Auxiliary methods
  */
+
+static void
+idle_data_free (gpointer data)
+{
+  GtdIdleData *idle_data = data;
+
+  g_clear_pointer (&idle_data->added, g_ptr_array_unref);
+  g_clear_pointer (&idle_data->removed, g_ptr_array_unref);
+  g_clear_pointer (&idle_data, g_free);
+}
+
+static void
+add_and_remove_tasks_in_idle (GtdTaskListView *self,
+                              GPtrArray       *added,
+                              GPtrArray       *removed)
+{
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+  GtdIdleData *idle_data;
+
+  idle_data = g_new0 (GtdIdleData, 1);
+  idle_data->self = self;
+  idle_data->added = g_ptr_array_ref (added);
+  idle_data->removed = g_ptr_array_ref (removed);
+  idle_data->state = GTD_IDLE_STATE_STARTED;
+
+  /* Start loading stuff in idle */
+  priv->idle_handler_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE,
+                                           idle_process_items_cb,
+                                           idle_data,
+                                           idle_data_free);
+}
 
 static void
 set_active_row (GtdTaskListView *self,
@@ -310,7 +363,8 @@ ask_subtask_removal_warning (GtdTaskListView *self)
 
 static void
 add_task_row (GtdTaskListView *self,
-              GtdTask         *task)
+              GtdTask         *task,
+              gboolean         animated)
 {
   GtdTaskListViewPrivate *priv = self->priv;
   GtkWidget *new_row;
@@ -351,7 +405,7 @@ add_task_row (GtdTaskListView *self,
                                priv->tasklist_name_sizegroup,
                                priv->due_date_sizegroup);
 
-  gtd_task_row_reveal (GTD_TASK_ROW (new_row));
+  gtd_task_row_reveal (GTD_TASK_ROW (new_row), animated);
 }
 
 static void
@@ -405,15 +459,20 @@ destroy_task_row (GtdTaskListView *self,
 }
 
 static void
-remove_task (GtdTaskListView *view,
+remove_task (GtdTaskListView *self,
              GtdTask         *task)
 {
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
   GtdTaskRow *row;
 
-  row = get_row_for_task (view, task);
+  row = get_row_for_task (self, task);
+
+  /* We must not try to remove a task that is not added */
+  g_assert (g_hash_table_contains (priv->tasks, task));
+  g_hash_table_remove (priv->tasks, task);
 
   if (row)
-    destroy_task_row (view, row);
+    destroy_task_row (self, row);
 }
 
 static void
@@ -432,17 +491,23 @@ remove_task_row (GtdTaskListView *view,
 }
 
 static void
-add_task (GtdTaskListView *view,
-          GtdTask         *task)
+add_task (GtdTaskListView *self,
+          GtdTask         *task,
+          gboolean         animated)
 {
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+
   GTD_ENTRY;
 
-  g_return_if_fail (GTD_IS_TASK_LIST_VIEW (view));
+  g_return_if_fail (GTD_IS_TASK_LIST_VIEW (self));
   g_return_if_fail (GTD_IS_TASK (task));
 
-  add_task_row (view, task);
+  /* We must not try to add a task that is already added */
+  g_assert (!g_hash_table_contains (priv->tasks, task));
+  g_hash_table_add (priv->tasks, task);
 
-  update_state (view);
+  add_task_row (self, task, animated);
+  update_state (self);
 
   GTD_EXIT;
 }
@@ -451,6 +516,71 @@ add_task (GtdTaskListView *view,
 /*
  * Callbacks
  */
+
+static gboolean
+idle_process_items_cb (gpointer data)
+{
+  GtdIdleData *idle_data = data;
+  guint32 n_removed_items;
+  guint32 n_added_items;
+  guint32 remaining;
+  guint i;
+
+  g_assert (idle_data->state == GTD_IDLE_STATE_STARTED || idle_data->state == GTD_IDLE_STATE_LOADING);
+
+  n_removed_items = idle_data->removed->len;
+  n_added_items = idle_data->added->len;
+
+  /* Stop when we finished loading */
+  if (idle_data->current_item == n_removed_items + n_added_items)
+    {
+      GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (idle_data->self);
+
+      GTD_TRACE_MSG ("Finished loading items");
+
+      /* Check if it should show the empty state */
+      update_state (idle_data->self);
+
+      priv->idle_handler_id = 0;
+      idle_data->state = GTD_IDLE_STATE_FINISHED;
+
+      return G_SOURCE_REMOVE;
+    }
+
+  GTD_TRACE_MSG ("Processing items (removed: %u, added: %u, current: %u)",
+                 n_removed_items,
+                 n_added_items,
+                 idle_data->current_item);
+
+  idle_data->state = GTD_IDLE_STATE_LOADING;
+
+  /* Add at most 10 items each time */
+  remaining = n_removed_items + n_added_items - idle_data->current_item;
+
+  for (i = 0; i < MIN (BATCH_SIZE, remaining); i++)
+    {
+      /* First, remove the rows marked for removal, and then add the new rows */
+      if (idle_data->current_item < n_removed_items)
+        {
+          remove_task (idle_data->self, g_ptr_array_index (idle_data->removed, idle_data->current_item));
+        }
+      else
+        {
+          /*
+           * For performance reasons, only animate task reveal when adding less
+           * than a batch of items.
+           */
+          add_task (idle_data->self,
+                    g_ptr_array_index (idle_data->added, idle_data->current_item - n_removed_items),
+                    n_added_items < BATCH_SIZE);
+        }
+
+      /* Next item */
+      idle_data->current_item += 1;
+    }
+
+  return G_SOURCE_CONTINUE;
+}
 
 static gboolean
 undo_remove_task_cb (GtdTaskListView *self,
@@ -473,7 +603,7 @@ real_remove_task_cb (GtdTaskListView *self,
   gtd_provider_remove_task (gtd_task_get_provider (task), task);
 
   /* Remove from the internal list */
-  priv->list = g_list_remove (priv->list, task);
+  g_hash_table_remove (priv->tasks, task);
 
   GTD_TRACE_MSG ("Removing task %p from list", task);
 
@@ -553,7 +683,7 @@ remove_task_rows_from_list_view_cb (GtdTaskListView *self,
   on_task_list_task_removed_cb (self, task);
 
   /* Remove from the internal list */
-  priv->list = g_list_remove (priv->list, task);
+  g_hash_table_remove (priv->tasks, task);
 
   GTD_TRACE_MSG ("Removing task %p from list", task);
 
@@ -725,10 +855,10 @@ on_task_list_task_added_cb (GtdTaskList     *list,
 
   GTD_ENTRY;
 
-  add_task (self, task);
+  add_task (self, task, TRUE);
 
   /* Also add to the list of current tasks */
-  priv->list = g_list_prepend (priv->list, task);
+  g_hash_table_add (priv->tasks, task);
 
   GTD_TRACE_MSG ("Adding task %p to list", task);
 
@@ -1178,7 +1308,7 @@ gtd_task_list_view_finalize (GObject *object)
   GtdTaskListViewPrivate *priv = GTD_TASK_LIST_VIEW (object)->priv;
 
   g_clear_pointer (&priv->default_date, g_date_time_unref);
-  g_clear_pointer (&priv->list, g_list_free);
+  g_clear_pointer (&priv->tasks, g_hash_table_destroy);
   g_clear_object (&priv->renderer);
 
   G_OBJECT_CLASS (gtd_task_list_view_parent_class)->finalize (object);
@@ -1425,10 +1555,16 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
 static void
 gtd_task_list_view_init (GtdTaskListView *self)
 {
-  self->priv = gtd_task_list_view_get_instance_private (self);
-  self->priv->can_toggle = TRUE;
-  self->priv->handle_subtasks = TRUE;
-  self->priv->show_due_date = TRUE;
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+
+  self->priv = priv;
+
+  priv->can_toggle = TRUE;
+  priv->handle_subtasks = TRUE;
+  priv->show_due_date = TRUE;
+  priv->show_due_date = TRUE;
+
+  priv->tasks = g_hash_table_new (g_direct_hash, g_direct_equal);
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
@@ -1474,10 +1610,8 @@ gtd_task_list_view_get_list (GtdTaskListView *view)
 
   if (view->priv->task_list)
     return gtd_task_list_get_tasks (view->priv->task_list);
-  else if (view->priv->list)
-    return g_list_copy (view->priv->list);
   else
-    return NULL;
+    return g_hash_table_get_keys (view->priv->tasks);
 }
 
 /**
@@ -1491,25 +1625,38 @@ void
 gtd_task_list_view_set_list (GtdTaskListView *view,
                              GList           *list)
 {
-  g_autoptr (GHashTable) old_tasks = NULL;
   g_autoptr (GHashTable) new_tasks = NULL;
+  g_autoptr (GPtrArray) removed = NULL;
+  g_autoptr (GPtrArray) added = NULL;
+  g_autoptr (GList) old_list = NULL;
   GtdTaskListViewPrivate *priv;
-  GList *l, *old_list;
+  GList *l;
 
   g_return_if_fail (GTD_IS_TASK_LIST_VIEW (view));
 
-  priv = view->priv;
-  old_list = priv->list;
-  old_tasks = g_hash_table_new (g_direct_hash, g_direct_equal);
+  priv = gtd_task_list_view_get_instance_private (view);
+
+  /*
+   * If we are currently adding tasks in idle, cancel the idle before
+   * anything else. Just for safety.
+   */
+  if (priv->idle_handler_id > 0)
+    {
+      GTD_TRACE_MSG ("Cancelling current idle add");
+
+      g_source_remove (priv->idle_handler_id);
+      priv->idle_handler_id = 0;
+    }
+
+  added = g_ptr_array_new_full (100, g_object_unref);
+  removed = g_ptr_array_new_full (100, g_object_unref);
   new_tasks = g_hash_table_new (g_direct_hash, g_direct_equal);
+  old_list = g_hash_table_get_keys (priv->tasks);
 
   /* Reset the DnD parent row */
   gtd_dnd_row_set_row_above (GTD_DND_ROW (priv->dnd_row), NULL);
 
   /* Map the current tasks */
-  for (l = old_list; l; l = l->next)
-    g_hash_table_add (old_tasks, l->data);
-
   for (l = list; l; l = l->next)
     g_hash_table_add (new_tasks, l->data);
 
@@ -1517,23 +1664,23 @@ gtd_task_list_view_set_list (GtdTaskListView *view,
   for (l = old_list; l; l = l->next)
     {
       if (!g_hash_table_contains (new_tasks, l->data))
-        remove_task (view, l->data);
+        g_ptr_array_add (removed, g_object_ref (l->data));
     }
 
   /* Add the tasks that are in the new list, but not in the current list */
   for (l = list; l; l = l->next)
     {
-      if (g_hash_table_contains (old_tasks, l->data))
+      if (g_hash_table_contains (priv->tasks, l->data))
         continue;
 
-      add_task (view, l->data);
+      g_ptr_array_add (added, g_object_ref (l->data));
     }
 
-  g_list_free (old_list);
-  priv->list = g_list_copy (list);
-
-  /* Check if it should show the empty state */
-  update_state (view);
+  /*
+   * Add the new tasks and remove the old ones in idle, to keep
+   * a slick UI responsiveness.
+   */
+  add_and_remove_tasks_in_idle (view, added, removed);
 }
 
 /**
@@ -1606,6 +1753,8 @@ gtd_task_list_view_set_task_list (GtdTaskListView *view,
 
   if (priv->task_list == list)
     return;
+
+  g_debug ("%p: Setting task list to '%s'", view, gtd_task_list_get_name (list));
 
   gtd_new_task_row_set_show_list_selector (GTD_NEW_TASK_ROW (priv->new_task_row), list == NULL);
 

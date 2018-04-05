@@ -18,6 +18,7 @@
 
 #define G_LOG_DOMAIN "GtdEditPane"
 
+#include "gtd-debug.h"
 #include "gtd-edit-pane.h"
 #include "gtd-manager.h"
 #include "gtd-markdown-renderer.h"
@@ -128,6 +129,8 @@ on_date_selected_cb (GtkCalendar *calendar,
   guint month;
   guint day;
 
+  GTD_ENTRY;
+
   gtk_calendar_get_date (calendar,
                          &year,
                          &month,
@@ -146,6 +149,8 @@ on_date_selected_cb (GtkCalendar *calendar,
   gtk_label_set_label (self->date_label, text);
 
   g_signal_emit (self, signals[CHANGED], 0);
+
+  GTD_EXIT;
 }
 
 static void
@@ -159,42 +164,52 @@ static void
 on_no_date_button_clicked_cb (GtkButton   *button,
                               GtdEditPane *self)
 {
+  GTD_ENTRY;
+
   gtd_task_set_due_date (self->task, NULL);
   gtk_calendar_clear_marks (GTK_CALENDAR (self->calendar));
   update_date_widgets (self);
 
   g_signal_emit (self, signals[CHANGED], 0);
+
+  GTD_EXIT;
 }
 
 static void
 on_today_button_clicked_cb (GtkButton   *button,
                             GtdEditPane *self)
 {
-  GDateTime *new_dt;
+  g_autoptr (GDateTime) new_dt = g_date_time_new_now_local ();
 
-  new_dt = g_date_time_new_now_local ();
+  GTD_ENTRY;
 
   gtd_task_set_due_date (self->task, new_dt);
   update_date_widgets (self);
 
   g_signal_emit (self, signals[CHANGED], 0);
 
-  g_clear_pointer (&new_dt, g_date_time_unref);
+  GTD_EXIT;
 }
 
 static void
 on_priority_changed_cb (GtkComboBox *combobox,
                         GtdEditPane *self)
 {
+  GTD_ENTRY;
+
   g_signal_emit (self, signals[CHANGED], 0);
+
+  GTD_EXIT;
 }
 
 static void
 on_tomorrow_button_clicked_cb (GtkButton   *button,
                                GtdEditPane *self)
 {
-  GDateTime *current_date;
-  GDateTime *new_dt;
+  g_autoptr (GDateTime) current_date = NULL;
+  g_autoptr (GDateTime) new_dt = NULL;
+
+  GTD_ENTRY;
 
   current_date = g_date_time_new_now_local ();
   new_dt = g_date_time_add_days (current_date, 1);
@@ -204,8 +219,7 @@ on_tomorrow_button_clicked_cb (GtkButton   *button,
 
   g_signal_emit (self, signals[CHANGED], 0);
 
-  g_clear_pointer (&current_date, g_date_time_unref);
-  g_clear_pointer (&new_dt, g_date_time_unref);
+  GTD_EXIT;
 }
 
 static void
@@ -213,7 +227,11 @@ on_text_buffer_changed_cb (GtkTextBuffer *buffer,
                            GParamSpec    *pspec,
                            GtdEditPane   *self)
 {
+  GTD_ENTRY;
+
   g_signal_emit (self, signals[CHANGED], 0);
+
+  GTD_EXIT;
 }
 
 static gboolean
@@ -557,14 +575,16 @@ gtd_edit_pane_set_task (GtdEditPane *self,
     {
       GtkTextBuffer *buffer;
 
+      buffer = gtk_text_view_get_buffer (self->notes_textview);
+
+      g_signal_handlers_block_by_func (buffer, on_text_buffer_changed_cb, self);
+      g_signal_handlers_block_by_func (self->priority_combo, on_priority_changed_cb, self);
+
       /* due date */
       update_date_widgets (self);
 
       /* description */
-      buffer = gtk_text_view_get_buffer (self->notes_textview);
-      gtk_text_buffer_set_text (buffer,
-                                gtd_task_get_description (task),
-                                -1);
+      gtk_text_buffer_set_text (buffer, gtd_task_get_description (task), -1);
 
       self->notes_binding = g_object_bind_property (buffer,
                                                     "text",
@@ -580,6 +600,9 @@ gtd_edit_pane_set_task (GtdEditPane *self,
                                                        self->priority_combo,
                                                        "active",
                                                        G_BINDING_BIDIRECTIONAL);
+
+      g_signal_handlers_unblock_by_func (self->priority_combo, on_priority_changed_cb, self);
+      g_signal_handlers_unblock_by_func (buffer, on_text_buffer_changed_cb, self);
 
     }
 

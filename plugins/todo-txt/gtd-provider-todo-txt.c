@@ -516,7 +516,7 @@ gtd_provider_todo_txt_get_task_lists (GtdProvider *provider)
 {
   GtdProviderTodoTxt *self = GTD_PROVIDER_TODO_TXT (provider);
 
-  return self->task_lists;
+  return g_list_copy (self->task_lists);
 }
 
 static GtdTaskList*

@@ -144,6 +144,8 @@ on_date_selected_cb (GtkCalendar *calendar,
 
   gtd_task_set_due_date (self->task, new_dt);
   gtk_label_set_label (self->date_label, text);
+
+  g_signal_emit (self, signals[CHANGED], 0);
 }
 
 static void
@@ -160,6 +162,8 @@ on_no_date_button_clicked_cb (GtkButton   *button,
   gtd_task_set_due_date (self->task, NULL);
   gtk_calendar_clear_marks (GTK_CALENDAR (self->calendar));
   update_date_widgets (self);
+
+  g_signal_emit (self, signals[CHANGED], 0);
 }
 
 static void
@@ -206,6 +210,7 @@ on_tomorrow_button_clicked_cb (GtkButton   *button,
 
 static void
 on_text_buffer_changed_cb (GtkTextBuffer *buffer,
+                           GParamSpec    *pspec,
                            GtdEditPane   *self)
 {
   g_signal_emit (self, signals[CHANGED], 0);
@@ -383,8 +388,7 @@ gtd_edit_pane_dispose (GObject *object)
 {
   GtdEditPane *self = (GtdEditPane *) object;
 
-  if (self->task)
-    gtd_edit_pane_set_task (GTD_EDIT_PANE (object), NULL);
+  g_clear_object (&self->task);
 
   G_OBJECT_CLASS (gtd_edit_pane_parent_class)->dispose (object);
 }

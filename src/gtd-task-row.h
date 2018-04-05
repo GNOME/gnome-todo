@@ -41,7 +41,8 @@ void                      gtd_task_row_set_list_name_visible    (GtdTaskRow     
 void                      gtd_task_row_set_due_date_visible     (GtdTaskRow          *row,
                                                                  gboolean             show_due_date);
 
-void                      gtd_task_row_reveal                   (GtdTaskRow          *row);
+void                      gtd_task_row_reveal                   (GtdTaskRow          *row,
+                                                                 gboolean             animated);
 
 void                      gtd_task_row_destroy                  (GtdTaskRow          *row);
 

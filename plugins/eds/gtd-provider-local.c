@@ -59,7 +59,7 @@ gtd_provider_local_get_provider_type (GtdProviderEds *provider)
 static const gchar*
 gtd_provider_local_get_description (GtdProviderEds *provider)
 {
-  return "";
+  return _("Local");
 }
 
 static gboolean

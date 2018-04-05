@@ -83,11 +83,6 @@ gboolean                  gtd_task_list_view_get_show_due_date  (GtdTaskListView
 void                      gtd_task_list_view_set_show_due_date  (GtdTaskListView        *self,
                                                                  gboolean                show_due_date);
 
-gboolean                  gtd_task_list_view_get_show_completed (GtdTaskListView        *view);
-
-void                      gtd_task_list_view_set_show_completed (GtdTaskListView        *view,
-                                                                 gboolean                show_completed);
-
 void                      gtd_task_list_view_set_header_func    (GtdTaskListView           *view,
                                                                  GtdTaskListViewHeaderFunc  func,
                                                                  gpointer                   user_data);

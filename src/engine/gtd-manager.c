@@ -204,7 +204,7 @@ on_provider_added_cb (GtdPluginManager *plugin_manager,
                       GtdProvider      *provider,
                       GtdManager       *self)
 {
-  GList *lists;
+  g_autoptr (GList) lists = NULL;
   GList *l;
 
   self->providers = g_list_append (self->providers, provider);
@@ -241,7 +241,7 @@ on_provider_removed_cb (GtdPluginManager *plugin_manager,
                         GtdProvider      *provider,
                         GtdManager       *self)
 {
-  GList *lists;
+  g_autoptr (GList) lists = NULL;
   GList *l;
 
   self->providers = g_list_remove (self->providers, provider);

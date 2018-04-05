@@ -481,6 +481,9 @@ gtd_provider_compare (GtdProvider *a,
   g_return_val_if_fail (GTD_IS_PROVIDER (a), 0);
   g_return_val_if_fail (GTD_IS_PROVIDER (b), 0);
 
+  if (a == b)
+    return 0;
+
   result = gtd_collate_compare_strings (gtd_provider_get_name (a), gtd_provider_get_name (b));
 
   if (result != 0)

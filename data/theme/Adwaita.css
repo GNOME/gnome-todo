@@ -82,6 +82,13 @@ taskrow.new-task-row entry                         { padding: 0 18px;           
 taskrow:not(.new-task-row) entry                   { border: solid 1px transparent;  }
 taskrow:not(.new-task-row) entry:hover:not(:focus) { border: solid 1px @borders;     }
 
+/* make new task row's list button match the entry border */
+taskrow:not(:backdrop) entry:focus + button { border: solid 1px @theme_selected_bg_color; }
+taskrow:not(:backdrop) entry:focus + button:dir(ltr) { border-left: 0; }
+taskrow:not(:backdrop) entry:focus + button:dir(rtl) { border-right: 0; }
+
+taskrow entry + button:hover { background: none; border: solid 1px @theme_selected_bg_color; }
+
 /* line-through complete tasks */
 taskrow.complete { opacity: 0.5; }
 taskrow.complete entry.title { text-decoration-line: line-through; }

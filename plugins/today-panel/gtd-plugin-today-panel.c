@@ -29,6 +29,7 @@ struct _GtdPluginTodayPanel
   PeasExtensionBase   parent;
 
   GList              *panels;
+  GtkCssProvider     *css_provider;
 };
 
 static void          gtd_activatable_iface_init                  (GtdActivatableInterface  *iface);
@@ -139,6 +140,28 @@ gtd_plugin_today_panel_class_init (GtdPluginTodayPanelClass *klass)
 static void
 gtd_plugin_today_panel_init (GtdPluginTodayPanel *self)
 {
+  g_autofree gchar *theme_name = NULL;
+  g_autofree gchar *theme_uri = NULL;
+  g_autoptr (GSettings) settings = NULL;
+  g_autoptr (GFile) css_file = NULL;
+
+  /* Load CSS provider */
+  settings = g_settings_new ("org.gnome.desktop.interface");
+  theme_name = g_settings_get_string (settings, "gtk-theme");
+  theme_uri = g_build_filename ("resource:///org/gnome/todo/theme/today-panel", theme_name, ".css", NULL);
+  css_file = g_file_new_for_uri (theme_uri);
+
+  self->css_provider = gtk_css_provider_new ();
+  gtk_style_context_add_provider_for_screen (gdk_screen_get_default (),
+                                             GTK_STYLE_PROVIDER (self->css_provider),
+                                             GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+  if (g_file_query_exists (css_file, NULL))
+    gtk_css_provider_load_from_file (self->css_provider, css_file, NULL);
+  else
+    gtk_css_provider_load_from_resource (self->css_provider, "/org/gnome/todo/theme/today-panel/Adwaita.css");
+
+  /* And then the panel */
   self->panels = g_list_append (NULL, gtd_panel_today_new ());
 }
 

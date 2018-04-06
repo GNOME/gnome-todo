@@ -34,7 +34,6 @@ struct _GtdPanelToday
   gint                day_change_callback_id;
 
   guint               number_of_tasks;
-  GList              *task_list;
 };
 
 static void          gtd_panel_iface_init                        (GtdPanelInterface  *iface);
@@ -60,6 +59,27 @@ enum
   N_PROPS
 };
 
+
+/*
+ * Auxiliary methods
+ */
+
+static gboolean
+is_overdue (GDateTime *today,
+            GDateTime *dt)
+{
+  if (!dt)
+    return FALSE;
+
+  if (g_date_time_get_year (dt) > g_date_time_get_year (today))
+    return FALSE;
+
+  if (g_date_time_get_year (dt) < g_date_time_get_year (today))
+    return TRUE;
+
+  return g_date_time_get_day_of_year (dt) < g_date_time_get_day_of_year (today);
+}
+
 static gboolean
 is_today (GDateTime *today,
           GDateTime *dt)
@@ -68,8 +88,7 @@ is_today (GDateTime *today,
     return FALSE;
 
   if (g_date_time_get_year (dt) == g_date_time_get_year (today) &&
-      g_date_time_get_month (dt) == g_date_time_get_month (today) &&
-      g_date_time_get_day_of_month (dt) == g_date_time_get_day_of_month (today))
+      g_date_time_get_day_of_year (dt) == g_date_time_get_day_of_year (today))
     {
       return TRUE;
     }
@@ -77,12 +96,20 @@ is_today (GDateTime *today,
   return FALSE;
 }
 
-static void
-gtd_panel_today_count_tasks (GtdPanelToday *panel)
+static inline gboolean
+should_be_added (GDateTime *today,
+                 GDateTime *dt)
 {
-  g_autoptr (GDateTime) now;
+  return is_today (today, dt) || is_overdue (today, dt);
+}
+
+static void
+update_tasks (GtdPanelToday *panel)
+{
+  g_autoptr (GDateTime) now = NULL;
+  g_autoptr (GList) tasklists = NULL;
+  g_autoptr (GList) list = NULL;
   GtdManager *manager;
-  GList *tasklists;
   GList *l;
   guint number_of_tasks;
 
@@ -91,42 +118,38 @@ gtd_panel_today_count_tasks (GtdPanelToday *panel)
   tasklists = gtd_manager_get_task_lists (manager);
   number_of_tasks = 0;
 
-  g_clear_pointer (&panel->task_list, g_list_free);
-
   /* Recount tasks */
   for (l = tasklists; l != NULL; l = l->next)
     {
-      GList *tasks;
+      g_autoptr (GList) tasks = NULL;
       GList *t;
 
       tasks = gtd_task_list_get_tasks (l->data);
 
       for (t = tasks; t != NULL; t = t->next)
         {
-          GDateTime *task_dt;
+          g_autoptr (GDateTime) task_dt = NULL;
+          GtdTask *task;
 
-          task_dt = gtd_task_get_due_date (t->data);
+          task = t->data;
+          task_dt = gtd_task_get_due_date (task);
 
-          if (!is_today (now, task_dt))
-            {
-              g_clear_pointer (&task_dt, g_date_time_unref);
-              continue;
-            }
+          /* Ignore completed tasks, and tasks in the future */
+          if (gtd_task_get_complete (task) || !should_be_added (now, task_dt))
+            continue;
 
-          panel->task_list = g_list_prepend (panel->task_list, t->data);
+          list = g_list_prepend (list, task);
 
-          if (!gtd_task_get_complete (t->data))
+          if (!gtd_task_get_complete (task))
             number_of_tasks++;
-
-          g_clear_pointer (&task_dt, g_date_time_unref);
         }
-
-      g_list_free (tasks);
     }
 
   /* Add the tasks to the view */
-  gtd_task_list_view_set_list (GTD_TASK_LIST_VIEW (panel->view), panel->task_list);
+  gtd_task_list_view_set_list (GTD_TASK_LIST_VIEW (panel->view), list);
   gtd_task_list_view_set_default_date (GTD_TASK_LIST_VIEW (panel->view), now);
+
+  gtd_task_list_view_invalidate (GTD_TASK_LIST_VIEW (panel->view));
 
   if (number_of_tasks != panel->number_of_tasks)
     {
@@ -134,13 +157,113 @@ gtd_panel_today_count_tasks (GtdPanelToday *panel)
 
       g_object_notify (G_OBJECT (panel), "subtitle");
     }
-
-  g_list_free (tasklists);
 }
 
-/**********************
- * GtdPanel iface init
- **********************/
+static GtkWidget*
+create_label (const gchar *text,
+              gboolean     overdue)
+{
+  GtkStyleContext *context;
+  GtkWidget *label;
+
+  label = g_object_new (GTK_TYPE_LABEL,
+                        "visible", TRUE,
+                        "label", text,
+                        "margin", 6,
+                        "margin-top", overdue ? 6 : 18,
+                        "xalign", 0.0,
+                        "hexpand", TRUE,
+                        NULL);
+
+  context = gtk_widget_get_style_context (label);
+  gtk_style_context_add_class (context, overdue ? "date-overdue" : "date-scheduled");
+
+  return label;
+}
+
+static void
+custom_header_func (GtkListBoxRow *row,
+                    GtdTask       *task,
+                    GtkListBoxRow *previous_row,
+                    GtdTask       *previous_task,
+                    gpointer       user_data)
+{
+  g_autoptr (GDateTime) now = NULL;
+  g_autoptr (GDateTime) dt = NULL;
+  GtkWidget *header = NULL;
+
+  now = g_date_time_new_now_local ();
+  dt = gtd_task_get_due_date (task);
+
+  /* Only show a header if the we have overdue tasks */
+  if (!previous_row && is_overdue (now, dt))
+    {
+      header = create_label (_("Overdue"), TRUE);
+    }
+  else if (previous_row)
+    {
+      g_autoptr (GDateTime) previous_dt = NULL;
+
+      previous_dt = gtd_task_get_due_date (previous_task);
+
+      if (is_today (now, dt) != is_today (now, previous_dt))
+        header = create_label (_("Today"), FALSE);
+    }
+
+  gtk_list_box_row_set_header (row, header);
+}
+
+static gint
+custom_sort_func (GtkListBoxRow *row1,
+                  GtdTask       *task1,
+                  GtkListBoxRow *row2,
+                  GtdTask       *task2,
+                  gpointer       user_data)
+{
+  g_autoptr (GDateTime) dt1 = NULL;
+  g_autoptr (GDateTime) dt2 = NULL;
+  GDate dates[2];
+  gint result;
+
+  dt1 = gtd_task_get_due_date (task1);
+  dt2 = gtd_task_get_due_date (task2);
+
+  g_date_clear (dates, 2);
+
+  g_date_set_dmy (&dates[0],
+                  g_date_time_get_day_of_month (dt1),
+                  g_date_time_get_month (dt1),
+                  g_date_time_get_year (dt1));
+
+  g_date_set_dmy (&dates[1],
+                  g_date_time_get_day_of_month (dt2),
+                  g_date_time_get_month (dt2),
+                  g_date_time_get_year (dt2));
+
+  result = g_date_days_between (&dates[1], &dates[0]);
+
+  if (result != 0)
+    return result;
+
+  return gtd_task_compare (task1, task2);
+}
+
+
+
+/*
+ * Callbacks
+ */
+
+static void
+on_manager_task_list_changed_cb (GtdPanelToday *self)
+{
+  update_tasks (self);
+}
+
+/*
+ * GtdPanel iface
+ */
+
 static const gchar*
 gtd_panel_today_get_panel_name (GtdPanel *panel)
 {
@@ -204,7 +327,6 @@ gtd_panel_today_finalize (GObject *object)
 
   g_clear_object (&self->icon);
   g_clear_object (&self->menu);
-  g_clear_pointer (&self->task_list, g_list_free);
 
   G_OBJECT_CLASS (gtd_panel_today_parent_class)->finalize (object);
 }
@@ -277,8 +399,8 @@ gtd_panel_today_class_init (GtdPanelTodayClass *klass)
 static void
 gtd_panel_today_init (GtdPanelToday *self)
 {
+  g_autoptr (GDateTime) now = NULL;
   GtdManager *manager;
-  GDateTime *now;
 
   self->icon = g_themed_icon_new ("weather-clear-symbolic");
 
@@ -286,20 +408,23 @@ gtd_panel_today_init (GtdPanelToday *self)
   manager = gtd_manager_get_default ();
   now = g_date_time_new_now_local ();
 
-  g_signal_connect_swapped (manager,
-                            "list-added",
-                            G_CALLBACK (gtd_panel_today_count_tasks),
-                            self);
+  g_signal_connect_object (manager,
+                           "list-added",
+                           G_CALLBACK (on_manager_task_list_changed_cb),
+                           self,
+                           G_CONNECT_SWAPPED);
 
-  g_signal_connect_swapped (manager,
-                            "list-removed",
-                            G_CALLBACK (gtd_panel_today_count_tasks),
-                            self);
+  g_signal_connect_object (manager,
+                           "list-removed",
+                           G_CALLBACK (on_manager_task_list_changed_cb),
+                           self,
+                           G_CONNECT_SWAPPED);
 
-  g_signal_connect_swapped (manager,
-                            "list-changed",
-                            G_CALLBACK (gtd_panel_today_count_tasks),
-                            self);
+  g_signal_connect_object (manager,
+                           "list-changed",
+                           G_CALLBACK (on_manager_task_list_changed_cb),
+                           self,
+                           G_CONNECT_SWAPPED);
 
   /* Menu */
   self->menu = g_menu_new ();
@@ -313,6 +438,8 @@ gtd_panel_today_init (GtdPanelToday *self)
   gtd_task_list_view_set_show_list_name (GTD_TASK_LIST_VIEW (self->view), TRUE);
   gtd_task_list_view_set_show_due_date (GTD_TASK_LIST_VIEW (self->view), FALSE);
   gtd_task_list_view_set_default_date (GTD_TASK_LIST_VIEW (self->view), now);
+  gtd_task_list_view_set_header_func (GTD_TASK_LIST_VIEW (self->view), custom_header_func, self);
+  gtd_task_list_view_set_sort_func (GTD_TASK_LIST_VIEW (self->view), custom_sort_func, self);
 
   gtk_widget_set_hexpand (self->view, TRUE);
   gtk_widget_set_vexpand (self->view, TRUE);
@@ -321,12 +448,11 @@ gtd_panel_today_init (GtdPanelToday *self)
   gtk_widget_show_all (GTK_WIDGET (self));
 
   /* Start timer */
-  g_signal_connect_swapped (gtd_manager_get_timer (manager),
-                            "update",
-                            G_CALLBACK (gtd_panel_today_count_tasks),
-                            self);
-
-  g_clear_pointer (&now, g_date_time_unref);
+  g_signal_connect_object (gtd_manager_get_timer (manager),
+                           "update",
+                           G_CALLBACK (on_manager_task_list_changed_cb),
+                           self,
+                           G_CONNECT_SWAPPED);
 }
 
 GtkWidget*

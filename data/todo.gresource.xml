@@ -47,7 +47,9 @@
   <!--Today panel-->
   <gresource prefix="/org/gnome/todo">
     <file alias="plugins/today-panel/today-panel.plugin">../plugins/today-panel/today-panel.plugin</file>
+    <file compressed="true" alias="theme/today-panel/Adwaita.css">../plugins/today-panel/theme/Adwaita.css</file>
   </gresource>
+
   <!--Todo.Txt-->
   <gresource prefix="/org/gnome/todo">
     <file alias="plugins/todo-txt/todo-txt.plugin">../plugins/todo-txt/todo-txt.plugin</file>

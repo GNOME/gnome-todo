@@ -72,8 +72,9 @@ typedef struct
   GtkWidget             *empty_box;
   GtkListBox            *listbox;
   GtkListBoxRow         *new_task_row;
-  GtkWidget             *viewport;
   GtkWidget             *scrolled_window;
+  GtkStack              *stack;
+  GtkWidget             *viewport;
 
   /* internal */
   gboolean               can_toggle;
@@ -138,7 +139,6 @@ typedef struct
   guint32               current_item;
 } GtdIdleData;
 
-#define BATCH_SIZE                   30
 #define COLOR_TEMPLATE               "viewport {background-color: %s;}"
 #define DND_SCROLL_OFFSET            24 //px
 #define LUMINANCE(c)                 (0.299 * c->red + 0.587 * c->green + 0.114 * c->blue)
@@ -223,7 +223,7 @@ add_and_remove_tasks_in_idle (GtdTaskListView *self,
   idle_data->state = GTD_IDLE_STATE_STARTED;
 
   /* Start loading stuff in idle */
-  priv->idle_handler_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE,
+  priv->idle_handler_id = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE,
                                            idle_process_items_cb,
                                            idle_data,
                                            idle_data_free);
@@ -520,29 +520,34 @@ add_task (GtdTaskListView *self,
 static gboolean
 idle_process_items_cb (gpointer data)
 {
-  GtdIdleData *idle_data = data;
+  GtdTaskListViewPrivate *priv;
+  GtdIdleData *idle_data;
   guint32 n_removed_items;
   guint32 n_added_items;
-  guint32 remaining;
   guint i;
+
+  idle_data = data;
+  priv = gtd_task_list_view_get_instance_private (idle_data->self);
 
   g_assert (idle_data->state == GTD_IDLE_STATE_STARTED || idle_data->state == GTD_IDLE_STATE_LOADING);
 
   n_removed_items = idle_data->removed->len;
   n_added_items = idle_data->added->len;
 
-  /* Stop when we finished loading */
+  /* Stop if we finished loading */
   if (idle_data->current_item == n_removed_items + n_added_items)
     {
-      GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (idle_data->self);
-
-      GTD_TRACE_MSG ("Finished loading items");
+      GTD_TRACE_MSG ("Finished adding %u and removing %u items", n_added_items, n_removed_items);
 
       /* Check if it should show the empty state */
       update_state (idle_data->self);
 
       priv->idle_handler_id = 0;
       idle_data->state = GTD_IDLE_STATE_FINISHED;
+
+      /* Show the list again */
+      gtk_widget_show (GTK_WIDGET (priv->listbox));
+      gtk_stack_set_visible_child_name (priv->stack, "listbox");
 
       return G_SOURCE_REMOVE;
     }
@@ -554,30 +559,44 @@ idle_process_items_cb (gpointer data)
 
   idle_data->state = GTD_IDLE_STATE_LOADING;
 
-  /* Add at most 10 items each time */
-  remaining = n_removed_items + n_added_items - idle_data->current_item;
-
-  for (i = 0; i < MIN (BATCH_SIZE, remaining); i++)
+  /*
+   * A performance trick we do is to hide the listbox until it's completely
+   * finished. Only do that if we're going to idle more than 30 tasks. This
+   * number is arbitrary
+   */
+  if (n_added_items > 30)
     {
-      /* First, remove the rows marked for removal, and then add the new rows */
-      if (idle_data->current_item < n_removed_items)
-        {
-          remove_task (idle_data->self, g_ptr_array_index (idle_data->removed, idle_data->current_item));
-        }
-      else
-        {
-          /*
-           * For performance reasons, only animate task reveal when adding less
-           * than a batch of items.
-           */
-          add_task (idle_data->self,
-                    g_ptr_array_index (idle_data->added, idle_data->current_item - n_removed_items),
-                    n_added_items < BATCH_SIZE);
-        }
-
-      /* Next item */
-      idle_data->current_item += 1;
+      gtk_widget_hide (GTK_WIDGET (priv->listbox));
+      gtk_stack_set_visible_child_name (priv->stack, "loading");
     }
+
+  /*
+   * Here we take the following approach:
+   *  1. Remove all the rows marked for removal at once.
+   *  2. Add the remaining rows in chunks of BATCH_SIZE
+   */
+  if (idle_data->current_item < n_removed_items)
+    {
+      for (i = 0; i < n_removed_items; i++)
+        remove_task (idle_data->self, g_ptr_array_index (idle_data->removed, i));
+
+      idle_data->current_item = n_removed_items;
+    }
+
+  /* No tasks to add, run the mainloop one more time to finish loading */
+  if (n_added_items == 0)
+    return G_SOURCE_CONTINUE;
+
+  /*
+   * For performance reasons, only animate task reveal when adding less
+   * than a batch of items.
+   */
+  add_task (idle_data->self,
+            g_ptr_array_index (idle_data->added, idle_data->current_item - n_removed_items),
+            n_added_items < 30);
+
+  /* Next item */
+  idle_data->current_item += 1;
 
   return G_SOURCE_CONTINUE;
 }
@@ -1307,6 +1326,12 @@ gtd_task_list_view_finalize (GObject *object)
 {
   GtdTaskListViewPrivate *priv = GTD_TASK_LIST_VIEW (object)->priv;
 
+  if (priv->idle_handler_id > 0)
+    {
+      g_source_remove (priv->idle_handler_id);
+      priv->idle_handler_id = 0;
+    }
+
   g_clear_pointer (&priv->default_date, g_date_time_unref);
   g_clear_pointer (&priv->tasks, g_hash_table_destroy);
   g_clear_object (&priv->renderer);
@@ -1538,8 +1563,9 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, listbox);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, new_task_row);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, tasklist_name_sizegroup);
-  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, viewport);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, scrolled_window);
+  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, stack);
+  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, viewport);
 
   gtk_widget_class_bind_template_callback (widget_class, listbox_drag_drop);
   gtk_widget_class_bind_template_callback (widget_class, listbox_drag_leave);

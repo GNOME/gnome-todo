@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="GtdTaskListPanel" parent="GtkBox">
+    <property name="visible">true</property>
+    <property name="can-focus">false</property>
+
+    <!-- Main task list view -->
+    <child>
+      <object class="GtdTaskListView" id="task_list_view">
+        <property name="visible">true</property>
+      </object>
+    </child>
+
+  </template>
+
+  <!-- Color button -->
+  <object class="GtkColorButton" id="color_button">
+    <property name="visible">true</property>
+    <property name="can_focus">True</property>
+    <property name="receives_default">True</property>
+    <property name="halign">end</property>
+    <signal name="color-set" handler="on_color_button_color_set_cb" object="GtdTaskListPanel" swapped="no" />
+  </object>
+</interface>

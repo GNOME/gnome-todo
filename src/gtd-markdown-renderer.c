@@ -43,6 +43,7 @@ static void          on_text_buffer_weak_notified_cb             (gpointer      
                                                                   GObject            *where_the_object_was);
 
 static void          on_text_changed_cb                          (GtkTextBuffer       *buffer,
+                                                                  GParamSpec          *pspec,
                                                                   GtdMarkdownRenderer *self);
 
 
@@ -252,7 +253,7 @@ populate_tag_table (GtdMarkdownRenderer *self,
 
   /* Add to the map of populated buffers */
   g_hash_table_add (self->populated_buffers, buffer);
-  g_signal_connect (buffer, "changed", G_CALLBACK (on_text_changed_cb), self);
+  g_signal_connect (buffer, "notify::text", G_CALLBACK (on_text_changed_cb), self);
 
   g_debug ("Added buffer %p to markdown renderer", buffer);
 }
@@ -266,6 +267,8 @@ render_markdown (GtdMarkdownRenderer *self,
   GtkTextIter end;
 
   GTD_ENTRY;
+
+  /* TODO: render in idle */
 
   /* Wipe out the previous tags */
   gtk_text_buffer_get_start_iter (buffer, &start);
@@ -313,6 +316,7 @@ on_text_buffer_weak_notified_cb (gpointer  data,
 
 static void
 on_text_changed_cb (GtkTextBuffer       *buffer,
+                    GParamSpec          *pspec,
                     GtdMarkdownRenderer *self)
 {
   render_markdown (self, buffer);

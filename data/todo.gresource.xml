@@ -38,6 +38,12 @@
     <file alias="plugins/eds/eds.plugin">../plugins/eds/eds.plugin</file>
   </gresource>
 
+  <!--Next Week panel-->
+  <gresource prefix="/org/gnome/todo">
+    <file alias="plugins/next-week-panel/scheduled-panel.plugin">../plugins/next-week-panel/next-week-panel.plugin</file>
+    <file compressed="true" alias="theme/next-week-panel/Adwaita.css">../plugins/next-week-panel/theme/Adwaita.css</file>
+  </gresource>
+
   <!--Scheduled panel-->
   <gresource prefix="/org/gnome/todo">
     <file alias="plugins/scheduled-panel/scheduled-panel.plugin">../plugins/scheduled-panel/scheduled-panel.plugin</file>

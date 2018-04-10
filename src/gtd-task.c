@@ -84,27 +84,38 @@ share_same_ancestor (GtdTask *t1,
                      GtdTask *t2)
 {
   GtdTask *p1, *p2;
-  gboolean has_ancestor;
+  gint depth_difference;
 
-  has_ancestor = FALSE;
-  p1 = t1;
+  depth_difference = ABS (gtd_task_get_depth (t1) - gtd_task_get_depth (t2));
 
-  for (p1 = t1; p1 != NULL; p1 = gtd_task_get_parent (p1))
+  /* Put the tasks at the same depth */
+  if (depth_difference != 0)
     {
-      for (p2 = t2; p2 != NULL; p2 = gtd_task_get_parent (p2))
-        {
-          if (p1 == p2)
-            {
-              has_ancestor = TRUE;
-              break;
-            }
-        }
+      gint i;
 
-      if (has_ancestor)
-        break;
+      for (i = 0; i < depth_difference; i++)
+        {
+          if (gtd_task_get_depth (t1) > gtd_task_get_depth (t2))
+            t1 = gtd_task_get_parent (t1);
+          else
+            t2 = gtd_task_get_parent (t2);
+        }
     }
 
-  return has_ancestor;
+  p1 = t1;
+  p2 = t2;
+
+  /* Walk up in the tree, if they match, we found the ancestor */
+  while (p1 && p2)
+    {
+      if (p1 == p2)
+        return TRUE;
+
+      p1 = gtd_task_get_parent (p1);
+      p2 = gtd_task_get_parent (p2);
+    }
+
+  return FALSE;
 }
 
 static GtdTask*
@@ -145,9 +156,6 @@ compare_by_subtasks (GtdTask **t1,
 
       depth_difference = ABS (gtd_task_get_depth (task1) - gtd_task_get_depth (task2));
 
-      if (depth_difference == 0)
-        return 0;
-
       if (gtd_task_is_subtask (task1, task2))
         {
           return -1;
@@ -158,6 +166,7 @@ compare_by_subtasks (GtdTask **t1,
         }
       else
         {
+          GtdTask *p1, *p2;
           gint i;
 
           for (i = depth_difference; i > 0; i--)
@@ -168,8 +177,21 @@ compare_by_subtasks (GtdTask **t1,
                 task2 = gtd_task_get_parent (task2);
             }
 
-          *t1 = task1;
-          *t2 = task2;
+          p1 = task1;
+          p2 = task2;
+
+          /* Walk up in the tree, if they match, we found the ancestor */
+          while (gtd_task_get_parent (p1) && gtd_task_get_parent (p2))
+            {
+              if (gtd_task_get_parent (p1) == gtd_task_get_parent (p2))
+                break;
+
+              p1 = gtd_task_get_parent (p1);
+              p2 = gtd_task_get_parent (p2);
+            }
+
+          *t1 = p1;
+          *t2 = p2;
         }
     }
   else
@@ -1105,8 +1127,6 @@ gtd_task_compare (GtdTask *t1,
 {
   GDateTime *dt1;
   GDateTime *dt2;
-  gboolean completed1;
-  gboolean completed2;
   gchar *txt1;
   gchar *txt2;
   gint p1;
@@ -1139,16 +1159,6 @@ gtd_task_compare (GtdTask *t1,
       if (retval != 0)
         return retval;
     }
-
-  /*
-   * First, compare by ::complete.
-   */
-  completed1 = gtd_task_get_complete (t1);
-  completed2 = gtd_task_get_complete (t2);
-  retval = completed1 - completed2;
-
-  if (retval != 0)
-    return retval;
 
   /*
    * Second, compare by ::priority

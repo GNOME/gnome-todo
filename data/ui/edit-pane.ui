@@ -225,7 +225,7 @@
   </template>
 
   <object class="GtkTextBuffer" id="text_buffer">
-    <signal name="changed" handler="on_text_buffer_changed_cb" object="GtdEditPane" swapped="no" />
+    <signal name="notify::text" handler="on_text_buffer_changed_cb" object="GtdEditPane" swapped="no" />
   </object>
 
   <object class="GtkPopover" id="date_popover">

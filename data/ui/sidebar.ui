@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="GtdSidebar" parent="GtkBox">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="hexpand">False</property>
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="min-content-width">300</property>
+        <property name="hscrollbar-policy">never</property>
+        <property name="vscrollbar-policy">automatic</property>
+
+        <!-- Listbox -->
+        <child>
+          <object class="GtkListBox" id="listbox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="expand">True</property>
+            <property name="selection_mode">browse</property>
+            <signal name="row-activated" handler="on_listbox_row_activated_cb" object="GtdSidebar" swapped="no" />
+            <style>
+              <class name="sidebar"/>
+            </style>
+          </object>
+        </child>
+
+      </object>
+    </child>
+  </template>
+</interface>

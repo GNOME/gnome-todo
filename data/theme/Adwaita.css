@@ -126,3 +126,16 @@ tasklistview.light emptylistwidget label,
 tasklistview.light emptylistwidget image {
     color: black;
 }
+
+/* Add a subtle shadow to the task list color circle */
+sidebar row image.color-circle-icon { -gtk-icon-shadow: 0 1px alpha(black, 0.18); }
+
+/*
+ * Hack: Move separator by 1px so that it aligns with the sidebar
+ *
+ * Stolen from https://gitlab.gnome.org/GNOME/polari/blob/master/data/resources/application.css
+ */
+.titlebar > separator:dir(ltr) { margin-left: -1px; }
+.titlebar > headerbar:first-child:dir(ltr) { margin-right: 1px; }
+.titlebar > separator:dir(rtl) { margin-right: -1px; }
+.titlebar > headerbar:first-child:dir(rtl) { margin-left: 1px; }

@@ -21,7 +21,6 @@
 #include "interfaces/gtd-activatable.h"
 #include "interfaces/gtd-provider.h"
 #include "interfaces/gtd-panel.h"
-#include "views/gtd-list-selector-panel.h"
 #include "gtd-application.h"
 #include "gtd-enum-types.h"
 #include "gtd-task-list-view.h"
@@ -30,9 +29,12 @@
 #include "gtd-notification.h"
 #include "gtd-notification-widget.h"
 #include "gtd-plugin-manager.h"
+#include "gtd-sidebar.h"
 #include "gtd-task.h"
 #include "gtd-task-list.h"
+#include "gtd-task-list-panel.h"
 #include "gtd-window.h"
+#include "gtd-window-private.h"
 
 #include <glib/gi18n.h>
 
@@ -57,6 +59,7 @@ struct _GtdWindow
   GtkWidget          *gear_menu_button;
   GtkHeaderBar       *headerbar;
   GtkStack           *stack;
+  GtdSidebar         *sidebar;
 
   GtdNotificationWidget *notification_widget;
 
@@ -67,12 +70,10 @@ struct _GtdWindow
   GtkWidget          *panel_box_start;
 
   GtdPanel           *active_panel;
+  GtdPanel           *task_list_panel;
 
   /* mode */
   GtdWindowMode       mode;
-
-  /* loading notification */
-  GtdNotification    *loading_notification;
 
   guint               save_geometry_timeout_id;
 };
@@ -203,17 +204,6 @@ gtd_window__panel_menu_changed (GObject    *object,
 }
 
 static void
-gtd_window__panel_title_changed (GObject    *object,
-                                 GParamSpec *pspec,
-                                 GtdWindow  *self)
-{
-  gtk_container_child_set (GTK_CONTAINER (self->stack),
-                           GTK_WIDGET (object),
-                           "title", gtd_panel_get_panel_title (GTD_PANEL (object)),
-                           NULL);
-}
-
-static void
 on_panel_added_cb (GtdManager *manager,
                    GtdPanel   *panel,
                    GtdWindow  *self)
@@ -222,11 +212,6 @@ on_panel_added_cb (GtdManager *manager,
                         GTK_WIDGET (panel),
                         gtd_panel_get_panel_name (panel),
                         gtd_panel_get_panel_title (panel));
-
-  g_signal_connect (panel,
-                    "notify::title",
-                    G_CALLBACK (gtd_window__panel_title_changed),
-                    self);
 }
 
 static void
@@ -435,19 +420,6 @@ on_stack_visible_child_cb (GtdWindow  *self,
 }
 
 static void
-on_loading_changed_cb (GObject    *source,
-                       GParamSpec *spec,
-                       GtdWindow  *self)
-{
-  g_assert (GTD_IS_WINDOW (self));
-
-  if (gtd_object_get_loading (GTD_OBJECT (source)))
-    gtd_notification_widget_notify (self->notification_widget, self->loading_notification);
-  else
-    gtd_notification_widget_cancel (self->notification_widget, self->loading_notification);
-}
-
-static void
 on_show_error_message_cb (GtdManager                *manager,
                           const gchar               *primary_text,
                           const gchar               *secondary_text,
@@ -578,19 +550,9 @@ gtd_window_constructed (GObject *object)
   for (l = lists; l; l = l->next)
     on_panel_added_cb (NULL, l->data, self);
 
-  g_signal_connect (gtd_manager_get_default (), "notify::loading", G_CALLBACK (on_loading_changed_cb), self);
   g_signal_connect (gtd_manager_get_default (), "panel-added", G_CALLBACK (on_panel_added_cb), self);
   g_signal_connect (gtd_manager_get_default (), "panel-removed", G_CALLBACK (on_panel_removed_cb), self);
   g_signal_connect (gtd_manager_get_default (), "show-error-message", G_CALLBACK (on_show_error_message_cb), self);
-}
-
-static void
-gtd_window_finalize (GObject *object)
-{
-  GtdWindow *self = GTD_WINDOW (object);
-
-  g_clear_object (&self->loading_notification);
-  G_OBJECT_CLASS (gtd_window_parent_class)->finalize (object);
 }
 
 static void
@@ -637,7 +599,6 @@ gtd_window_class_init (GtdWindowClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->finalize = gtd_window_finalize;
   object_class->constructed = gtd_window_constructed;
   object_class->get_property = gtd_window_get_property;
   object_class->set_property = gtd_window_set_property;
@@ -661,6 +622,7 @@ gtd_window_class_init (GtdWindowClass *klass)
                            G_PARAM_READWRITE));
 
   g_type_ensure (GTD_TYPE_NOTIFICATION_WIDGET);
+  g_type_ensure (GTD_TYPE_SIDEBAR);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/todo/ui/window.ui");
 
@@ -668,6 +630,7 @@ gtd_window_class_init (GtdWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, gear_menu_button);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, headerbar);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, notification_widget);
+  gtk_widget_class_bind_template_child (widget_class, GtdWindow, sidebar);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, stack);
 
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, extension_box_end);
@@ -682,23 +645,14 @@ gtd_window_class_init (GtdWindowClass *klass)
 static void
 gtd_window_init (GtdWindow *self)
 {
-  GtkWidget *panel;
-
-  self->loading_notification = gtd_notification_new (_("Loading your task lists…"), 0);
-  gtd_object_push_loading (GTD_OBJECT (self->loading_notification));
-
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  /* Add the default 'Lists' panel before everything else */
-  panel = gtd_list_selector_panel_new ();
+  /* Task list panel */
+  self->task_list_panel = GTD_PANEL (gtd_task_list_panel_new ());
+  on_panel_added_cb (gtd_manager_get_default (), self->task_list_panel, self);
 
-  on_panel_added_cb (gtd_manager_get_default (), GTD_PANEL (panel), self);
-
-  g_object_bind_property (self,
-                          "mode",
-                          panel,
-                          "mode",
-                          G_BINDING_BIDIRECTIONAL);
+  gtd_sidebar_set_panel_stack (self->sidebar, GTK_STACK (self->stack));
+  gtd_sidebar_set_task_list_panel (self->sidebar, self->task_list_panel);
 }
 
 GtkWidget*
@@ -826,4 +780,13 @@ gtd_window_set_custom_title (GtdWindow   *self,
     {
       gtk_header_bar_set_title (self->headerbar, _("To Do"));
     }
+}
+
+/* Private functions */
+void
+_gtd_window_finish_startup (GtdWindow *self)
+{
+  g_return_if_fail (GTD_IS_WINDOW (self));
+
+  gtd_sidebar_activate (self->sidebar);
 }

@@ -1,0 +1,13 @@
+[Plugin]
+Name = Next 7 days
+Module = next-week-panel
+Description = A panel to show tasks scheduled for the next 7 days
+Version = @VERSION@
+Authors = Georges Basile Stavracas Neto <gbsneto@gnome.org>
+Copyright = Copyleft © The To Do maintainers
+Website = https://wiki.gnome.org/Apps/Todo
+Builtin = true
+License = GPL
+Loader = C
+Embedded = gtd_plugin_next_week_panel_register_types
+Depends =

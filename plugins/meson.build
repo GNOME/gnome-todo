@@ -8,6 +8,7 @@ plugins_conf = configuration_data()
 plugins_conf.set('VERSION', gnome_todo_version)
 
 subdir('eds')
+subdir('next-week-panel')
 
 if get_option('background_plugin')
   subdir('background')

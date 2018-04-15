@@ -30,6 +30,18 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (GtdTaskListView, gtd_task_list_view, GTD, TASK_LIST_VIEW, GtkOverlay)
 
 /**
+ * GtdTaskListViewFilterFunc:
+ * @task: a #GtdTask
+ * @user_data: (closure): user data
+ *
+ * The filter function called on every task.
+ *
+ * Returns: %TRUE if the row is visible, %FALSE otherwise.
+ */
+typedef gboolean (*GtdTaskListViewFilterFunc) (GtdTask              *task,
+                                               gpointer              user_data);
+
+/**
  * GtdTaskListViewHeaderFunc:
  * @row: the current #GtkListBoxRow
  * @row_task: the #GtdTask that @row represents
@@ -85,6 +97,10 @@ void                      gtd_task_list_view_set_show_due_date  (GtdTaskListView
 
 void                      gtd_task_list_view_set_header_func    (GtdTaskListView           *view,
                                                                  GtdTaskListViewHeaderFunc  func,
+                                                                 gpointer                   user_data);
+
+void                      gtd_task_list_view_set_filter_func    (GtdTaskListView           *view,
+                                                                 GtdTaskListViewFilterFunc  func,
                                                                  gpointer                   user_data);
 
 void                      gtd_task_list_view_set_sort_func      (GtdTaskListView           *view,

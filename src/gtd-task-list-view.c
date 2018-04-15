@@ -105,6 +105,10 @@ typedef struct
   GtdTaskListViewHeaderFunc header_func;
   gpointer                  header_user_data;
 
+  /* Custom filter function data */
+  GtdTaskListViewFilterFunc filter_func;
+  gpointer                  filter_user_data;
+
   /* Custom sorting function data */
   GtdTaskListViewSortFunc sort_func;
   gpointer                sort_user_data;
@@ -954,6 +958,28 @@ default_sort_func (GtkListBoxRow *row1,
 
   return compare_task_rows (row1, row2);
 }
+
+
+/*
+ * Custom filter function
+ */
+
+static gboolean
+custom_filter_func (GtkListBoxRow   *row,
+                    GtdTaskListView *self)
+{
+  GtdTaskListViewPrivate *priv;
+  GtdTask *task;
+
+  if (GTD_IS_NEW_TASK_ROW (row) || GTD_IS_DND_ROW (row))
+    return gtk_widget_get_visible (GTK_WIDGET (row));
+
+  priv = gtd_task_list_view_get_instance_private (self);
+  task = gtd_task_row_get_task (GTD_TASK_ROW (row));
+
+  return priv->filter_func (task, priv->filter_user_data);;
+}
+
 
 /*
  * Custom sorting functions
@@ -1998,6 +2024,46 @@ gtd_task_list_view_set_header_func (GtdTaskListView           *view,
 }
 
 /**
+ * gtd_task_list_view_set_filter_func:
+ * @view: a #GtdTaskListView
+ * @func: (closure user_data) (scope call) (nullable): the filter function
+ * @user_data: data passed to @func
+ *
+ * Sets @func as the filter function of @view.
+ *
+ * Do not unref nor free any of the passed data.
+ */
+void
+gtd_task_list_view_set_filter_func (GtdTaskListView           *view,
+                                    GtdTaskListViewFilterFunc  func,
+                                    gpointer                   user_data)
+{
+  GtdTaskListViewPrivate *priv;
+
+  g_return_if_fail (GTD_IS_TASK_LIST_VIEW (view));
+
+  priv = view->priv;
+
+  if (func)
+    {
+      priv->filter_func = func;
+      priv->filter_user_data = user_data;
+
+      gtk_list_box_set_filter_func (priv->listbox,
+                                    (GtkListBoxFilterFunc) custom_filter_func,
+                                    view,
+                                    NULL);
+    }
+  else
+    {
+      priv->filter_func = NULL;
+      priv->filter_user_data = NULL;
+
+      gtk_list_box_set_filter_func (priv->listbox, NULL, NULL, NULL);
+    }
+}
+
+/**
  * gtd_task_list_view_set_sort_func:
  * @view: a #GtdTaskListView
  * @func: (closure user_data) (scope call) (nullable): the sort function
@@ -2203,4 +2269,5 @@ gtd_task_list_view_invalidate (GtdTaskListView *self)
 
   gtk_list_box_invalidate_sort (priv->listbox);
   gtk_list_box_invalidate_headers (priv->listbox);
+  gtk_list_box_invalidate_filter (priv->listbox);
 }

@@ -914,6 +914,15 @@ on_listbox_row_activated_cb (GtkListBox      *listbox,
     set_active_row (self, GTK_WIDGET (row));
 }
 
+static gint
+sort_tasks_gptrarray_cb (gconstpointer a,
+                         gconstpointer b)
+{
+  GtdTask *task_a = (*((GtdTask**) a));
+  GtdTask *task_b = (*((GtdTask**) b));
+
+  return gtd_task_compare (task_a, task_b);
+}
 
 /*
  * Default sorting functions
@@ -1727,6 +1736,9 @@ gtd_task_list_view_set_list (GtdTaskListView *view,
 
       g_ptr_array_add (added, g_object_ref (l->data));
     }
+
+  /* Sort the array so we can add the tasks in the order they'll be displayed */
+  g_ptr_array_sort (added, sort_tasks_gptrarray_cb);
 
   /*
    * Add the new tasks and remove the old ones in idle, to keep

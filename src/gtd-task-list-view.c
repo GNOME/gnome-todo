@@ -899,6 +899,21 @@ on_task_list_task_removed_cb (GtdTaskListView *view,
   update_state (view);
 }
 
+static void
+on_listbox_row_activated_cb (GtkListBox      *listbox,
+                             GtkListBox      *row,
+                             GtdTaskListView *self)
+{
+  if (!GTD_IS_TASK_ROW (row))
+    return;
+
+  /* Toggle the row */
+  if (gtd_task_row_get_active (GTD_TASK_ROW (row)))
+    set_active_row (self, NULL);
+  else
+    set_active_row (self, GTK_WIDGET (row));
+}
+
 
 /*
  * Default sorting functions
@@ -1081,21 +1096,6 @@ custom_sort_func (GtkListBoxRow   *a,
     return internal_compare_dnd_rows (view, a, b);
 
   return internal_compare_task_rows (view, a, b);
-}
-
-static void
-listbox_row_activated (GtkListBox      *listbox,
-                       GtkListBox      *row,
-                       GtdTaskListView *self)
-{
-  if (!GTD_IS_TASK_ROW (row))
-    return;
-
-  /* Toggle the row */
-  if (gtd_task_row_get_active (GTD_TASK_ROW (row)))
-    set_active_row (self, NULL);
-  else
-    set_active_row (self, GTK_WIDGET (row));
 }
 
 
@@ -1596,7 +1596,7 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, listbox_drag_drop);
   gtk_widget_class_bind_template_callback (widget_class, listbox_drag_leave);
   gtk_widget_class_bind_template_callback (widget_class, listbox_drag_motion);
-  gtk_widget_class_bind_template_callback (widget_class, listbox_row_activated);
+  gtk_widget_class_bind_template_callback (widget_class, on_listbox_row_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_done_button_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_task_row_entered_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_task_row_exited_cb);

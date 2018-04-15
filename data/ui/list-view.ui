@@ -51,7 +51,7 @@
                             <signal name="drag-drop" handler="listbox_drag_drop" object="GtdTaskListView" swapped="no" />
                             <signal name="drag-leave" handler="listbox_drag_leave" object="GtdTaskListView" swapped="no" />
                             <signal name="drag-motion" handler="listbox_drag_motion" object="GtdTaskListView" swapped="no" />
-                            <signal name="row-activated" handler="listbox_row_activated" object="GtdTaskListView" swapped="no" />
+                            <signal name="row-activated" handler="on_listbox_row_activated_cb" object="GtdTaskListView" swapped="no" />
                             <child>
                               <object class="GtdNewTaskRow" id="new_task_row">
                                 <property name="visible">True</property>

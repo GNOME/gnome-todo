@@ -86,6 +86,7 @@ typedef struct
   GDateTime             *default_date;
 
   guint                  idle_handler_id;
+  guint                  scroll_to_bottom_handler_id;
 
   /* Markup renderer*/
   GtdMarkdownRenderer   *renderer;
@@ -170,6 +171,8 @@ static void          on_task_row_entered_cb                      (GtdTaskListVie
 
 static void          on_task_row_exited_cb                       (GtdTaskListView    *self,
                                                                   GtdTaskRow         *row);
+
+static gboolean      scroll_to_bottom_cb                         (gpointer            data);
 
 
 G_DEFINE_TYPE_WITH_PRIVATE (GtdTaskListView, gtd_task_list_view, GTK_TYPE_OVERLAY)
@@ -516,10 +519,35 @@ add_task (GtdTaskListView *self,
   GTD_EXIT;
 }
 
+static void
+schedule_scroll_to_bottom (GtdTaskListView *self)
+{
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+
+  if (priv->scroll_to_bottom_handler_id > 0)
+    return;
+
+  priv->scroll_to_bottom_handler_id = g_timeout_add (250, scroll_to_bottom_cb, self);
+}
+
 
 /*
  * Callbacks
  */
+
+static gboolean
+scroll_to_bottom_cb (gpointer data)
+{
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (data);
+  gboolean ignored;
+
+  priv->scroll_to_bottom_handler_id = 0;
+
+  gtk_widget_grab_focus (GTK_WIDGET (priv->new_task_row));
+  g_signal_emit_by_name (priv->scrolled_window, "scroll-child", GTK_SCROLL_END, FALSE, &ignored);
+
+  return G_SOURCE_REMOVE;
+}
 
 static gboolean
 idle_process_items_cb (gpointer data)
@@ -552,6 +580,9 @@ idle_process_items_cb (gpointer data)
       /* Show the list again */
       gtk_widget_show (GTK_WIDGET (priv->listbox));
       gtk_stack_set_visible_child_name (priv->stack, "listbox");
+
+      /* Scroll to the bottom */
+      schedule_scroll_to_bottom (idle_data->self);
 
       return G_SOURCE_REMOVE;
     }
@@ -1365,6 +1396,12 @@ gtd_task_list_view_finalize (GObject *object)
     {
       g_source_remove (priv->idle_handler_id);
       priv->idle_handler_id = 0;
+    }
+
+  if (priv->scroll_to_bottom_handler_id > 0)
+    {
+      g_source_remove (priv->scroll_to_bottom_handler_id);
+      priv->scroll_to_bottom_handler_id = 0;
     }
 
   g_clear_pointer (&priv->default_date, g_date_time_unref);

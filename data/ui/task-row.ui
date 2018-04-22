@@ -165,14 +165,6 @@
                 <property name="can_focus">False</property>
                 <property name="transition_type">slide-down</property>
                 <property name="transition_duration">250</property>
-                <child>
-                  <object class="GtdEditPane" id="edit_panel">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <signal name="changed" handler="on_task_changed_cb" object="GtdTaskRow" swapped="yes" />
-                    <signal name="remove-task" handler="on_remove_task_cb" object="GtdTaskRow" swapped="no" />
-                  </object>
-                </child>
               </object>
             </child>
           </object>

@@ -41,7 +41,6 @@ struct _GtdTaskRow
   GtkRevealer        *revealer;
 
   GtkWidget          *done_check;
-  GtkWidget          *edit_panel;
   GtkWidget          *edit_panel_revealer;
   GtkWidget          *header_event_box;
   GtkWidget          *title_entry;
@@ -62,6 +61,8 @@ struct _GtdTaskRow
 
   /* data */
   GtdTask            *task;
+
+  GtdEditPane        *edit_pane;
 
   GtdMarkdownRenderer *renderer;
 
@@ -280,8 +281,6 @@ gtd_task_row_set_task (GtdTaskRow *row,
 
       g_signal_handlers_unblock_by_func (row->done_check, on_complete_check_toggled_cb, row);
       g_signal_handlers_unblock_by_func (row->title_entry, on_task_changed_cb, row);
-
-      gtd_edit_pane_set_task (GTD_EDIT_PANE (row->edit_panel), task);
     }
 
   g_object_notify (G_OBJECT (row), "task");
@@ -620,7 +619,6 @@ gtd_task_row_set_property (GObject      *object,
 
     case PROP_RENDERER:
       self->renderer = g_value_get_object (value);
-      gtd_edit_pane_set_markdown_renderer (GTD_EDIT_PANE (self->edit_panel), self->renderer);
       break;
 
     case PROP_TASK:
@@ -741,7 +739,6 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, dnd_event_box);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, dnd_icon);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, done_check);
-  gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, edit_panel);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, edit_panel_revealer);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, header_event_box);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, revealer);
@@ -948,7 +945,30 @@ gtd_task_row_set_active (GtdTaskRow *self,
   else
     gtk_style_context_remove_class (context, "active");
 
-  /* And the listbox */
+  /* Create or destroy the edit panel */
+  if (active && !self->edit_pane)
+    {
+      GTD_TRACE_MSG ("Creating edit pane");
+
+      self->edit_pane = GTD_EDIT_PANE (gtd_edit_pane_new ());
+      gtd_edit_pane_set_markdown_renderer (self->edit_pane, self->renderer);
+      gtd_edit_pane_set_task (self->edit_pane, self->task);
+
+      gtk_container_add (GTK_CONTAINER (self->edit_panel_revealer), GTK_WIDGET (self->edit_pane));
+      gtk_widget_show (GTK_WIDGET (self->edit_pane));
+
+      g_signal_connect_swapped (self->edit_pane, "changed", G_CALLBACK (on_task_changed_cb), self);
+      g_signal_connect (self->edit_pane, "remove-task", G_CALLBACK (on_remove_task_cb), self);
+    }
+  else if (!active && self->edit_pane)
+    {
+      GTD_TRACE_MSG ("Destroying edit pane");
+
+      gtk_container_remove (GTK_CONTAINER (self->edit_panel_revealer), GTK_WIDGET (self->edit_pane));
+      self->edit_pane = NULL;
+    }
+
+  /* And reveal or hide it */
   gtk_revealer_set_reveal_child (GTK_REVEALER (self->edit_panel_revealer), active);
 
   /* Save the task if it is not being loaded */

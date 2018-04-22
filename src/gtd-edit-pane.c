@@ -299,8 +299,8 @@ on_hyperlink_clicked_cb (GtkTextView *text_view,
   GtkTextIter iter;
   GSList *tags = NULL;
   GSList *l = NULL;
-  gdouble ex;
-  gdouble ey;
+  gdouble ex = 0.0;
+  gdouble ey = 0.0;
   gint x;
   gint y;
 

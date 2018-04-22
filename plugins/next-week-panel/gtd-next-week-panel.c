@@ -208,21 +208,21 @@ update_tasks (GtdNextWeekPanel *self)
           g_autoptr (GDateTime) task_dt = NULL;
           gint days_offset;
 
+          if (gtd_task_get_complete (t->data))
+            continue;
+
           task_dt = gtd_task_get_due_date (t->data);
+
+          if (!task_dt)
+              continue;
 
           get_date_offset (task_dt, &days_offset, NULL);
 
-          /*
-           * GtdTaskListView automagically updates the list
-           * whenever a task is added/removed/changed.
-           */
-          if (!gtd_task_get_complete (t->data) &&
-              task_dt &&
-              days_offset < 7)
-            {
-              list = g_list_prepend (list, t->data);
-              number_of_tasks++;
-            }
+          if (days_offset >= 7)
+            continue;
+
+          list = g_list_prepend (list, t->data);
+          number_of_tasks++;
         }
     }
 
@@ -503,21 +503,6 @@ gtd_next_week_panel_init (GtdNextWeekPanel *self)
 
   self->icon = g_themed_icon_new ("x-office-calendar-symbolic");
 
-  /* Connect to GtdManager::list-* signals to update the title */
-  manager = gtd_manager_get_default ();
-
-  update_tasks (self);
-
-  g_signal_connect_object (manager, "list-added", G_CALLBACK (update_tasks), self, G_CONNECT_SWAPPED);
-  g_signal_connect_object (manager, "list-removed", G_CALLBACK (update_tasks), self, G_CONNECT_SWAPPED);
-  g_signal_connect_object (manager, "list-changed", G_CALLBACK (update_tasks), self, G_CONNECT_SWAPPED);
-
-  g_signal_connect_object (gtd_manager_get_timer (manager),
-                           "update",
-                           G_CALLBACK (update_tasks),
-                           self,
-                           G_CONNECT_SWAPPED);
-
   /* The main view */
   self->view = GTD_TASK_LIST_VIEW (gtd_task_list_view_new ());
   gtd_task_list_view_set_handle_subtasks (GTD_TASK_LIST_VIEW (self->view), FALSE);
@@ -537,6 +522,21 @@ gtd_next_week_panel_init (GtdNextWeekPanel *self)
                                     self);
 
   gtk_widget_show_all (GTK_WIDGET (self));
+
+  /* Connect to GtdManager::list-* signals to update the title */
+  manager = gtd_manager_get_default ();
+
+  update_tasks (self);
+
+  g_signal_connect_object (manager, "list-added", G_CALLBACK (update_tasks), self, G_CONNECT_SWAPPED);
+  g_signal_connect_object (manager, "list-removed", G_CALLBACK (update_tasks), self, G_CONNECT_SWAPPED);
+  g_signal_connect_object (manager, "list-changed", G_CALLBACK (update_tasks), self, G_CONNECT_SWAPPED);
+
+  g_signal_connect_object (gtd_manager_get_timer (manager),
+                           "update",
+                           G_CALLBACK (update_tasks),
+                           self,
+                           G_CONNECT_SWAPPED);
 }
 
 GtkWidget*

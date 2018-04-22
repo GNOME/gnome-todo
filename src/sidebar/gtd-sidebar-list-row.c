@@ -18,11 +18,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#define G_LOG_DOMAIN "GtdSidebarListRow"
+
+#include "gtd-provider.h"
+#include "gtd-manager.h"
+#include "gtd-notification.h"
 #include "gtd-task.h"
 #include "gtd-task-list.h"
 #include "gtd-sidebar-list-row.h"
 
 #include <math.h>
+#include <glib/gi18n.h>
 
 struct _GtdSidebarListRow
 {
@@ -31,6 +37,9 @@ struct _GtdSidebarListRow
   GtkImage           *color_icon;
   GtkLabel           *name_label;
   GtkLabel           *tasks_counter_label;
+
+  GActionMap         *action_group;
+  GMenu              *menu;
 
   GtdTaskList        *list;
 };
@@ -58,6 +67,46 @@ static GParamSpec *properties [N_PROPS];
 /*
  * Auxiliary methods
  */
+
+static void
+activate_row_below (GtdSidebarListRow *self)
+{
+  g_autoptr (GList) children = NULL;
+  GtkWidget *next_row;
+  GtkWidget *listbox;
+  GList *l;
+  gboolean after_deleted;
+
+  listbox = gtk_widget_get_parent (GTK_WIDGET (self));
+  children = gtk_container_get_children (GTK_CONTAINER (listbox));
+  after_deleted = FALSE;
+  next_row = NULL;
+
+  for (l = children; l; l = l->next)
+    {
+      GtkWidget *row = l->data;
+
+      if (row == (GtkWidget*) self)
+        {
+          after_deleted = TRUE;
+          continue;
+        }
+
+      if (!gtk_widget_get_visible (row) ||
+          !gtk_list_box_row_get_activatable (GTK_LIST_BOX_ROW (row)))
+        {
+          continue;
+        }
+
+      next_row = row;
+
+      if (after_deleted)
+        break;
+    }
+
+  if (next_row)
+    g_signal_emit_by_name (next_row, "activate");
+}
 
 static cairo_surface_t*
 create_circular_icon (GtdTaskList *list,
@@ -127,6 +176,8 @@ static void
 set_list (GtdSidebarListRow *self,
           GtdTaskList       *list)
 {
+  GSimpleAction *delete_action;
+
   g_assert (list != NULL);
   g_assert (self->list == NULL);
 
@@ -149,12 +200,70 @@ set_list (GtdSidebarListRow *self,
   g_signal_connect_object (list, "notify::color", G_CALLBACK (on_list_color_changed_cb), self, 0);
 
   update_color_icon (self);
+
+  /* Disable the delete action if task is not writable */
+  delete_action = G_SIMPLE_ACTION (g_action_map_lookup_action (self->action_group, "delete"));
+
+  g_object_bind_property (list,
+                          "is-removable",
+                          delete_action,
+                          "enabled",
+                          G_BINDING_DEFAULT | G_BINDING_SYNC_CREATE);
 }
 
 
 /*
  * Callbacks
  */
+
+static void
+delete_list_cb (GtdNotification *notification,
+                gpointer         user_data)
+{
+  GtdTaskList *list;
+  GtdProvider *provider;
+
+  list = GTD_TASK_LIST (user_data);
+  provider = gtd_task_list_get_provider (list);
+
+  g_assert (provider != NULL);
+  g_assert (gtd_task_list_is_removable (list));
+
+  gtd_provider_remove_task_list (provider, list);
+}
+
+static void
+undo_delete_list_cb (GtdNotification *notification,
+                     gpointer         user_data)
+{
+  gtk_widget_show (GTK_WIDGET (user_data));
+}
+
+static void
+on_delete_action_activated_cb (GSimpleAction *action,
+                               GVariant      *parameters,
+                               gpointer       user_data)
+{
+  GtdSidebarListRow *self;
+  GtdNotification *notification;
+
+  self = GTD_SIDEBAR_LIST_ROW (user_data);
+
+  notification = gtd_notification_new ("", 6000.0);
+  gtd_notification_set_primary_action (notification, delete_list_cb, self->list);
+  gtd_notification_set_secondary_action (notification, _("Undo"), undo_delete_list_cb, self);
+
+  gtd_manager_send_notification (gtd_manager_get_default (), notification);
+
+  /*
+   * If the deleted list is selected, go to the next one (or previous, if
+   * there are no other task list after this one).
+   */
+  if (gtk_list_box_row_is_selected (GTK_LIST_BOX_ROW (self)))
+    activate_row_below (self);
+
+  gtk_widget_hide (GTK_WIDGET (self));
+}
 
 static void
 on_list_changed_cb (GtdSidebarListRow *self)
@@ -181,6 +290,7 @@ gtd_sidebar_list_row_finalize (GObject *object)
   GtdSidebarListRow *self = (GtdSidebarListRow *)object;
 
   g_clear_object (&self->list);
+  g_clear_object (&self->action_group);
 
   G_OBJECT_CLASS (gtd_sidebar_list_row_parent_class)->finalize (object);
 }
@@ -244,6 +354,7 @@ gtd_sidebar_list_row_class_init (GtdSidebarListRowClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/todo/ui/sidebar-list-row.ui");
 
   gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, color_icon);
+  gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, menu);
   gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, name_label);
   gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, tasks_counter_label);
 }
@@ -251,7 +362,16 @@ gtd_sidebar_list_row_class_init (GtdSidebarListRowClass *klass)
 static void
 gtd_sidebar_list_row_init (GtdSidebarListRow *self)
 {
+  const GActionEntry entries[] = {
+    { "delete", on_delete_action_activated_cb },
+  };
+
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  /* Actions */
+  self->action_group = G_ACTION_MAP (g_simple_action_group_new ());
+  g_action_map_add_action_entries (self->action_group, entries, G_N_ELEMENTS (entries), self);
+  gtk_widget_insert_action_group (GTK_WIDGET (self), "list-row", G_ACTION_GROUP (self->action_group));
 }
 
 GtkWidget*
@@ -268,4 +388,19 @@ gtd_sidebar_list_row_get_task_list (GtdSidebarListRow *self)
   g_return_val_if_fail (GTD_IS_SIDEBAR_LIST_ROW (self), NULL);
 
   return self->list;
+}
+
+void
+gtd_sidebar_list_row_popup_menu (GtdSidebarListRow *self)
+{
+  GtkWidget *popover;
+
+  g_return_if_fail (GTD_IS_SIDEBAR_LIST_ROW (self));
+
+  popover = gtk_popover_new_from_model (GTK_WIDGET (self), G_MENU_MODEL (self->menu));
+  gtk_widget_set_size_request (popover, 150, -1);
+
+  g_signal_connect (popover, "hide", G_CALLBACK (gtk_widget_destroy), NULL);
+
+  gtk_popover_popup (GTK_POPOVER (popover));
 }

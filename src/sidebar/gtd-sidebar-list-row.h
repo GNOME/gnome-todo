@@ -34,4 +34,6 @@ GtkWidget*           gtd_sidebar_list_row_new                    (GtdTaskList   
 
 GtdTaskList*         gtd_sidebar_list_row_get_task_list          (GtdSidebarListRow  *self);
 
+void                 gtd_sidebar_list_row_popup_menu             (GtdSidebarListRow  *self);
+
 G_END_DECLS

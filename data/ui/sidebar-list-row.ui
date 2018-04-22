@@ -46,4 +46,15 @@
       </object>
     </child>
   </template>
+
+  <!-- Right-click menu -->
+  <menu id="menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Delete</attribute>
+        <attribute name="action">list-row.delete</attribute>
+      </item>
+    </section>
+  </menu>
+
 </interface>

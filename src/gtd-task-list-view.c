@@ -1867,13 +1867,15 @@ void
 gtd_task_list_view_set_task_list (GtdTaskListView *view,
                                   GtdTaskList     *list)
 {
-  GtdTaskListViewPrivate *priv = view->priv;
-  GdkRGBA *color;
-  gchar *color_str;
-  gchar *parsed_css;
-  GList *task_list;
+  GtdTaskListViewPrivate *priv;
+  g_autoptr (GdkRGBA) color = NULL;
+  g_autoptr (GList) task_list = NULL;
+  g_autofree gchar *parsed_css = NULL;
+  g_autofree gchar *color_str = NULL;
 
   g_return_if_fail (GTD_IS_TASK_LIST_VIEW (view));
+
+  priv = gtd_task_list_view_get_instance_private (view);
 
   if (priv->task_list == list)
     return;
@@ -1909,18 +1911,11 @@ gtd_task_list_view_set_task_list (GtdTaskListView *view,
                                    -1,
                                    NULL);
 
-  g_free (parsed_css);
-  gdk_rgba_free (color);
-  g_free (color_str);
-
   update_font_color (view);
 
   /* Add the tasks from the list */
   task_list = gtd_task_list_get_tasks (list);
-
   gtd_task_list_view_set_list (view, task_list);
-
-  g_list_free (task_list);
 
   g_signal_connect (list,
                     "task-added",

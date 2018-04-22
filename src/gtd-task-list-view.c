@@ -223,6 +223,10 @@ add_and_remove_tasks_in_idle (GtdTaskListView *self,
   GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
   GtdIdleData *idle_data;
 
+  /* If there's nothing to add or remove, don't do anything */
+  if (added->len == 0 && removed->len == 0)
+    return;
+
   idle_data = g_new0 (GtdIdleData, 1);
   idle_data->self = self;
   idle_data->added = g_ptr_array_ref (added);
@@ -538,13 +542,32 @@ schedule_scroll_to_bottom (GtdTaskListView *self)
 static gboolean
 scroll_to_bottom_cb (gpointer data)
 {
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (data);
-  gboolean ignored;
+  GtdTaskListViewPrivate *priv;
+  GtkWindow *window;
+  GtkWidget *widget;
+
+  priv = gtd_task_list_view_get_instance_private (data);
+  widget = GTK_WIDGET (data);
+  window = GTK_WINDOW (gtk_widget_get_toplevel (widget));
+
+  g_assert (window != NULL);
 
   priv->scroll_to_bottom_handler_id = 0;
 
-  gtk_widget_grab_focus (GTK_WIDGET (priv->new_task_row));
-  g_signal_emit_by_name (priv->scrolled_window, "scroll-child", GTK_SCROLL_END, FALSE, &ignored);
+  /*
+   * Only focus the new task row if the current list is visible,
+   * and the focused widget isn't inside this list view.
+   */
+  if (gtk_widget_get_visible (widget) &&
+      gtk_widget_get_child_visible (widget) &&
+      gtk_widget_get_mapped (widget) &&
+      !gtk_widget_is_ancestor (gtk_window_get_focus (window), widget))
+    {
+      gboolean ignored;
+
+      gtk_widget_grab_focus (GTK_WIDGET (priv->new_task_row));
+      g_signal_emit_by_name (priv->scrolled_window, "scroll-child", GTK_SCROLL_END, FALSE, &ignored);
+    }
 
   return G_SOURCE_REMOVE;
 }

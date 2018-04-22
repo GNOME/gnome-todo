@@ -457,6 +457,14 @@ on_show_error_message_cb (GtdManager                *manager,
   gtd_window_notify (self, notification);
 }
 
+static void
+on_show_notification_cb (GtdManager      *manager,
+                         GtdNotification *notification,
+                         GtdWindow       *self)
+{
+  gtd_window_notify (self, notification);
+}
+
 
 /*
  * GtkWindow overrides
@@ -552,7 +560,9 @@ gtd_window_constructed (GObject *object)
 
   g_signal_connect (gtd_manager_get_default (), "panel-added", G_CALLBACK (on_panel_added_cb), self);
   g_signal_connect (gtd_manager_get_default (), "panel-removed", G_CALLBACK (on_panel_removed_cb), self);
+
   g_signal_connect (gtd_manager_get_default (), "show-error-message", G_CALLBACK (on_show_error_message_cb), self);
+  g_signal_connect (gtd_manager_get_default (), "show-notification", G_CALLBACK (on_show_notification_cb), self);
 }
 
 static void

@@ -20,6 +20,7 @@
 
 #include "interfaces/gtd-provider.h"
 #include "interfaces/gtd-panel.h"
+#include "notification/gtd-notification.h"
 #include "gtd-debug.h"
 #include "gtd-manager.h"
 #include "gtd-manager-protected.h"
@@ -47,7 +48,7 @@
 
 struct _GtdManager
 {
-   GtdObject          parent;
+  GtdObject           parent;
 
   GSettings          *settings;
   GtdPluginManager   *plugin_manager;
@@ -72,6 +73,7 @@ enum
   LIST_CHANGED,
   LIST_REMOVED,
   SHOW_ERROR_MESSAGE,
+  SHOW_NOTIFICATION,
   PANEL_ADDED,
   PANEL_REMOVED,
   PROVIDER_ADDED,
@@ -482,6 +484,24 @@ gtd_manager_class_init (GtdManagerClass *klass)
                                               G_TYPE_POINTER);
 
   /**
+   * GtdManager::show-notification:
+   * @manager: a #GtdManager
+   * @notification: the #GtdNotification
+   *
+   * Sends a notification.
+   */
+  signals[SHOW_NOTIFICATION] = g_signal_new ("show-notification",
+                                             GTD_TYPE_MANAGER,
+                                             G_SIGNAL_RUN_LAST,
+                                             0,
+                                             NULL,
+                                             NULL,
+                                             NULL,
+                                             G_TYPE_NONE,
+                                             1,
+                                             GTD_TYPE_NOTIFICATION);
+
+  /**
    * GtdManager::panel-added:
    * @manager: a #GtdManager
    * @panel: a #GtdPanel
@@ -822,6 +842,22 @@ gtd_manager_emit_error_message (GtdManager         *self,
                  description,
                  function,
                  user_data);
+}
+
+/**
+ * gtd_manager_send_notification:
+ * @self: a #GtdManager
+ * @notification: a #GtdNotification
+ *
+ * Sends a notification to the notification system.
+ */
+void
+gtd_manager_send_notification (GtdManager      *self,
+                               GtdNotification *notification)
+{
+  g_return_if_fail (GTD_IS_MANAGER (self));
+
+  g_signal_emit (self, signals[SHOW_NOTIFICATION], 0, notification);
 }
 
 /**

@@ -39,7 +39,7 @@
 
 typedef struct
 {
-  GList                *task_lists;
+  GHashTable           *task_lists;
 
   ESourceRegistry      *source_registry;
   ECredentialsPrompter *credentials_prompter;
@@ -153,7 +153,7 @@ on_client_connected_cb (GObject      *source_object,
   /* creates a new task list */
   list = gtd_task_list_eds_new (GTD_PROVIDER (self), source, client);
 
-  priv->task_lists = g_list_append (priv->task_lists, list);
+  g_hash_table_add (priv->task_lists, list);
 
   g_object_set_data (G_OBJECT (source), "task-list", list);
 
@@ -199,10 +199,15 @@ on_source_removed_cb (GtdProviderEds *provider,
   GtdProviderEdsPrivate *priv;
   GtdTaskList *list;
 
+  GTD_ENTRY;
+
   priv = gtd_provider_eds_get_instance_private (provider);
   list = g_object_get_data (G_OBJECT (source), "task-list");
 
-  priv->task_lists = g_list_remove (priv->task_lists, list);
+  if (!g_hash_table_contains (priv->task_lists, list))
+    GTD_RETURN ();
+
+  g_hash_table_remove (priv->task_lists, list);
 
   /*
    * Since all subclasses will have this signal given that they
@@ -210,6 +215,8 @@ on_source_removed_cb (GtdProviderEds *provider,
    * to let it stay here.
    */
   g_signal_emit_by_name (provider, "list-removed", list);
+
+  GTD_EXIT;
 }
 
 static void
@@ -469,7 +476,11 @@ on_task_list_removed_cb (ESource      *source,
 
   REPORT_ERROR (_("An error occurred while modifying a task list"), error);
 
-  g_signal_emit_by_name (self, "list-removed", list);
+  /*
+   * Note: we don't need to emit the "list-removed" signal here
+   * because EDS will emit the "source-removed" signal, and we
+   * emit "list-removed" there.
+   */
 
   GTD_EXIT;
 }
@@ -727,7 +738,7 @@ gtd_provider_eds_get_task_lists (GtdProvider *provider)
 {
   GtdProviderEdsPrivate *priv = gtd_provider_eds_get_instance_private (GTD_PROVIDER_EDS (provider));
 
-  return g_list_copy (priv->task_lists);
+  return g_hash_table_get_keys (priv->task_lists);
 }
 
 static GtdTaskList*
@@ -807,6 +818,7 @@ gtd_provider_eds_finalize (GObject *object)
   g_clear_object (&priv->cancellable);
   g_clear_object (&priv->credentials_prompter);
   g_clear_object (&priv->source_registry);
+  g_clear_pointer (&priv->task_lists, g_hash_table_destroy);
 
   G_OBJECT_CLASS (gtd_provider_eds_parent_class)->finalize (object);
 }
@@ -984,6 +996,7 @@ gtd_provider_eds_init (GtdProviderEds *self)
   GtdProviderEdsPrivate *priv = gtd_provider_eds_get_instance_private (self);
 
   priv->cancellable = g_cancellable_new ();
+  priv->task_lists = g_hash_table_new (g_direct_hash, g_direct_equal);
 }
 
 GtdProviderEds*

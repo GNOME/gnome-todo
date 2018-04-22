@@ -63,7 +63,7 @@ flatpak:master:
     stage: flatpak
     script:
     - flatpak-builder --repo=repo app org.gnome.Todo.json
-    - flatpak build-bundle repo gnome-todo-$CI_COMMIT_REF_SLUG.flatpak --runtime-repo=https://sdk.gnome.org/gnome-nightly.flatpakrepo org.gnome.TodoDevel
+    - flatpak build-bundle repo gnome-todo-$CI_COMMIT_REF_SLUG.flatpak --runtime-repo=https://sdk.gnome.org/gnome-nightly.flatpakrepo org.gnome.Todo
     artifacts:
         paths:
         - gnome-todo-$CI_COMMIT_REF_SLUG.flatpak

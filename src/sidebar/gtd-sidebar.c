@@ -223,6 +223,29 @@ on_panel_removed_cb (GtdManager *manager,
     gtk_widget_destroy (GTK_WIDGET (row));
 }
 
+static gboolean
+on_listbox_button_released_cb (GtkListBox     *listbox,
+                               GdkEventButton *event_button,
+                               GtdSidebar     *self)
+{
+  GtkListBoxRow *row;
+
+  if (event_button->type != GDK_BUTTON_RELEASE || event_button->button != 3)
+    return GDK_EVENT_PROPAGATE;
+
+  row = gtk_list_box_get_row_at_y (listbox, event_button->y);
+
+  if (!row || GTD_IS_SIDEBAR_PANEL_ROW (row))
+    return GDK_EVENT_PROPAGATE;
+
+  g_debug ("Right-click on a %s row", G_OBJECT_TYPE_NAME (row));
+
+  if (GTD_IS_SIDEBAR_LIST_ROW (row))
+    gtd_sidebar_list_row_popup_menu (GTD_SIDEBAR_LIST_ROW (row));
+
+  return GDK_EVENT_STOP;
+}
+
 static void
 on_listbox_row_activated_cb (GtkListBox    *panels_listbox,
                              GtkListBoxRow *row,
@@ -515,6 +538,7 @@ gtd_sidebar_class_init (GtdSidebarClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/todo/ui/sidebar.ui");
 
   gtk_widget_class_bind_template_child (widget_class, GtdSidebar, listbox);
+  gtk_widget_class_bind_template_callback (widget_class, on_listbox_button_released_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_listbox_row_activated_cb);
 
   gtk_widget_class_set_css_name (widget_class, "sidebar");

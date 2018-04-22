@@ -20,6 +20,7 @@
             <property name="expand">True</property>
             <property name="selection_mode">browse</property>
             <signal name="row-activated" handler="on_listbox_row_activated_cb" object="GtdSidebar" swapped="no" />
+            <signal name="button-release-event" handler="on_listbox_button_released_cb" object="GtdSidebar" swapped="no" />
             <style>
               <class name="sidebar"/>
             </style>

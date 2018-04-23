@@ -183,11 +183,9 @@ gtd_dnd_row_set_row_above (GtdDndRow     *self,
 }
 
 gboolean
-gtd_dnd_row_drag_motion (GtkWidget      *widget,
-                         GdkDragContext *context,
-                         gint            x,
-                         gint            y,
-                         guint           time)
+gtd_dnd_row_drag_motion (GtkWidget *widget,
+                         gint       x,
+                         gint       y)
 {
   GtkAllocation alloc;
   GtdDndRow *self;
@@ -221,17 +219,18 @@ gtd_dnd_row_drag_motion (GtkWidget      *widget,
 }
 
 gboolean
-gtd_dnd_row_drag_drop (GtkWidget      *widget,
-                       GdkDragContext *context,
-                       gint            x,
-                       gint            y,
-                       guint           time)
+gtd_dnd_row_drag_drop (GtkWidget *widget,
+                       GdkDrop   *drop,
+                       gint       x,
+                       gint       y)
 {
   GtdDndRow *self;
   GtkWidget *source_widget, *row;
   GtdTask *row_task, *target_task;
+  GdkDrag *drag;
 
   self = GTD_DND_ROW (widget);
+  drag = gdk_drop_get_drag (drop);
 
   /* Reset padding */
   update_row_padding (self);
@@ -239,7 +238,7 @@ gtd_dnd_row_drag_drop (GtkWidget      *widget,
   gtk_widget_hide (widget);
 
   row = NULL;
-  source_widget = gtk_drag_get_source_widget (context);
+  source_widget = gtk_drag_get_source_widget (drag);
 
   if (!source_widget)
     return FALSE;
@@ -286,4 +285,5 @@ gtd_dnd_row_drag_drop (GtkWidget      *widget,
 
   return TRUE;
 }
+
 

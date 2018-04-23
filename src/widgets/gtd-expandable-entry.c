@@ -44,18 +44,31 @@ static GParamSpec *properties [N_PROPS];
  */
 
 static gboolean
-gtd_expandable_entry_enter_notify_event (GtkWidget        *widget,
-                                         GdkEventCrossing *event_crossing)
+gtd_expandable_entry_event (GtkWidget *widget,
+                            GdkEvent  *event)
 {
-  gtk_widget_set_state_flags (widget, GTK_STATE_FLAG_PRELIGHT, FALSE);
-  gtk_widget_queue_draw (widget);
+  if (gdk_event_get_event_type (event) == GDK_ENTER_NOTIFY)
+    {
+      gtk_widget_set_state_flags (widget, GTK_STATE_FLAG_PRELIGHT, FALSE);
+      gtk_widget_queue_draw (widget);
+    }
+  else if (gdk_event_get_event_type (event) == GDK_LEAVE_NOTIFY)
+    {
+      gtk_widget_unset_state_flags (widget, GTK_STATE_FLAG_PRELIGHT);
+      gtk_widget_queue_draw (widget);
+    }
+
   return GDK_EVENT_PROPAGATE;
 }
 
 static void
-gtd_expandable_entry_get_preferred_width (GtkWidget *widget,
-                                          gint      *minimum_width,
-                                          gint      *natural_width)
+gtd_expandable_entry_measure (GtkWidget      *widget,
+                              GtkOrientation  orientation,
+                              gint            for_size,
+                              gint           *minimum,
+                              gint           *natural,
+                              gint           *minimum_baseline,
+                              gint           *natural_baseline)
 {
   GtdExpandableEntry *self;
   GtkStyleContext *context;
@@ -69,18 +82,34 @@ gtd_expandable_entry_get_preferred_width (GtkWidget *widget,
 
   self = GTD_EXPANDABLE_ENTRY (widget);
 
+  /* Just chain up when calculating the vertical size */
+  if (orientation == GTK_ORIENTATION_VERTICAL)
+    {
+      GTK_WIDGET_CLASS (gtd_expandable_entry_parent_class)->measure (widget,
+                                                                     orientation,
+                                                                     for_size,
+                                                                     minimum,
+                                                                     natural,
+                                                                     minimum_baseline,
+                                                                     natural_baseline);
+      return;
+    }
+
   context = gtk_widget_get_style_context (widget);
-  gtk_style_context_get_border (context, gtk_style_context_get_state (context), &border);
-  gtk_style_context_get_margin (context, gtk_style_context_get_state (context), &margin);
-  gtk_style_context_get_padding (context, gtk_style_context_get_state (context), &padding);
+  gtk_style_context_get_border (context, &border);
+  gtk_style_context_get_margin (context, &margin);
+  gtk_style_context_get_padding (context, &padding);
 
   /* Query the text width */
   layout = gtk_entry_get_layout (GTK_ENTRY (widget));
   pango_layout_get_pixel_size (layout, &text_width, NULL);
 
-  GTK_WIDGET_CLASS (gtd_expandable_entry_parent_class)->get_preferred_width (widget,
-                                                                             &local_minimum,
-                                                                             &local_natural);
+  GTK_WIDGET_CLASS (gtd_expandable_entry_parent_class)->measure (widget,
+                                                                 orientation,
+                                                                 for_size,
+                                                                 &local_minimum,
+                                                                 &local_natural,
+                                                                 NULL, NULL);
 
   if (self->propagate_natural_width)
     {
@@ -90,20 +119,11 @@ gtd_expandable_entry_get_preferred_width (GtkWidget *widget,
       local_natural += padding.left + padding.right;
     }
 
-  if (minimum_width)
-    *minimum_width = local_minimum;
+  if (minimum)
+    *minimum = local_minimum;
 
-  if (natural_width)
-    *natural_width = local_natural;
-}
-
-static gboolean
-gtd_expandable_entry_leave_notify_event (GtkWidget        *widget,
-                                         GdkEventCrossing *event_crossing)
-{
-  gtk_widget_unset_state_flags (widget, GTK_STATE_FLAG_PRELIGHT);
-  gtk_widget_queue_draw (widget);
-  return GDK_EVENT_PROPAGATE;
+  if (natural)
+    *natural = local_natural;
 }
 
 
@@ -158,9 +178,8 @@ gtd_expandable_entry_class_init (GtdExpandableEntryClass *klass)
   object_class->get_property = gtd_expandable_entry_get_property;
   object_class->set_property = gtd_expandable_entry_set_property;
 
-  widget_class->enter_notify_event = gtd_expandable_entry_enter_notify_event;
-  widget_class->get_preferred_width = gtd_expandable_entry_get_preferred_width;
-  widget_class->leave_notify_event = gtd_expandable_entry_leave_notify_event;
+  widget_class->event = gtd_expandable_entry_event;
+  widget_class->measure = gtd_expandable_entry_measure;
 
   properties[PROP_PROPAGATE_NATURAL_WIDTH] = g_param_spec_boolean ("propagate-natural-width",
                                                                    "Propagate natural width",

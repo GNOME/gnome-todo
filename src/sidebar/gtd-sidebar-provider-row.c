@@ -231,15 +231,6 @@ gtd_sidebar_provider_row_set_property (GObject      *object,
  * GtkWidget overrides
  */
 
-static gboolean
-gtd_sidebar_provider_row_button_release_event (GtkWidget      *widget,
-                                               GdkEventButton *event_button)
-{
-  g_message ("Button released");
-
-  return GDK_EVENT_PROPAGATE;
-}
-
 static void
 gtd_sidebar_provider_row_class_init (GtdSidebarProviderRowClass *klass)
 {
@@ -249,8 +240,6 @@ gtd_sidebar_provider_row_class_init (GtdSidebarProviderRowClass *klass)
   object_class->finalize = gtd_sidebar_provider_row_finalize;
   object_class->get_property = gtd_sidebar_provider_row_get_property;
   object_class->set_property = gtd_sidebar_provider_row_set_property;
-
-  widget_class->button_release_event = gtd_sidebar_provider_row_button_release_event;
 
   properties[PROP_PROVIDER] = g_param_spec_object ("provider",
                                                    "Provider",

@@ -31,9 +31,6 @@ G_DEFINE_TYPE (GtdDoneButton, gtd_done_button, GTK_TYPE_BUTTON)
 static void
 gtd_done_button_class_init (GtdDoneButtonClass *klass)
 {
-  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
-
-  widget_class->get_preferred_width = gtd_row_get_preferred_width_with_max;
 }
 
 static void

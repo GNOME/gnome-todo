@@ -9,6 +9,7 @@
     ],
     "desktop-file-name-prefix" : "(Development) ",
     "finish-args" : [
+    	"--device=dri",
         "--share=ipc",
         "--socket=x11",
         "--socket=wayland",
@@ -48,6 +49,48 @@
         "*.a"
     ],
     "modules" : [
+    	{
+            "name" : "graphene",
+            "buildsystem" : "meson",
+            "builddir" : true,
+            "config-opts" : [
+                "--libdir=/app/lib"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/ebassi/graphene.git"
+                }
+            ]
+        },
+        {
+            "name" : "wayland",
+            "buildsystem" : "autotools",
+            "builddir" : true,
+            "config-opts" : [
+                "--disable-documentation"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/wayland-project/wayland.git"
+                }
+            ]
+        },
+    	{
+            "name" : "gtk4",
+            "buildsystem" : "meson",
+            "builddir" : true,
+            "config-opts" : [
+                "--libdir=/app/lib"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/gtk.git"
+                }
+            ]
+        },
         {
             "name" : "gnome-online-accounts",
             "config-opts" : [
@@ -89,7 +132,7 @@
                 "/share/dbus-1/services"
             ],
             "config-opts" : [
-                "-DENABLE_GTK=ON",
+                "-DENABLE_GTK=OFF",
                 "-DENABLE_GOOGLE_AUTH=OFF",
                 "-DENABLE_UOA=OFF",
                 "-DENABLE_GOOGLE=OFF",
@@ -99,7 +142,8 @@
                 "-DENABLE_INTROSPECTION=ON",
                 "-DENABLE_INSTALLED_TESTS=OFF",
                 "-DENABLE_GTK_DOC=OFF",
-                "-DENABLE_EXAMPLES=OFF"
+                "-DENABLE_EXAMPLES=OFF",
+                "-DENABLE_OAUTH2=OFF"
             ],
             "cmake" : true,
             "sources" : [
@@ -114,6 +158,9 @@
             "cleanup" : [
                 "/bin/*",
                 "/lib/peas-demo"
+            ],
+            "config-opts" : [
+                "-disable-gtk"
             ],
             "sources" : [
                 {

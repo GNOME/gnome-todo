@@ -17,7 +17,10 @@
           <object class="GtkImage" id="color_icon">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="stock">gtk-missing-image</property>
+            <property name="width-request">12</property>
+            <property name="height-request">12</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
             <style>
               <class name="color-circle-icon" />
             </style>

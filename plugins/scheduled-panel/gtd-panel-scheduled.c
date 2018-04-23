@@ -170,8 +170,6 @@ create_label (const gchar *text,
 
   gtk_container_add (GTK_CONTAINER (box), label);
 
-  gtk_widget_show_all (box);
-
   return box;
 }
 
@@ -552,8 +550,6 @@ gtd_panel_scheduled_init (GtdPanelScheduled *self)
   gtd_task_list_view_set_sort_func (GTD_TASK_LIST_VIEW (self->view),
                                     (GtdTaskListViewSortFunc) gtd_panel_scheduled_sort_func,
                                     self);
-
-  gtk_widget_show_all (GTK_WIDGET (self));
 }
 
 GtkWidget*

@@ -25,7 +25,6 @@
 #include <glib.h>
 
 #include <libecal/libecal.h>
-#include <libedataserverui/libedataserverui.h>
 
 G_BEGIN_DECLS
 

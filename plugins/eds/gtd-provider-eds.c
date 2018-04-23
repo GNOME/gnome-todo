@@ -42,7 +42,6 @@ typedef struct
   GHashTable           *task_lists;
 
   ESourceRegistry      *source_registry;
-  ECredentialsPrompter *credentials_prompter;
 
   GCancellable         *cancellable;
 
@@ -217,94 +216,6 @@ on_source_removed_cb (GtdProviderEds *provider,
   g_signal_emit_by_name (provider, "list-removed", list);
 
   GTD_EXIT;
-}
-
-static void
-on_authentication_invoked_cb (GObject      *source_object,
-                              GAsyncResult *result,
-                              gpointer      user_data)
-{
-  g_autoptr (GError) error = NULL;
-  ESource *source;
-
-  source = E_SOURCE (source_object);
-
-  e_source_invoke_authenticate_finish (source, result, &error);
-
-  if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-    g_warning ("Failed to prompt for credentials (%s): %s", e_source_get_uid (source), error->message);
-}
-
-static void
-on_credentials_prompt_finished_cb (GObject      *source_object,
-                                   GAsyncResult *result,
-                                   gpointer      user_data)
-{
-  ETrustPromptResponse response = E_TRUST_PROMPT_RESPONSE_UNKNOWN;
-  ESource *source = E_SOURCE (source_object);
-  g_autoptr (GError) error = NULL;
-
-  e_trust_prompt_run_for_source_finish (source, result, &response, &error);
-
-  if (error)
-    {
-      g_warning ("%s: %s '%s': %s",
-                 G_STRFUNC,
-                 "Failed to prompt for credentials for",
-                 e_source_get_display_name (source),
-                 error->message);
-      return;
-    }
-
-  if (response != E_TRUST_PROMPT_RESPONSE_ACCEPT && response != E_TRUST_PROMPT_RESPONSE_ACCEPT_TEMPORARILY)
-      return;
-
-  /* Use NULL credentials to reuse those from the last time. */
-  e_source_invoke_authenticate (source,
-                                NULL,
-                                NULL,
-                                on_authentication_invoked_cb,
-                                NULL);
-}
-
-static void
-on_eds_credentials_required_cb (ESourceRegistry          *registry,
-                                ESource                  *source,
-                                ESourceCredentialsReason  reason,
-                                const gchar              *certificate_pem,
-                                GTlsCertificateFlags      certificate_errors,
-                                const GError             *error,
-                                gpointer                  user_data)
-{
-  GtdProviderEdsPrivate *priv;
-  GtdProviderEds *self;
-
-  g_return_if_fail (GTD_IS_PROVIDER_EDS (user_data));
-
-  self = GTD_PROVIDER_EDS (user_data);
-  priv = gtd_provider_eds_get_instance_private (self);
-
-  if (e_credentials_prompter_get_auto_prompt_disabled_for (priv->credentials_prompter, source))
-    return;
-
-  if (reason == E_SOURCE_CREDENTIALS_REASON_SSL_FAILED)
-    {
-      e_trust_prompt_run_for_source (e_credentials_prompter_get_dialog_parent (priv->credentials_prompter),
-                                     source,
-                                     certificate_pem,
-                                     certificate_errors,
-                                     error ? error->message : NULL,
-                                     TRUE, // allow saving sources
-                                     NULL, // we won't cancel the operation
-                                     on_credentials_prompt_finished_cb,
-                                     NULL);
-    }
-  else if (error && reason == E_SOURCE_CREDENTIALS_REASON_ERROR)
-    {
-      g_warning ("Authentication failure '%s': %s",
-                 e_source_get_display_name (source),
-                 error->message);
-    }
 }
 
 static void
@@ -816,7 +727,6 @@ gtd_provider_eds_finalize (GObject *object)
   g_cancellable_cancel (priv->cancellable);
 
   g_clear_object (&priv->cancellable);
-  g_clear_object (&priv->credentials_prompter);
   g_clear_object (&priv->source_registry);
   g_clear_pointer (&priv->task_lists, g_hash_table_destroy);
 
@@ -834,28 +744,12 @@ gtd_provider_eds_constructed (GObject *object)
 
   self = GTD_PROVIDER_EDS (object);
   priv = gtd_provider_eds_get_instance_private (self);
-  priv->credentials_prompter = e_credentials_prompter_new (priv->source_registry);
 
   if (error)
     {
       g_warning ("%s: %s", "Error loading task manager", error->message);
       return;
     }
-
-  /* First of all, disable authentication dialog for non-tasklists sources */
-  sources = e_source_registry_list_sources (priv->source_registry, NULL);
-
-  for (l = sources; l != NULL; l = g_list_next (l))
-    {
-      ESource *source = E_SOURCE (l->data);
-
-      /* Mark for skip also currently disabled sources */
-      e_credentials_prompter_set_auto_prompt_disabled_for (priv->credentials_prompter,
-                                                           source,
-                                                           !e_source_has_extension (source, E_SOURCE_EXTENSION_TASK_LIST));
-    }
-
-  g_list_free_full (sources, g_object_unref);
 
   /* Load task list sources */
   sources = e_source_registry_list_sources (priv->source_registry, E_SOURCE_EXTENSION_TASK_LIST);
@@ -877,16 +771,9 @@ gtd_provider_eds_constructed (GObject *object)
                             self);
 
   g_signal_connect (priv->source_registry,
-                    "credentials-required",
-                    G_CALLBACK (on_eds_credentials_required_cb),
-                    self);
-
-  g_signal_connect (priv->source_registry,
                     "notify::default-task-list",
                     G_CALLBACK (on_default_tasklist_changed_cb),
                     self);
-
-  e_credentials_prompter_process_awaiting_credentials (priv->credentials_prompter);
 }
 
 static void

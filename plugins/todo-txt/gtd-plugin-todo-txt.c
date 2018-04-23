@@ -209,8 +209,6 @@ setup_preferences_panel (GtdPluginTodoTxt *self)
 
   gtk_container_add (GTK_CONTAINER (box), label);
 
-  gtk_widget_show_all (box);
-
   /* Store the box, and report it as the preferences panel itself */
   self->preferences_box = box;
 

@@ -40,24 +40,19 @@
                 </child>
 
                 <child>
-                  <object class="GtkEventBox" id="dnd_event_box">
+                  <object class="GtkImage" id="dnd_icon">
                     <property name="visible">True</property>
-                    <signal name="button-press-event" handler="on_button_press_event_cb" object="GtdTaskRow" swapped="no" />
+                    <property name="icon-name">open-menu-symbolic</property>
+                    <property name="pixel-size">12</property>
                     <signal name="drag-begin" handler="on_drag_begin_cb" object="GtdTaskRow" swapped="no" />
                     <signal name="drag-end" handler="on_drag_end_cb" object="GtdTaskRow" swapped="no" />
                     <signal name="drag-failed" handler="on_drag_failed_cb" object="GtdTaskRow" swapped="no" />
-                    <signal name="enter-notify-event" handler="on_mouse_over_dnd_event_cb" object="GtdTaskRow" swapped="no" />
-                    <signal name="leave-notify-event" handler="on_mouse_out_dnd_event_cb" object="GtdTaskRow" swapped="no" />
-                    <child>
-                      <object class="GtkImage" id="dnd_icon">
-                        <property name="visible">True</property>
-                        <property name="icon-name">open-menu-symbolic</property>
-                        <property name="pixel-size">12</property>
-                        <style>
-                          <class name="dim-label" />
-                        </style>
-                      </object>
-                    </child>
+                    <signal name="event" handler="on_button_press_event_cb" object="GtdTaskRow" swapped="no" />
+                    <signal name="event" handler="on_mouse_over_dnd_event_cb" object="GtdTaskRow" swapped="no" />
+                    <signal name="event" handler="on_mouse_out_dnd_event_cb" object="GtdTaskRow" swapped="no" />
+                    <style>
+                      <class name="dim-label" />
+                    </style>
                   </object>
                 </child>
 
@@ -77,61 +72,56 @@
                 </child>
 
                 <child>
-                  <object class="GtkEventBox" id="header_event_box">
+                  <object class="GtkBox" id="header_event_box">
                     <property name="visible">True</property>
-                    <signal name="button-press-event" handler="on_button_press_event_cb" object="GtdTaskRow" swapped="no" />
+                    <property name="can_focus">False</property>
                     <signal name="drag-begin" handler="on_drag_begin_cb" object="GtdTaskRow" swapped="no" />
                     <signal name="drag-end" handler="on_drag_end_cb" object="GtdTaskRow" swapped="no" />
                     <signal name="drag-failed" handler="on_drag_failed_cb" object="GtdTaskRow" swapped="no" />
-                    <signal name="enter-notify-event" handler="on_mouse_over_event_cb" object="GtdTaskRow" swapped="no" />
-                    <signal name="leave-notify-event" handler="on_mouse_out_event_cb" object="GtdTaskRow" swapped="no" />
+                    <signal name="event" handler="on_button_press_event_cb" object="GtdTaskRow" swapped="no" />
+                    <signal name="event" handler="on_mouse_over_event_cb" object="GtdTaskRow" swapped="no" />
+                    <signal name="event" handler="on_mouse_out_event_cb" object="GtdTaskRow" swapped="no" />
+
+                    <!-- Task title entry -->
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtdExpandableEntry" id="title_entry">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-
-                        <!-- Task title entry -->
-                        <child>
-                          <object class="GtdExpandableEntry" id="title_entry">
-                            <property name="visible">True</property>
-                            <property name="hexpand">True</property>
-                            <property name="halign">start</property>
-                            <property name="width-chars">5</property>
-                            <property name="propagate-natural-width">True</property>
-                            <signal name="activate" handler="on_task_changed_cb" object="GtdTaskRow" swapped="yes" />
-                            <signal name="notify::text" handler="on_task_changed_cb" object="GtdTaskRow" swapped="yes" />
-                            <style>
-                              <class name="title" />
-                            </style>
-                          </object>
-                        </child>
-
-                        <child>
-                          <object class="GtkLabel" id="task_date_label">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="xalign">1.0</property>
-                            <property name="margin-start">6</property>
-                            <style>
-                              <class name="dim-label"/>
-                            </style>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="task_list_label">
-                            <property name="visible">False</property>
-                            <property name="can_focus">False</property>
-                            <property name="xalign">1.0</property>
-                            <property name="max_width_chars">18</property>
-                            <property name="ellipsize">middle</property>
-                            <style>
-                              <class name="dim-label"/>
-                            </style>
-                          </object>
-                        </child>
-
+                        <property name="hexpand">True</property>
+                        <property name="halign">start</property>
+                        <property name="width-chars">5</property>
+                        <property name="propagate-natural-width">True</property>
+                        <signal name="activate" handler="on_task_changed_cb" object="GtdTaskRow" swapped="yes" />
+                        <signal name="notify::text" handler="on_task_changed_cb" object="GtdTaskRow" swapped="yes" />
+                        <style>
+                          <class name="title" />
+                        </style>
                       </object>
                     </child>
+
+                    <child>
+                      <object class="GtkLabel" id="task_date_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">1.0</property>
+                        <property name="margin-start">6</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="task_list_label">
+                        <property name="visible">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">1.0</property>
+                        <property name="max_width_chars">18</property>
+                        <property name="ellipsize">middle</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                    </child>
+
                   </object>
                 </child>
 

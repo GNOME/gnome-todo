@@ -14,9 +14,6 @@
           <object class="GtkOverlay">
             <property name="visible">True</property>
             <property name="vexpand">True</property>
-            <style>
-              <class name="view" />
-            </style>
             <child>
               <object class="GtkScrolledWindow" id="scrolled_window">
                 <property name="visible">True</property>
@@ -61,7 +58,7 @@
                             </child>
                             <child>
                               <object class="GtdDndRow" id="dnd_row">
-                                <property name="no-show-all">True</property>
+                                <property name="visible">False</property>
                                 <signal name="notify::row-above" handler="gtk_list_box_invalidate_sort" object="listbox" swapped="yes" />
                               </object>
                             </child>
@@ -104,11 +101,6 @@
               </object>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
       </object>
     </child>

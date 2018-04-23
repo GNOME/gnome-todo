@@ -29,7 +29,7 @@
                   <object class="GtkBox" id="google_stub_row_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="border_width">12</property>
+                    <property name="margin">12</property>
                     <property name="spacing">12</property>
                     <child>
                       <object class="GtkImage" id="google_stub_row_icon_image">
@@ -38,11 +38,6 @@
                         <property name="pixel_size">32</property>
                         <property name="icon_name">goa-account-google</property>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="google_stub_row_label">
@@ -50,11 +45,6 @@
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Google</property>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
                     </child>
                   </object>
                 </child>
@@ -69,7 +59,7 @@
                   <object class="GtkBox" id="box3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="border_width">12</property>
+                    <property name="margin">12</property>
                     <property name="spacing">12</property>
                     <child>
                       <object class="GtkImage" id="image2">
@@ -78,11 +68,6 @@
                         <property name="pixel_size">32</property>
                         <property name="icon_name">goa-account-owncloud</property>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label2">
@@ -90,11 +75,6 @@
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ownCloud</property>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
                     </child>
                   </object>
                 </child>
@@ -109,7 +89,7 @@
                   <object class="GtkBox" id="box4">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="border_width">12</property>
+                    <property name="margin">12</property>
                     <property name="spacing">12</property>
                     <child>
                       <object class="GtkImage" id="image3">
@@ -118,11 +98,6 @@
                         <property name="pixel_size">32</property>
                         <property name="icon_name">goa-account</property>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label3">
@@ -130,11 +105,6 @@
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Microsoft Exchange</property>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
                     </child>
                   </object>
                 </child>
@@ -143,11 +113,6 @@
           </object>
         </child>
       </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">0</property>
-      </packing>
     </child>
     <child>
       <object class="GtkCheckButton" id="local_check">
@@ -158,11 +123,6 @@
         <property name="draw_indicator">True</property>
         <signal name="toggled" handler="gtd_provider_selector__check_toggled" object="GtdProviderSelector" swapped="yes" />
       </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
-      </packing>
     </child>
   </template>
 </interface>

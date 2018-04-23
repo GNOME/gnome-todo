@@ -165,8 +165,6 @@ create_label (const gchar *text,
 
   gtk_container_add (GTK_CONTAINER (box), label);
 
-  gtk_widget_show_all (box);
-
   return box;
 }
 
@@ -520,8 +518,6 @@ gtd_next_week_panel_init (GtdNextWeekPanel *self)
   gtd_task_list_view_set_sort_func (GTD_TASK_LIST_VIEW (self->view),
                                     (GtdTaskListViewSortFunc) sort_func,
                                     self);
-
-  gtk_widget_show_all (GTK_WIDGET (self));
 
   /* Connect to GtdManager::list-* signals to update the title */
   manager = gtd_manager_get_default ();

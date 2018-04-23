@@ -21,26 +21,47 @@
 #define MAX_WIDTH                  700
 
 void
-gtd_row_get_preferred_width_with_max (GtkWidget *widget,
-                                      gint      *minimum_width,
-                                      gint      *natural_width)
+gtd_row_measure_with_max (GtkWidget      *widget,
+                          GtkOrientation  orientation,
+                          gint            for_size,
+                          gint           *minimum,
+                          gint           *natural,
+                          gint           *minimum_baseline,
+                          gint           *natural_baseline)
 {
-  gint local_minimum_width, local_natural_width;
-  gint scale_factor;
-  gint margins;
+  if (orientation == GTK_ORIENTATION_VERTICAL)
+    {
+      gtk_widget_measure (gtk_bin_get_child (GTK_BIN (widget)),
+                          orientation,
+                          for_size,
+                          minimum,
+                          natural,
+                          minimum_baseline,
+                          natural_baseline);
+    }
+  else
+    {
+      gint local_minimum_width;
+      gint local_natural_width;
+      gint scale_factor;
+      gint margins;
 
-  scale_factor = gtk_widget_get_scale_factor (widget);
+      gtk_widget_measure (gtk_bin_get_child (GTK_BIN (widget)),
+                          orientation,
+                          for_size,
+                          &local_minimum_width,
+                          &local_natural_width,
+                          minimum_baseline,
+                          natural_baseline);
 
-  gtk_widget_get_preferred_width (gtk_bin_get_child (GTK_BIN (widget)),
-                                  &local_minimum_width,
-                                  &local_natural_width);
+      scale_factor = gtk_widget_get_scale_factor (widget);
+      margins = gtk_widget_get_margin_start (widget) + gtk_widget_get_margin_end (widget);
 
-  margins = gtk_widget_get_margin_start (widget) + gtk_widget_get_margin_end (widget);
+      if (minimum)
+        *minimum = (MIN (local_minimum_width, MAX_WIDTH) - margins) * scale_factor;
 
-  if (minimum_width)
-    *minimum_width = (MIN (local_minimum_width, MAX_WIDTH) - margins) * scale_factor;
-
-  if (natural_width)
-    *natural_width = (MAX (local_minimum_width, MAX_WIDTH) - margins) * scale_factor;
+      if (natural)
+        *natural = (MAX (local_minimum_width, MAX_WIDTH) - margins) * scale_factor;
+    }
 }
 

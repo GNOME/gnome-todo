@@ -67,6 +67,9 @@ struct _GtdTaskRow
 
   gboolean            active;
   gboolean            changed;
+
+  GtkEventController *dnd_icon_motion_controller;
+  GtkEventController *header_motion_controller;
 };
 
 #define PRIORITY_ICON_SIZE 8
@@ -283,57 +286,32 @@ on_remove_task_cb (GtdEditPane *edit_panel,
   g_signal_emit (self, signals[REMOVE_TASK], 0);
 }
 
-static gboolean
-on_mouse_out_event_cb (GtkWidget  *widget,
-                       GdkEvent   *event,
-                       GtdTaskRow *self)
+static void
+on_header_enter_cb (GtkEventController *controller,
+                    GtdTaskRow         *self)
 {
-  if (gdk_event_get_event_type (event) != GDK_LEAVE_NOTIFY)
-    return GDK_EVENT_PROPAGATE;
-
-  gtk_widget_set_cursor_from_name (widget, NULL);
-
-  return GDK_EVENT_STOP;
+  gtk_widget_set_cursor_from_name (self->header_event_box, "pointer");
 }
 
-static gboolean
-on_mouse_over_event_cb (GtkWidget  *widget,
-                        GdkEvent   *event,
-                        GtdTaskRow *self)
+static void
+on_header_leave_cb (GtkEventController *controller,
+                    GtdTaskRow         *self)
 {
-  if (gdk_event_get_event_type (event) != GDK_ENTER_NOTIFY)
-    return GDK_EVENT_PROPAGATE;
-
-  gtk_widget_set_cursor_from_name (widget, "pointer");
-
-  return GDK_EVENT_STOP;
+  gtk_widget_set_cursor_from_name (self->header_event_box, NULL);
 }
 
-
-static gboolean
-on_mouse_out_dnd_event_cb (GtkWidget  *widget,
-                           GdkEvent   *event,
-                           GtdTaskRow *self)
+static void
+on_dnd_icon_enter_cb (GtkEventController *controller,
+                      GtdTaskRow         *self)
 {
-  if (gdk_event_get_event_type (event) != GDK_LEAVE_NOTIFY)
-    return GDK_EVENT_PROPAGATE;
-
-  gtk_widget_set_cursor_from_name (widget, NULL);
-
-  return GDK_EVENT_STOP;
+  gtk_widget_set_cursor_from_name (self->dnd_icon, "grab");
 }
 
-static gboolean
-on_mouse_over_dnd_event_cb (GtkWidget  *widget,
-                            GdkEvent   *event,
-                            GtdTaskRow *self)
+static void
+on_dnd_icon_leave_cb (GtkEventController *controller,
+                      GtdTaskRow         *self)
 {
-  if (gdk_event_get_event_type (event) != GDK_ENTER_NOTIFY)
-    return GDK_EVENT_PROPAGATE;
-
-  gtk_widget_set_cursor_from_name (widget, "grab");
-
-  return GDK_EVENT_STOP;
+  gtk_widget_set_cursor_from_name (self->dnd_icon, NULL);
 }
 
 static gboolean
@@ -559,6 +537,8 @@ gtd_task_row_finalize (GObject *object)
     }
 
   g_clear_object (&self->task);
+  g_clear_object (&self->dnd_icon_motion_controller);
+  g_clear_object (&self->header_motion_controller);
 
   G_OBJECT_CLASS (gtd_task_row_parent_class)->finalize (object);
 }
@@ -757,10 +737,6 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_drag_begin_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_drag_end_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_drag_failed_cb);
-  gtk_widget_class_bind_template_callback (widget_class, on_mouse_out_event_cb);
-  gtk_widget_class_bind_template_callback (widget_class, on_mouse_out_dnd_event_cb);
-  gtk_widget_class_bind_template_callback (widget_class, on_mouse_over_event_cb);
-  gtk_widget_class_bind_template_callback (widget_class, on_mouse_over_dnd_event_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_remove_task_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_task_changed_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_toggle_active_cb);
@@ -776,13 +752,23 @@ gtd_task_row_init (GtdTaskRow *self)
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  /* The source of DnD is the drag icon */
+  /* DnD icon */
+  self->dnd_icon_motion_controller = gtk_event_controller_motion_new (self->dnd_icon);
+
+  g_signal_connect (self->dnd_icon_motion_controller, "enter", G_CALLBACK (on_dnd_icon_enter_cb), self);
+  g_signal_connect (self->dnd_icon_motion_controller, "leave", G_CALLBACK (on_dnd_icon_leave_cb), self);
+
   gtk_drag_source_set (self->dnd_icon,
                        GDK_BUTTON1_MASK,
                        NULL,
                        GDK_ACTION_MOVE);
 
-  /* But the rest of the row header is also draggable */
+  /* Header box */
+  self->header_motion_controller = gtk_event_controller_motion_new (self->header_event_box);
+
+  g_signal_connect (self->header_motion_controller, "enter", G_CALLBACK (on_header_enter_cb), self);
+  g_signal_connect (self->header_motion_controller, "leave", G_CALLBACK (on_header_leave_cb), self);
+
   gtk_drag_source_set (self->header_event_box,
                        GDK_BUTTON1_MASK,
                        NULL,

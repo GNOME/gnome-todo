@@ -48,8 +48,6 @@
                     <signal name="drag-end" handler="on_drag_end_cb" object="GtdTaskRow" swapped="no" />
                     <signal name="drag-failed" handler="on_drag_failed_cb" object="GtdTaskRow" swapped="no" />
                     <signal name="event" handler="on_button_press_event_cb" object="GtdTaskRow" swapped="no" />
-                    <signal name="event" handler="on_mouse_over_dnd_event_cb" object="GtdTaskRow" swapped="no" />
-                    <signal name="event" handler="on_mouse_out_dnd_event_cb" object="GtdTaskRow" swapped="no" />
                     <style>
                       <class name="dim-label" />
                     </style>
@@ -79,8 +77,6 @@
                     <signal name="drag-end" handler="on_drag_end_cb" object="GtdTaskRow" swapped="no" />
                     <signal name="drag-failed" handler="on_drag_failed_cb" object="GtdTaskRow" swapped="no" />
                     <signal name="event" handler="on_button_press_event_cb" object="GtdTaskRow" swapped="no" />
-                    <signal name="event" handler="on_mouse_over_event_cb" object="GtdTaskRow" swapped="no" />
-                    <signal name="event" handler="on_mouse_out_event_cb" object="GtdTaskRow" swapped="no" />
 
                     <!-- Task title entry -->
                     <child>

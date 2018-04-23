@@ -20,12 +20,12 @@
 
 #define G_LOG_DOMAIN "GtdSidebarListRow"
 
-#include "gtd-provider.h"
 #include "gtd-manager.h"
 #include "gtd-notification.h"
+#include "gtd-provider.h"
+#include "gtd-sidebar-list-row.h"
 #include "gtd-task.h"
 #include "gtd-task-list.h"
-#include "gtd-sidebar-list-row.h"
 
 #include <math.h>
 #include <glib/gi18n.h>
@@ -42,6 +42,9 @@ struct _GtdSidebarListRow
   GMenu              *menu;
 
   GtdTaskList        *list;
+
+  GtkGesture         *long_press_gesture;
+  GtkGesture         *multipress_gesture;
 };
 
 
@@ -200,6 +203,19 @@ set_list (GtdSidebarListRow *self,
                           G_BINDING_DEFAULT | G_BINDING_SYNC_CREATE);
 }
 
+static void
+popup_menu (GtdSidebarListRow *self)
+{
+  GtkWidget *popover;
+
+  popover = gtk_popover_new_from_model (GTK_WIDGET (self), G_MENU_MODEL (self->menu));
+  gtk_widget_set_size_request (popover, 150, -1);
+
+  g_signal_connect (popover, "hide", G_CALLBACK (gtk_widget_destroy), NULL);
+
+  gtk_popover_popup (GTK_POPOVER (popover));
+}
+
 
 /*
  * Callbacks
@@ -255,6 +271,28 @@ on_delete_action_activated_cb (GSimpleAction *action,
 }
 
 static void
+on_gesture_multipress_released_cb (GtkGesture        *gesture,
+                                   guint              n_press,
+                                   gdouble            x,
+                                   gdouble            y,
+                                   GtdSidebarListRow *self)
+{
+  if (n_press > 1)
+    return;
+
+  popup_menu (self);
+}
+
+static void
+on_gesture_long_press_cb (GtkGesture        *gesture,
+                          gdouble            x,
+                          gdouble            y,
+                          GtdSidebarListRow *self)
+{
+  popup_menu (self);
+}
+
+static void
 on_list_changed_cb (GtdSidebarListRow *self)
 {
   update_counter_label (self);
@@ -280,6 +318,8 @@ gtd_sidebar_list_row_finalize (GObject *object)
 
   g_clear_object (&self->list);
   g_clear_object (&self->action_group);
+  g_clear_object (&self->long_press_gesture);
+  g_clear_object (&self->multipress_gesture);
 
   G_OBJECT_CLASS (gtd_sidebar_list_row_parent_class)->finalize (object);
 }
@@ -361,6 +401,18 @@ gtd_sidebar_list_row_init (GtdSidebarListRow *self)
   self->action_group = G_ACTION_MAP (g_simple_action_group_new ());
   g_action_map_add_action_entries (self->action_group, entries, G_N_ELEMENTS (entries), self);
   gtk_widget_insert_action_group (GTK_WIDGET (self), "list-row", G_ACTION_GROUP (self->action_group));
+
+  /* Gestures */
+  self->long_press_gesture = gtk_gesture_long_press_new (GTK_WIDGET (self));
+  gtk_event_controller_set_propagation_phase (GTK_EVENT_CONTROLLER (self->long_press_gesture), GTK_PHASE_TARGET);
+  gtk_gesture_single_set_touch_only (GTK_GESTURE_SINGLE (self->long_press_gesture), TRUE);
+  g_signal_connect (self->long_press_gesture, "pressed", G_CALLBACK (on_gesture_long_press_cb), self);
+
+  self->multipress_gesture = gtk_gesture_multi_press_new (GTK_WIDGET (self));
+  gtk_event_controller_set_propagation_phase (GTK_EVENT_CONTROLLER (self->multipress_gesture), GTK_PHASE_BUBBLE);
+  gtk_gesture_single_set_touch_only (GTK_GESTURE_SINGLE (self->multipress_gesture), FALSE);
+  gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (self->multipress_gesture), GDK_BUTTON_SECONDARY);
+  g_signal_connect (self->multipress_gesture, "released", G_CALLBACK (on_gesture_multipress_released_cb), self);
 }
 
 GtkWidget*
@@ -377,19 +429,4 @@ gtd_sidebar_list_row_get_task_list (GtdSidebarListRow *self)
   g_return_val_if_fail (GTD_IS_SIDEBAR_LIST_ROW (self), NULL);
 
   return self->list;
-}
-
-void
-gtd_sidebar_list_row_popup_menu (GtdSidebarListRow *self)
-{
-  GtkWidget *popover;
-
-  g_return_if_fail (GTD_IS_SIDEBAR_LIST_ROW (self));
-
-  popover = gtk_popover_new_from_model (GTK_WIDGET (self), G_MENU_MODEL (self->menu));
-  gtk_widget_set_size_request (popover, 150, -1);
-
-  g_signal_connect (popover, "hide", G_CALLBACK (gtk_widget_destroy), NULL);
-
-  gtk_popover_popup (GTK_POPOVER (popover));
 }

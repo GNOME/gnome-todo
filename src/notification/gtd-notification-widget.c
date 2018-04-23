@@ -46,6 +46,9 @@ struct _GtdNotificationWidget
   GBinding           *message_label_binding;
   GBinding           *loading_binding;
   GBinding           *secondary_label_binding;
+
+  /* Gestures */
+  GtkEventController *motion_controller;
 };
 
 
@@ -128,22 +131,20 @@ execute_notification (GtdNotificationWidget *self,
 }
 
 
-static gboolean
-on_event_cb (GtdNotificationWidget *self,
-             GdkEvent              *event)
+static void
+on_motion_controller_enter_cb (GtkEventController    *controller,
+                               GtdNotificationWidget *self)
 {
-  GdkEventType event_type;
-
-  event_type = gdk_event_get_event_type (event);
-
-  /* Stop the timer when mouse enters */
-  if (event_type == GDK_ENTER_NOTIFY && self->current_notification)
-    gtd_notification_stop (self->current_notification);
-  else if (event_type == GDK_LEAVE_NOTIFY && self->current_notification)
-    gtd_notification_start (self->current_notification);
-
-  return GDK_EVENT_PROPAGATE;
+  gtd_notification_stop (self->current_notification);
 }
+
+static void
+on_motion_controller_leave_cb (GtkEventController    *controller,
+                               GtdNotificationWidget *self)
+{
+  gtd_notification_start (self->current_notification);
+}
+
 
 static void
 on_close_button_clicked_cb (GtdNotificationWidget *self)
@@ -194,6 +195,8 @@ gtd_notification_widget_finalize (GObject *object)
       self->queue = NULL;
     }
 
+  g_clear_object (&self->motion_controller);
+
   G_OBJECT_CLASS (gtd_notification_widget_parent_class)->finalize (object);
 }
 
@@ -212,7 +215,6 @@ gtd_notification_widget_class_init (GtdNotificationWidgetClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdNotificationWidget, text_label);
 
   gtk_widget_class_bind_template_callback (widget_class, on_close_button_clicked_cb);
-  gtk_widget_class_bind_template_callback (widget_class, on_event_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_secondary_button_clicked_cb);
 }
 
@@ -223,6 +225,11 @@ gtd_notification_widget_init (GtdNotificationWidget *self)
   self->state = STATE_IDLE;
 
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  /* Event controller */
+  self->motion_controller = gtk_event_controller_motion_new (GTK_WIDGET (self));
+  g_signal_connect (self->motion_controller, "enter", G_CALLBACK (on_motion_controller_enter_cb), self);
+  g_signal_connect (self->motion_controller, "leave", G_CALLBACK (on_motion_controller_leave_cb), self);
 }
 
 /**

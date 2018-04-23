@@ -128,22 +128,20 @@ execute_notification (GtdNotificationWidget *self,
 }
 
 
-static gboolean
-on_event_cb (GtdNotificationWidget *self,
-             GdkEvent              *event)
+static void
+on_motion_controller_enter_cb (GtkEventController    *controller,
+                               GtdNotificationWidget *self)
 {
-  GdkEventType event_type;
-
-  event_type = gdk_event_get_event_type (event);
-
-  /* Stop the timer when mouse enters */
-  if (event_type == GDK_ENTER_NOTIFY && self->current_notification)
-    gtd_notification_stop (self->current_notification);
-  else if (event_type == GDK_LEAVE_NOTIFY && self->current_notification)
-    gtd_notification_start (self->current_notification);
-
-  return GDK_EVENT_PROPAGATE;
+  gtd_notification_stop (self->current_notification);
 }
+
+static void
+on_motion_controller_leave_cb (GtkEventController    *controller,
+                               GtdNotificationWidget *self)
+{
+  gtd_notification_start (self->current_notification);
+}
+
 
 static void
 on_close_button_clicked_cb (GtdNotificationWidget *self)
@@ -212,17 +210,25 @@ gtd_notification_widget_class_init (GtdNotificationWidgetClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdNotificationWidget, text_label);
 
   gtk_widget_class_bind_template_callback (widget_class, on_close_button_clicked_cb);
-  gtk_widget_class_bind_template_callback (widget_class, on_event_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_secondary_button_clicked_cb);
 }
 
 static void
 gtd_notification_widget_init (GtdNotificationWidget *self)
 {
+  GtkEventController *controller;
+
   self->queue = g_queue_new ();
   self->state = STATE_IDLE;
 
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  /* Event controller */
+  controller = gtk_event_controller_motion_new ();
+  g_signal_connect (controller, "enter", G_CALLBACK (on_motion_controller_enter_cb), self);
+  g_signal_connect (controller, "leave", G_CALLBACK (on_motion_controller_leave_cb), self);
+
+  gtk_widget_add_controller (GTK_WIDGET (self), controller);
 }
 
 /**

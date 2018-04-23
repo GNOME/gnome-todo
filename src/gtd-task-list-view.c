@@ -1230,8 +1230,7 @@ check_dnd_scroll (GtdTaskListView *self,
 
 static void
 listbox_drag_leave (GtkListBox      *listbox,
-                    GdkDragContext  *context,
-                    guint            time,
+                    GdkDrop         *drop,
                     GtdTaskListView *self)
 {
   GtdTaskListViewPrivate *priv;
@@ -1247,10 +1246,9 @@ listbox_drag_leave (GtkListBox      *listbox,
 
 static gboolean
 listbox_drag_motion (GtkListBox      *listbox,
-                     GdkDragContext  *context,
+                     GdkDrop         *drop,
                      gint             x,
                      gint             y,
-                     guint            time,
                      GtdTaskListView *self)
 {
   GtdTaskListViewPrivate *priv;
@@ -1259,11 +1257,20 @@ listbox_drag_motion (GtkListBox      *listbox,
   GtkListBoxRow *task_row;
   GtkListBoxRow *row_above_dnd;
   GtkWidget *source_widget;
+  GdkDrag *drag;
   gboolean success;
   gint row_x, row_y, row_height;
 
   priv = gtd_task_list_view_get_instance_private (self);
-  source_widget = gtk_drag_get_source_widget (context);
+  drag = gdk_drop_get_drag (drop);
+
+  if (!drag)
+    {
+      g_debug ("Only dragging task rows is supported");
+      goto fail;
+    }
+
+  source_widget = gtk_drag_get_source_widget (drag);
   source_row = GTK_LIST_BOX_ROW (gtk_widget_get_ancestor (source_widget, GTK_TYPE_LIST_BOX_ROW));
   hovered_row = gtk_list_box_get_row_at_y (listbox, y);
 
@@ -1280,7 +1287,7 @@ listbox_drag_motion (GtkListBox      *listbox,
 
   gtk_widget_queue_resize (priv->dnd_row);
 
-  gdk_drag_status (context, GDK_ACTION_MOVE, time);
+  gdk_drop_status (drop, GDK_ACTION_MOVE);
 
   /*
    * When not hovering any row, we still have to make sure that the listbox is a valid
@@ -1372,7 +1379,7 @@ success:
    * Also pass the current motion to the DnD row, so it correctly
    * adjusts itself - even when the DnD is hovering another row.
    */
-  success = gtd_dnd_row_drag_motion (GTK_WIDGET (priv->dnd_row), context, x, y, time);
+  success = gtd_dnd_row_drag_motion (GTK_WIDGET (priv->dnd_row), x, y);
 
   check_dnd_scroll (self, FALSE, y);
 
@@ -1384,7 +1391,7 @@ fail:
 
 static gboolean
 listbox_drag_drop (GtkWidget       *widget,
-                   GdkDragContext  *context,
+                   GdkDrop         *drop,
                    gint             x,
                    gint             y,
                    guint            time,
@@ -1394,11 +1401,11 @@ listbox_drag_drop (GtkWidget       *widget,
   gboolean success;
 
   priv = gtd_task_list_view_get_instance_private (self);
-  success = gtd_dnd_row_drag_drop (GTK_WIDGET (priv->dnd_row), context, x, y, time);
+  success = gtd_dnd_row_drag_drop (GTK_WIDGET (priv->dnd_row), drop, x, y);
 
   check_dnd_scroll (self, TRUE, -1);
 
-  gtk_drag_finish (context, success, time);
+  gdk_drop_finish (drop, GDK_ACTION_MOVE);
 
   return success;
 }

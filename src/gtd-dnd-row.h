@@ -38,16 +38,13 @@ void                 gtd_dnd_row_set_row_above                   (GtdDndRow     
 
 
 gboolean             gtd_dnd_row_drag_drop                       (GtkWidget          *widget,
-                                                                  GdkDragContext     *context,
+                                                                  GdkDrop            *drop,
                                                                   gint                x,
-                                                                  gint                y,
-                                                                  guint               time);
+                                                                  gint                y);
 
 gboolean             gtd_dnd_row_drag_motion                     (GtkWidget          *widget,
-                                                                  GdkDragContext     *context,
                                                                   gint                x,
-                                                                  gint                y,
-                                                                  guint               time);
+                                                                  gint                y);
 
 G_END_DECLS
 

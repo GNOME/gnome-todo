@@ -1,7 +1,7 @@
 {
     "app-id" : "org.gnome.Todo",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "3.28",
+    "runtime-version" : "master",
     "sdk" : "org.gnome.Sdk",
     "command" : "gnome-todo",
     "tags" : [
@@ -82,9 +82,8 @@
             "buildsystem" : "meson",
             "builddir" : true,
             "config-opts" : [
+                "--prefix=/app",
                 "--libdir=/app/lib",
-                "-Ddemos=false",
-                "-Dbuild-examples=false",
                 "-Dbuild-tests=false"
             ],
             "sources" : [

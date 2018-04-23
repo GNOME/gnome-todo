@@ -20,12 +20,12 @@
 
 #define G_LOG_DOMAIN "GtdSidebarListRow"
 
-#include "gtd-provider.h"
 #include "gtd-manager.h"
 #include "gtd-notification.h"
+#include "gtd-provider.h"
+#include "gtd-sidebar-list-row.h"
 #include "gtd-task.h"
 #include "gtd-task-list.h"
-#include "gtd-sidebar-list-row.h"
 
 #include <math.h>
 #include <glib/gi18n.h>
@@ -225,6 +225,19 @@ rename_list (GtdSidebarListRow *self)
   gtk_popover_popdown (self->rename_popover);
 }
 
+static void
+popup_menu (GtdSidebarListRow *self)
+{
+  GtkWidget *popover;
+
+  popover = gtk_popover_new_from_model (GTK_WIDGET (self), G_MENU_MODEL (self->menu));
+  gtk_widget_set_size_request (popover, 150, -1);
+
+  g_signal_connect (popover, "hide", G_CALLBACK (gtk_widget_destroy), NULL);
+
+  gtk_popover_popup (GTK_POPOVER (popover));
+}
+
 
 /*
  * Callbacks
@@ -300,6 +313,28 @@ on_rename_action_activated_cb (GSimpleAction *action,
 
   gtk_popover_set_relative_to (self->rename_popover, GTK_WIDGET (self));
   gtk_popover_popup (self->rename_popover);
+}
+
+static void
+on_gesture_multipress_released_cb (GtkGesture        *gesture,
+                                   guint              n_press,
+                                   gdouble            x,
+                                   gdouble            y,
+                                   GtdSidebarListRow *self)
+{
+  if (n_press > 1)
+    return;
+
+  popup_menu (self);
+}
+
+static void
+on_gesture_long_press_cb (GtkGesture        *gesture,
+                          gdouble            x,
+                          gdouble            y,
+                          GtdSidebarListRow *self)
+{
+  popup_menu (self);
 }
 
 static void
@@ -444,6 +479,7 @@ gtd_sidebar_list_row_class_init (GtdSidebarListRowClass *klass)
 static void
 gtd_sidebar_list_row_init (GtdSidebarListRow *self)
 {
+  GtkGesture *gesture;
   const GActionEntry entries[] =
   {
     { "delete", on_delete_action_activated_cb },
@@ -456,6 +492,22 @@ gtd_sidebar_list_row_init (GtdSidebarListRow *self)
   self->action_group = G_ACTION_MAP (g_simple_action_group_new ());
   g_action_map_add_action_entries (self->action_group, entries, G_N_ELEMENTS (entries), self);
   gtk_widget_insert_action_group (GTK_WIDGET (self), "list-row", G_ACTION_GROUP (self->action_group));
+
+  /* Gestures */
+  gesture = gtk_gesture_long_press_new ();
+  gtk_event_controller_set_propagation_phase (GTK_EVENT_CONTROLLER (gesture), GTK_PHASE_TARGET);
+  gtk_gesture_single_set_touch_only (GTK_GESTURE_SINGLE (gesture), TRUE);
+  g_signal_connect (gesture, "pressed", G_CALLBACK (on_gesture_long_press_cb), self);
+
+  gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (gesture));
+
+  gesture = gtk_gesture_multi_press_new ();
+  gtk_event_controller_set_propagation_phase (GTK_EVENT_CONTROLLER (gesture), GTK_PHASE_BUBBLE);
+  gtk_gesture_single_set_touch_only (GTK_GESTURE_SINGLE (gesture), FALSE);
+  gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), GDK_BUTTON_SECONDARY);
+  g_signal_connect (gesture, "released", G_CALLBACK (on_gesture_multipress_released_cb), self);
+
+  gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (gesture));
 }
 
 GtkWidget*
@@ -472,19 +524,4 @@ gtd_sidebar_list_row_get_task_list (GtdSidebarListRow *self)
   g_return_val_if_fail (GTD_IS_SIDEBAR_LIST_ROW (self), NULL);
 
   return self->list;
-}
-
-void
-gtd_sidebar_list_row_popup_menu (GtdSidebarListRow *self)
-{
-  GtkWidget *popover;
-
-  g_return_if_fail (GTD_IS_SIDEBAR_LIST_ROW (self));
-
-  popover = gtk_popover_new_from_model (GTK_WIDGET (self), G_MENU_MODEL (self->menu));
-  gtk_widget_set_size_request (popover, 150, -1);
-
-  g_signal_connect (popover, "hide", G_CALLBACK (gtk_widget_destroy), NULL);
-
-  gtk_popover_popup (GTK_POPOVER (popover));
 }

@@ -62,7 +62,10 @@ flatpak:master:
     image: registry.gitlab.com/alatiera/gnome-nightly-oci/gnome-master:latest
     stage: flatpak
     script:
-    - flatpak-builder --repo=repo app org.gnome.Todo.json
+    - flatpak-builder --stop-at=gnome-todo app org.gnome.Todo.json
+    - flatpak build app meson --prefix /app -Dtracing=true _build
+    - flatpak build app ninja -C _build
+    - flatpak-builder --finish-only--repo=repo app org.gnome.Todo.json
     - flatpak build-bundle repo gnome-todo-$CI_COMMIT_REF_SLUG.flatpak --runtime-repo=https://sdk.gnome.org/gnome-nightly.flatpakrepo org.gnome.Todo
     artifacts:
         paths:

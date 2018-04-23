@@ -87,9 +87,7 @@ update_message (GtdEmptyListWidget *self)
       subtitle_text = gettext (subtitles[subtitle_index]);
     }
 
-  gtk_image_set_from_icon_name (GTK_IMAGE (self->icon),
-                                icon_name,
-                                -1);
+  gtk_image_set_from_icon_name (GTK_IMAGE (self->icon), icon_name);
 
   gtk_label_set_markup (GTK_LABEL (self->title_label), title_text);
   gtk_label_set_markup (GTK_LABEL (self->subtitle_label), subtitle_text);

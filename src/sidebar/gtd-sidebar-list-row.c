@@ -108,50 +108,39 @@ activate_row_below (GtdSidebarListRow *self)
     g_signal_emit_by_name (next_row, "activate");
 }
 
-static cairo_surface_t*
-create_circular_icon (GtdTaskList *list,
-                      gint         size)
+static GdkPaintable*
+create_circular_paintable (GtdTaskList *list,
+                           gint         size)
 {
+  g_autoptr (GtkSnapshot) snapshot = NULL;
   g_autoptr (GdkRGBA) color = NULL;
-  cairo_surface_t *surface;
-  cairo_t *cr;
+  GskRoundedRect rect;
 
-  surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, size, size);
-  cr = cairo_create (surface);
+  snapshot = gtk_snapshot_new ();
 
   /* Draw the list's background color */
   color = gtd_task_list_get_color (list);
 
-  cairo_set_source_rgba (cr,
-                         color->red,
-                         color->green,
-                         color->blue,
-                         color->alpha);
+  gtk_snapshot_push_rounded_clip (snapshot,
+                                  gsk_rounded_rect_init_from_rect (&rect,
+                                                                   &GRAPHENE_RECT_INIT (0, 0, size, size),
+                                                                   size / 2.0));
 
-  cairo_arc (cr,
-             size / 2.0,
-             size / 2.0,
-             size / 2.0,
-             0.,
-             2 * M_PI);
+  gtk_snapshot_append_color (snapshot, color, &GRAPHENE_RECT_INIT (0, 0, size, size));
 
-  cairo_fill (cr);
+  gtk_snapshot_pop (snapshot);
 
-  g_clear_pointer (&cr, cairo_destroy);
-
-  return surface;
+  return gtk_snapshot_to_paintable (snapshot, &GRAPHENE_SIZE_INIT (size, size));
 }
 
 static void
 update_color_icon (GtdSidebarListRow *self)
 {
-  cairo_surface_t *surface;
+  g_autoptr (GdkPaintable) paintable = NULL;
 
-  surface = create_circular_icon (self->list, 12);
+  paintable = create_circular_paintable (self->list, 12);
 
-  gtk_image_set_from_surface (self->color_icon, surface);
-
-  cairo_surface_destroy (surface);
+  gtk_image_set_from_paintable (self->color_icon, paintable);
 }
 
 static void

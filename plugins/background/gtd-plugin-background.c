@@ -23,6 +23,7 @@
 #include "gtd-plugin-background.h"
 
 #include <glib/gi18n.h>
+#include <gtk/gtk.h>
 
 #define AUTOSTART_FILE                 "org.gnome.Todo.Autostart.desktop"
 #define AUTOSTART_NOTIFICATION_ID      "Gtd::BackgroundPlugin::autostart_notification"
@@ -60,12 +61,12 @@ enum {
 /*
  * Auxiliary methods
  */
-static inline GtdWindow*
+static inline GtkWindow*
 get_window (void)
 {
   GtkApplication *app = GTK_APPLICATION (g_application_get_default ());
 
-  return GTD_WINDOW (gtk_application_get_active_window (app));
+  return GTK_WINDOW (gtk_application_get_active_window (app));
 }
 
 static void
@@ -225,7 +226,7 @@ send_notification (GtdPluginBackground *self)
   gchar *title;
   gchar *body;
 
-  window = get_window ();
+  window = GTD_WINDOW (get_window ());
 
   /*
    * If the user already focused To Do's window, we don't have to
@@ -337,15 +338,12 @@ static void
 gtd_plugin_background_activate (GtdActivatable *activatable)
 {
   GtdPluginBackground *self;
-  GtdWindow *window;
+  GtkWindow *window;
 
   self = GTD_PLUGIN_BACKGROUND (activatable);
   window = get_window ();
 
-  g_signal_connect (window,
-                    "delete-event",
-                    G_CALLBACK (gtk_widget_hide_on_delete),
-                    window);
+  gtk_window_set_hide_on_close (window, TRUE);
 
   on_startup_changed (self->settings, "run-on-startup", self);
   g_signal_connect (self->settings,
@@ -362,15 +360,13 @@ gtd_plugin_background_deactivate (GtdActivatable *activatable)
 {
   GtdPluginBackground *self;
   GtdManager *manager;
-  GtdWindow *window;
+  GtkWindow *window;
 
   self = GTD_PLUGIN_BACKGROUND (activatable);
   manager = gtd_manager_get_default ();
   window = get_window ();
 
-  g_signal_handlers_disconnect_by_func (window,
-                                        gtk_widget_hide_on_delete,
-                                        window);
+  gtk_window_set_hide_on_close (window, FALSE);
 
   g_signal_handlers_disconnect_by_func (self->settings,
                                         on_startup_changed,

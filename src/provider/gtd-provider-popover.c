@@ -147,9 +147,7 @@ gtd_provider_popover__provider_selected (GtdProviderPopover *popover,
 
   if (provider)
     {
-      gtk_image_set_from_gicon (GTK_IMAGE (popover->location_provider_image),
-                                gtd_provider_get_icon (provider),
-                                GTK_ICON_SIZE_BUTTON);
+      gtk_image_set_from_gicon (GTK_IMAGE (popover->location_provider_image), gtd_provider_get_icon (provider));
       gtk_widget_set_tooltip_text (popover->change_location_button, gtd_provider_get_name (provider));
 
       /* Go back immediately after selecting a provider */
@@ -178,11 +176,7 @@ gtd_provider_popover_constructed (GObject *object)
   provider = gtd_provider_selector_get_selected_provider (GTD_PROVIDER_SELECTOR (popover->provider_selector));
 
   if (provider)
-    {
-      gtk_image_set_from_gicon (GTK_IMAGE (popover->location_provider_image),
-                                gtd_provider_get_icon (provider),
-                                GTK_ICON_SIZE_BUTTON);
-    }
+    gtk_image_set_from_gicon (GTK_IMAGE (popover->location_provider_image), gtd_provider_get_icon (provider));
 }
 
 static void

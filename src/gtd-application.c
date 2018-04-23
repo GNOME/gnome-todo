@@ -272,16 +272,16 @@ gtd_application_startup (GApplication *application)
 
   /* CSS provider */
   css_provider = gtk_css_provider_new ();
-  gtk_style_context_add_provider_for_screen (gdk_screen_get_default (),
-                                             GTK_STYLE_PROVIDER (css_provider),
-                                             GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
+  gtk_style_context_add_provider_for_display (gdk_display_get_default (),
+                                              GTK_STYLE_PROVIDER (css_provider),
+                                              GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
 
   g_object_get (gtk_settings_get_default (), "gtk-theme-name", &theme_name, NULL);
   theme_uri = g_strconcat ("resource:///org/gnome/todo/theme/", theme_name, ".css", NULL);
   css_file = g_file_new_for_uri (theme_uri);
 
   if (g_file_query_exists (css_file, NULL))
-    gtk_css_provider_load_from_file (css_provider, css_file, NULL);
+    gtk_css_provider_load_from_file (css_provider, css_file);
   else
     gtk_css_provider_load_from_resource (css_provider, "/org/gnome/todo/theme/Adwaita.css");
 

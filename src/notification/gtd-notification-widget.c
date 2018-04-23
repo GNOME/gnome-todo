@@ -128,20 +128,21 @@ execute_notification (GtdNotificationWidget *self,
 }
 
 
-static void
-on_enter_notify_cb (GtdNotificationWidget *self)
+static gboolean
+on_event_cb (GtdNotificationWidget *self,
+             GdkEvent              *event)
 {
-  /* Stop the timer when mouse enters */
-  if (self->current_notification)
-    gtd_notification_stop (self->current_notification);
-}
+  GdkEventType event_type;
 
-static void
-on_leave_notify_cb (GtdNotificationWidget *self)
-{
-  /* Restart the timer when mouse leaves */
-  if (self->current_notification)
+  event_type = gdk_event_get_event_type (event);
+
+  /* Stop the timer when mouse enters */
+  if (event_type == GDK_ENTER_NOTIFY && self->current_notification)
+    gtd_notification_stop (self->current_notification);
+  else if (event_type == GDK_LEAVE_NOTIFY && self->current_notification)
     gtd_notification_start (self->current_notification);
+
+  return GDK_EVENT_PROPAGATE;
 }
 
 static void
@@ -211,8 +212,7 @@ gtd_notification_widget_class_init (GtdNotificationWidgetClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdNotificationWidget, text_label);
 
   gtk_widget_class_bind_template_callback (widget_class, on_close_button_clicked_cb);
-  gtk_widget_class_bind_template_callback (widget_class, on_enter_notify_cb);
-  gtk_widget_class_bind_template_callback (widget_class, on_leave_notify_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_event_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_secondary_button_clicked_cb);
 }
 

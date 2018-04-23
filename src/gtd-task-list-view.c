@@ -864,10 +864,7 @@ on_task_list_color_changed_cb (GtdTaskListView *self)
 
   parsed_css = g_strdup_printf (COLOR_TEMPLATE, color_str);
 
-  gtk_css_provider_load_from_data (priv->color_provider,
-                                   parsed_css,
-                                   -1,
-                                   NULL);
+  gtk_css_provider_load_from_data (priv->color_provider, parsed_css, -1);
 
   update_font_color (self);
 
@@ -1400,7 +1397,7 @@ listbox_drag_drop (GtkWidget       *widget,
 
   check_dnd_scroll (self, TRUE, -1);
 
-  gtk_drag_finish (context, success, TRUE, time);
+  gtk_drag_finish (context, success, time);
 
   return success;
 }
@@ -1694,7 +1691,6 @@ gtd_task_list_view_init (GtdTaskListView *self)
   gtk_drag_dest_set (GTK_WIDGET (self->priv->listbox),
                      0,
                      NULL,
-                     0,
                      GDK_ACTION_MOVE);
 
   self->priv->renderer = gtd_markdown_renderer_new ();
@@ -1906,10 +1902,7 @@ gtd_task_list_view_set_task_list (GtdTaskListView *view,
   color_str = gdk_rgba_to_string (color);
   parsed_css = g_strdup_printf (COLOR_TEMPLATE, color_str);
 
-  gtk_css_provider_load_from_data (priv->color_provider,
-                                   parsed_css,
-                                   -1,
-                                   NULL);
+  gtk_css_provider_load_from_data (priv->color_provider, parsed_css, -1);
 
   update_font_color (view);
 

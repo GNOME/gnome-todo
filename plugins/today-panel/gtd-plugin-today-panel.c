@@ -152,12 +152,12 @@ gtd_plugin_today_panel_init (GtdPluginTodayPanel *self)
   css_file = g_file_new_for_uri (theme_uri);
 
   self->css_provider = gtk_css_provider_new ();
-  gtk_style_context_add_provider_for_screen (gdk_screen_get_default (),
-                                             GTK_STYLE_PROVIDER (self->css_provider),
-                                             GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  gtk_style_context_add_provider_for_display (gdk_display_get_default (),
+                                              GTK_STYLE_PROVIDER (self->css_provider),
+                                              GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
   if (g_file_query_exists (css_file, NULL))
-    gtk_css_provider_load_from_file (self->css_provider, css_file, NULL);
+    gtk_css_provider_load_from_file (self->css_provider, css_file);
   else
     gtk_css_provider_load_from_resource (self->css_provider, "/org/gnome/todo/theme/today-panel/Adwaita.css");
 

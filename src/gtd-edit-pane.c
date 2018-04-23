@@ -246,8 +246,6 @@ static gboolean
 on_hyperlink_hover_cb (GtkTextView    *text_view,
                        GdkEventMotion *event)
 {
-  g_autoptr (GdkCursor) cursor = NULL;
-  GdkDisplay *display = NULL;
   GtkTextIter iter;
   gboolean hovering;
   gdouble ex, ey;
@@ -282,10 +280,7 @@ on_hyperlink_hover_cb (GtkTextView    *text_view,
         }
     }
 
-  display = gtk_widget_get_display (GTK_WIDGET (text_view));
-  cursor = gdk_cursor_new_from_name (display, hovering ? "pointer" : "text");
-
-  gdk_window_set_cursor (gtk_text_view_get_window (text_view, GTK_TEXT_WINDOW_TEXT), cursor);
+  gtk_widget_set_cursor_from_name (GTK_WIDGET (text_view), hovering ? "pointer" : "text");
 
   return GDK_EVENT_STOP;
 }
@@ -295,6 +290,7 @@ on_hyperlink_clicked_cb (GtkTextView *text_view,
                          GdkEvent    *event)
 {
   GtkTextBuffer *buffer;
+  GdkEventType event_type;
   GtkTextIter end_iter;
   GtkTextIter iter;
   GSList *tags = NULL;
@@ -304,30 +300,13 @@ on_hyperlink_clicked_cb (GtkTextView *text_view,
   gint x;
   gint y;
 
+  event_type = gdk_event_get_event_type (event);
+
   /* Ignore events that are not button or touch release */
-  if (event->type != GDK_BUTTON_RELEASE && event->type != GDK_TOUCH_END)
+  if (event_type != GDK_BUTTON_RELEASE && event_type != GDK_TOUCH_END)
     return GDK_EVENT_PROPAGATE;
 
-  if (event->type == GDK_BUTTON_RELEASE)
-    {
-      GdkEventButton *event_button;
-
-      event_button = (GdkEventButton *)event;
-      if (event_button->button != GDK_BUTTON_PRIMARY)
-        return GDK_EVENT_PROPAGATE;
-
-      ex = event_button->x;
-      ey = event_button->y;
-    }
-  else if (event->type == GDK_TOUCH_END)
-    {
-      GdkEventTouch *event_touch;
-
-      event_touch = (GdkEventTouch *)event;
-
-      ex = event_touch->x;
-      ey = event_touch->y;
-    }
+  gdk_event_get_coords (event, &ex, &ey);
 
   buffer = gtk_text_view_get_buffer (text_view);
 

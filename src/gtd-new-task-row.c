@@ -67,45 +67,48 @@ static guint          signals [NUM_SIGNALS] = { 0, };
  */
 
 static gboolean
-gtd_new_task_row_focus_in_event (GtkWidget     *widget,
-                                 GdkEventFocus *event)
+gtd_new_task_row_event (GtkWidget *widget,
+                        GdkEvent  *event)
 {
   GtdNewTaskRow *self = GTD_NEW_TASK_ROW (widget);
+  gboolean focus_in;
 
-  gtd_new_task_row_set_active (self, TRUE);
+  if (gdk_event_get_focus_in (event, &focus_in) && focus_in)
+    gtd_new_task_row_set_active (self, TRUE);
 
   return GDK_EVENT_PROPAGATE;
 }
 
-static cairo_surface_t*
-get_circle_surface_from_color (GdkRGBA *color,
-                               gint     size)
+
+static GdkPaintable*
+create_circular_paintable (GdkRGBA *color,
+                           gint     size)
 {
-  cairo_surface_t *surface;
-  cairo_t *cr;
+  g_autoptr (GtkSnapshot) snapshot = NULL;
+  GskRoundedRect rect;
 
-  surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, size, size);
-  cr = cairo_create (surface);
+  snapshot = gtk_snapshot_new ();
 
-  cairo_set_source_rgba (cr,
-                         color->red,
-                         color->green,
-                         color->blue,
-                         color->alpha);
-  cairo_arc (cr, size / 2.0, size / 2.0, size / 2.0, 0., 2 * M_PI);
-  cairo_fill (cr);
-  cairo_destroy (cr);
+  /* Draw the list's background color */
+  gtk_snapshot_push_rounded_clip (snapshot,
+                                  gsk_rounded_rect_init_from_rect (&rect,
+                                                                   &GRAPHENE_RECT_INIT (0, 0, size, size),
+                                                                   size / 2.0));
 
-  return surface;
+  gtk_snapshot_append_color (snapshot, color, &GRAPHENE_RECT_INIT (0, 0, size, size));
+
+  gtk_snapshot_pop (snapshot);
+
+  return gtk_snapshot_to_paintable (snapshot, &GRAPHENE_SIZE_INIT (size, size));
 }
 
 static void
 set_selected_tasklist (GtdNewTaskRow *self,
                        GtdTaskList   *list)
 {
-  cairo_surface_t *surface;
+  g_autoptr (GdkPaintable) paintable = NULL;
+  g_autoptr (GdkRGBA) color = NULL;
   GtdManager *manager;
-  GdkRGBA *color;
 
   manager = gtd_manager_get_default ();
 
@@ -117,13 +120,10 @@ set_selected_tasklist (GtdNewTaskRow *self,
     return;
 
   color = gtd_task_list_get_color (list);
-  surface = get_circle_surface_from_color (color, 12);
+  paintable = create_circular_paintable (color, 12);
 
-  gtk_image_set_from_surface (self->list_color_icon, surface);
+  gtk_image_set_from_paintable (self->list_color_icon, paintable);
   gtk_label_set_label (self->list_name_label, gtd_task_list_get_name (list));
-
-  cairo_surface_destroy (surface);
-  gdk_rgba_free (color);
 }
 
 /*
@@ -206,9 +206,9 @@ update_tasklists_cb (GtdNewTaskRow *self)
 
   for (l = tasklists; l != NULL; l = l->next)
     {
+      g_autoptr (GdkPaintable) paintable = NULL;
+      g_autoptr (GdkRGBA) color = NULL;
       GtkWidget *row, *box, *icon, *name, *provider;
-      cairo_surface_t *surface;
-      GdkRGBA *color;
 
       box = g_object_new (GTK_TYPE_BOX,
                           "orientation", GTK_ORIENTATION_HORIZONTAL,
@@ -218,8 +218,11 @@ update_tasklists_cb (GtdNewTaskRow *self)
 
       /* Icon */
       color = gtd_task_list_get_color (l->data);
-      surface = get_circle_surface_from_color (color, 12);
-      icon = gtk_image_new_from_surface (surface);
+      paintable = create_circular_paintable (color, 12);
+      icon = gtk_image_new_from_paintable (paintable);
+      gtk_widget_set_size_request (icon, 12, 12);
+      gtk_widget_set_halign (icon, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
 
       gtk_container_add (GTK_CONTAINER (box), icon);
 
@@ -247,11 +250,6 @@ update_tasklists_cb (GtdNewTaskRow *self)
       gtk_container_add (GTK_CONTAINER (self->tasklist_list), row);
 
       g_object_set_data (G_OBJECT (row), "tasklist", l->data);
-
-      gtk_widget_show_all (row);
-
-      cairo_surface_destroy (surface);
-      gdk_rgba_free (color);
     }
 
   g_list_free (tasklists);
@@ -308,8 +306,8 @@ gtd_new_task_row_class_init (GtdNewTaskRowClass *klass)
   object_class->get_property = gtd_new_task_row_get_property;
   object_class->set_property = gtd_new_task_row_set_property;
 
-  widget_class->focus_in_event = gtd_new_task_row_focus_in_event;
-  widget_class->get_preferred_width = gtd_row_get_preferred_width_with_max;
+  widget_class->event = gtd_new_task_row_event;
+  widget_class->measure = gtd_row_measure_with_max;
 
   /**
    * GtdNewTaskRow::enter:

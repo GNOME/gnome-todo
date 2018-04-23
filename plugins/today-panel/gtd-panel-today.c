@@ -445,8 +445,6 @@ gtd_panel_today_init (GtdPanelToday *self)
   gtk_widget_set_vexpand (self->view, TRUE);
   gtk_container_add (GTK_CONTAINER (self), self->view);
 
-  gtk_widget_show_all (GTK_WIDGET (self));
-
   /* Start timer */
   g_signal_connect_object (gtd_manager_get_timer (manager),
                            "update",

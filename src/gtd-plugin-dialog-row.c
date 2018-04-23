@@ -133,9 +133,7 @@ gtd_plugin_dialog_row_constructed (GObject *object)
 
   gtk_switch_set_active (GTK_SWITCH (self->loaded_switch), self->plugin != NULL);
 
-  gtk_image_set_from_icon_name (GTK_IMAGE (self->icon_image),
-                                peas_plugin_info_get_icon_name (self->info),
-                                GTK_ICON_SIZE_DND);
+  gtk_image_set_from_icon_name (GTK_IMAGE (self->icon_image), peas_plugin_info_get_icon_name (self->info));
 }
 
 static void

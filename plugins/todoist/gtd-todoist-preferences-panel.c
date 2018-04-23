@@ -146,16 +146,13 @@ on_goa_account_added (GoaClient                   *client,
 
   g_object_set_data_full (G_OBJECT (row), "goa-object", g_object_ref (object), g_object_unref);
 
-  logo = gtk_image_new_from_icon_name ("org.gnome.Todo", GTK_ICON_SIZE_LARGE_TOOLBAR);
+  logo = gtk_image_new_from_icon_name ("org.gnome.Todo");
   desc = gtk_label_new (identity);
   box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
 
-  gtk_container_set_border_width (GTK_CONTAINER (box), 6);
   gtk_container_add (GTK_CONTAINER (box), logo);
   gtk_container_add (GTK_CONTAINER (box), desc);
   gtk_container_add (GTK_CONTAINER (row), box);
-
-  gtk_widget_show_all (row);
 
   gtk_stack_set_visible_child (GTK_STACK (self), self->accounts_page);
 

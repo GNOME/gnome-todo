@@ -130,7 +130,7 @@ gtd_dnd_row_class_init (GtdDndRowClass *klass)
   object_class->get_property = gtd_dnd_row_get_property;
   object_class->set_property = gtd_dnd_row_set_property;
 
-  widget_class->get_preferred_width = gtd_row_get_preferred_width_with_max;
+  widget_class->measure = gtd_row_measure_with_max;
 
   properties[PROP_ROW_ABOVE] = g_param_spec_object ("row-above",
                                                     "Row above",

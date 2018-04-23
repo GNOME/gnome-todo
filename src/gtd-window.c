@@ -138,7 +138,7 @@ add_widgets (GtdWindow *self,
       switch (gtk_widget_get_halign (l->data))
         {
         case GTK_ALIGN_START:
-          gtk_box_pack_start (GTK_BOX (container_start), l->data, FALSE, FALSE, 0);
+          gtk_box_pack_start (GTK_BOX (container_start), l->data);
           break;
 
         case GTK_ALIGN_CENTER:
@@ -146,13 +146,13 @@ add_widgets (GtdWindow *self,
           break;
 
         case GTK_ALIGN_END:
-          gtk_box_pack_end (GTK_BOX (container_end), l->data, FALSE, FALSE, 0);
+          gtk_box_pack_end (GTK_BOX (container_end), l->data);
           break;
 
         case GTK_ALIGN_BASELINE:
         case GTK_ALIGN_FILL:
         default:
-          gtk_box_pack_start (GTK_BOX (container_start), l->data, FALSE, FALSE, 0);
+          gtk_box_pack_start (GTK_BOX (container_start), l->data);
           break;
         }
     }
@@ -335,9 +335,7 @@ load_geometry (GtdWindow *self)
 static gboolean
 save_geometry (gpointer user_data)
 {
-  GdkWindowState state;
   GtdWindow *self;
-  GdkWindow *gdk_window;
   GtkWindow *window;
   GSettings *settings;
   gboolean maximized;
@@ -347,13 +345,11 @@ save_geometry (gpointer user_data)
 
   self = GTD_WINDOW (user_data);
   window = GTK_WINDOW (user_data);
-  gdk_window = gtk_widget_get_window (GTK_WIDGET (self));
-  state = gdk_window_get_state (gdk_window);
 
   settings = gtd_manager_get_settings (gtd_manager_get_default ());
 
   /* save window's state */
-  maximized = state & GDK_WINDOW_STATE_MAXIMIZED;
+  maximized = gtk_window_is_maximized (window);
 
   g_settings_set_boolean (settings, "window-maximized", maximized);
 
@@ -495,47 +491,23 @@ on_show_notification_cb (GtdManager      *manager,
  */
 
 static gboolean
-gtd_window_configure_event (GtkWidget         *widget,
-                            GdkEventConfigure *event)
+gtd_window_event (GtkWidget *widget,
+                  GdkEvent  *event)
 {
-  GtdWindow *self;
-  gboolean retval;
-
-  self = GTD_WINDOW (widget);
-
-  if (self->save_geometry_timeout_id != 0)
+  if (gdk_event_get_event_type (event) == GDK_CONFIGURE)
     {
-      g_source_remove (self->save_geometry_timeout_id);
-      self->save_geometry_timeout_id = 0;
+      GtdWindow *self = GTD_WINDOW (widget);
+
+      if (self->save_geometry_timeout_id != 0)
+        {
+          g_source_remove (self->save_geometry_timeout_id);
+          self->save_geometry_timeout_id = 0;
+        }
+
+      self->save_geometry_timeout_id = g_timeout_add (SAVE_GEOMETRY_ID_TIMEOUT, save_geometry, self);
     }
 
-  self->save_geometry_timeout_id = g_timeout_add (SAVE_GEOMETRY_ID_TIMEOUT, save_geometry, self);
-
-  retval = GTK_WIDGET_CLASS (gtd_window_parent_class)->configure_event (widget, event);
-
-  return retval;
-}
-
-static gboolean
-gtd_window_state_event (GtkWidget           *widget,
-                        GdkEventWindowState *event)
-{
-  GtdWindow *self;
-  gboolean retval;
-
-  self = GTD_WINDOW (widget);
-
-  if (self->save_geometry_timeout_id != 0)
-    {
-      g_source_remove (self->save_geometry_timeout_id);
-      self->save_geometry_timeout_id = 0;
-    }
-
-  self->save_geometry_timeout_id = g_timeout_add (SAVE_GEOMETRY_ID_TIMEOUT, save_geometry, self);
-
-  retval = GTK_WIDGET_CLASS (gtd_window_parent_class)->window_state_event (widget, event);
-
-  return retval;
+  return GTK_WIDGET_CLASS (gtd_window_parent_class)->event (widget, event);
 }
 
 
@@ -637,8 +609,7 @@ gtd_window_class_init (GtdWindowClass *klass)
   object_class->get_property = gtd_window_get_property;
   object_class->set_property = gtd_window_set_property;
 
-  widget_class->configure_event = gtd_window_configure_event;
-  widget_class->window_state_event = gtd_window_state_event;
+  widget_class->event = gtd_window_event;
 
   /**
    * GtdWindow::mode:
@@ -773,7 +744,7 @@ gtd_window_set_mode (GtdWindow     *self,
 
       gtk_widget_set_visible (self->gear_menu_button, !is_selection_mode);
       gtk_widget_set_visible (self->cancel_selection_button, is_selection_mode);
-      gtk_header_bar_set_show_close_button (self->headerbar, !is_selection_mode);
+      gtk_header_bar_set_show_title_buttons (self->headerbar, !is_selection_mode);
       gtk_header_bar_set_subtitle (self->headerbar, NULL);
 
       if (is_selection_mode)

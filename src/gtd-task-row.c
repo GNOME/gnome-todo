@@ -52,7 +52,6 @@ struct _GtdTaskRow
 
   /* dnd widgets */
   GtkWidget          *dnd_box;
-  GtkWidget          *dnd_event_box;
   GtkWidget          *dnd_icon;
   gint                clicked_x;
   gint                clicked_y;
@@ -195,28 +194,6 @@ create_transient_row (GtdTaskRow *self)
 }
 
 static void
-set_cursor (GtkWidget   *widget,
-            const gchar *cursor_name)
-{
-  GdkDisplay *display;
-  GdkCursor *cursor;
-
-  if (!gtk_widget_get_realized (widget))
-    return;
-
-  cursor = NULL;
-  display = gtk_widget_get_display (widget);
-
-  if (cursor_name)
-    cursor = gdk_cursor_new_from_name (display, cursor_name);
-
-  gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
-  gdk_display_flush (display);
-
-  g_clear_object (&cursor);
-}
-
-static void
 gtd_task_row_set_task (GtdTaskRow *row,
                        GtdTask    *task)
 {
@@ -311,7 +288,10 @@ on_mouse_out_event_cb (GtkWidget  *widget,
                        GdkEvent   *event,
                        GtdTaskRow *self)
 {
-  set_cursor (widget, NULL);
+  if (gdk_event_get_event_type (event) != GDK_LEAVE_NOTIFY)
+    return GDK_EVENT_PROPAGATE;
+
+  gtk_widget_set_cursor_from_name (widget, NULL);
 
   return GDK_EVENT_STOP;
 }
@@ -321,7 +301,10 @@ on_mouse_over_event_cb (GtkWidget  *widget,
                         GdkEvent   *event,
                         GtdTaskRow *self)
 {
-  set_cursor (widget, "pointer");
+  if (gdk_event_get_event_type (event) != GDK_ENTER_NOTIFY)
+    return GDK_EVENT_PROPAGATE;
+
+  gtk_widget_set_cursor_from_name (widget, "pointer");
 
   return GDK_EVENT_STOP;
 }
@@ -332,7 +315,10 @@ on_mouse_out_dnd_event_cb (GtkWidget  *widget,
                            GdkEvent   *event,
                            GtdTaskRow *self)
 {
-  set_cursor (widget, NULL);
+  if (gdk_event_get_event_type (event) != GDK_LEAVE_NOTIFY)
+    return GDK_EVENT_PROPAGATE;
+
+  gtk_widget_set_cursor_from_name (widget, NULL);
 
   return GDK_EVENT_STOP;
 }
@@ -342,23 +328,33 @@ on_mouse_over_dnd_event_cb (GtkWidget  *widget,
                             GdkEvent   *event,
                             GtdTaskRow *self)
 {
-  set_cursor (widget, "grab");
+  if (gdk_event_get_event_type (event) != GDK_ENTER_NOTIFY)
+    return GDK_EVENT_PROPAGATE;
+
+  gtk_widget_set_cursor_from_name (widget, "grab");
 
   return GDK_EVENT_STOP;
 }
 
 static gboolean
-on_button_press_event_cb (GtkWidget      *widget,
-                          GdkEventButton *event,
-                          GtdTaskRow     *self)
+on_button_press_event_cb (GtkWidget  *widget,
+                          GdkEvent   *event,
+                          GtdTaskRow *self)
 {
+  gdouble event_x;
+  gdouble event_y;
   gint real_x;
   gint real_y;
 
+  if (gdk_event_get_event_type (event) != GDK_BUTTON_PRESS)
+    return GDK_EVENT_PROPAGATE;
+
+  gdk_event_get_coords (event, &event_x, &event_y);
+
   gtk_widget_translate_coordinates (widget,
                                     GTK_WIDGET (self),
-                                    event->x,
-                                    event->y,
+                                    event_x,
+                                    event_y,
                                     &real_x,
                                     &real_y);
 
@@ -378,7 +374,7 @@ on_drag_begin_cb (GtkWidget      *event_box,
 
   widget = GTK_WIDGET (self);
 
-  set_cursor (widget, "grabbing");
+  gtk_widget_set_cursor_from_name (widget, "grabbing");
 
   /*
    * gtk_drag_set_icon_widget() inserts the row in a different GtkWindow, so
@@ -404,7 +400,7 @@ on_drag_end_cb (GtkWidget      *event_box,
                 GdkDragContext *context,
                 GtdTaskRow     *self)
 {
-  set_cursor (GTK_WIDGET (self), NULL);
+  gtk_widget_set_cursor_from_name (GTK_WIDGET (self), NULL);
   gtk_widget_show (GTK_WIDGET (self));
 }
 
@@ -414,7 +410,7 @@ on_drag_failed_cb (GtkWidget      *widget,
                    GtkDragResult   result,
                    GtdTaskRow     *self)
 {
-  set_cursor (GTK_WIDGET (self), NULL);
+  gtk_widget_set_cursor_from_name (GTK_WIDGET (self), NULL);
   gtk_widget_show (GTK_WIDGET (self));
 
   return FALSE;
@@ -515,18 +511,28 @@ on_task_changed_cb (GtdTaskRow  *self)
   self->changed = TRUE;
 }
 
+
 /*
  * GtkWidget overrides
  */
 
 static gboolean
 gtd_task_row_key_press_event (GtkWidget   *row,
-                              GdkEventKey *event)
+                              GdkEventKey *event_key)
 {
-  GtdTaskRow *self = GTD_TASK_ROW (row);
+  GdkModifierType modifiers;
+  GtdTaskRow *self;
+  GdkEvent *event;
+  guint keyval;
 
-  if (event->keyval == GDK_KEY_Escape && // Esc is pressed
-      !(event->state & (GDK_SHIFT_MASK|GDK_CONTROL_MASK))) // No modifiers together
+  self = GTD_TASK_ROW (row);
+  event = (GdkEvent*) event_key;
+
+  gdk_event_get_keyval (event, &keyval);
+  gdk_event_get_state (event, &modifiers);
+
+  /* Exit when pressing Esc without modifiers */
+  if (keyval == GDK_KEY_Escape && !(modifiers & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)))
     {
       self->active = FALSE;
       g_signal_emit (row, signals[EXIT], 0);
@@ -642,7 +648,7 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
   object_class->set_property = gtd_task_row_set_property;
 
   widget_class->key_press_event = gtd_task_row_key_press_event;
-  widget_class->get_preferred_width = gtd_row_get_preferred_width_with_max;
+  widget_class->measure = gtd_row_measure_with_max;
 
   g_type_ensure (GTD_TYPE_EXPANDABLE_ENTRY);
 
@@ -736,7 +742,6 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/todo/ui/task-row.ui");
 
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, dnd_box);
-  gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, dnd_event_box);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, dnd_icon);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, done_check);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, edit_panel_revealer);
@@ -772,17 +777,15 @@ gtd_task_row_init (GtdTaskRow *self)
   gtk_widget_init_template (GTK_WIDGET (self));
 
   /* The source of DnD is the drag icon */
-  gtk_drag_source_set (self->dnd_event_box,
+  gtk_drag_source_set (self->dnd_icon,
                        GDK_BUTTON1_MASK,
                        NULL,
-                       0,
                        GDK_ACTION_MOVE);
 
   /* But the rest of the row header is also draggable */
   gtk_drag_source_set (self->header_event_box,
                        GDK_BUTTON1_MASK,
                        NULL,
-                       0,
                        GDK_ACTION_MOVE);
 }
 
@@ -897,16 +900,18 @@ gtd_task_row_set_handle_subtasks (GtdTaskRow *self,
   self->handle_subtasks = handle_subtasks;
 
   gtk_widget_set_visible (self->dnd_box, handle_subtasks);
-  gtk_widget_set_visible (self->dnd_event_box, handle_subtasks);
+  gtk_widget_set_visible (self->dnd_icon, handle_subtasks);
   on_depth_changed_cb (self, NULL, self->task);
 
   if (handle_subtasks)
     {
+      /*
       gtk_drag_source_set (self->header_event_box,
                            GDK_BUTTON1_MASK,
                            NULL,
                            0,
                            GDK_ACTION_MOVE);
+       */
     }
   else
     {

@@ -3,12 +3,12 @@
   <requires lib="gtk+" version="3.16"/>
   <template class="GtdProviderPopover" parent="GtkPopover">
     <property name="can_focus">False</property>
-    <property name="border_width">18</property>
     <signal name="closed" handler="gtd_provider_popover__closed" swapped="no" />
     <child>
       <object class="GtkStack" id="stack">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="margin">18</property>
         <property name="vhomogeneous">False</property>
         <property name="interpolate_size">True</property>
         <property name="transition_duration">300</property>
@@ -81,11 +81,6 @@
                     <signal name="notify::text" handler="gtd_provider_popover__text_changed_cb" object="GtdProviderPopover" swapped="yes" />
                     <signal name="activate" handler="gtd_provider_popover__entry_activate" object="GtdProviderPopover" swapped="yes" />
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
                 </child>
                 <child>
                   <object class="GtkButton" id="change_location_button">
@@ -103,11 +98,6 @@
                       </object>
                     </child>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
                 <style>
                   <class name="linked"/>

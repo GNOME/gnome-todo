@@ -68,10 +68,10 @@
                     <property name="pixels-above-lines">6</property>
                     <property name="wrap-mode">word-char</property>
                     <property name="buffer">text_buffer</property>
-                    <signal name="button-press-event" handler="on_trap_textview_clicks_cb" swapped="no" after="yes" />
+                    <!-- <signal name="button-press-event" handler="on_trap_textview_clicks_cb" swapped="no" after="yes" />
                     <signal name="button-release-event" handler="on_trap_textview_clicks_cb" swapped="no" after="yes" />
                     <signal name="motion-notify-event" handler="on_hyperlink_hover_cb" swapped="no" />
-                    <signal name="event-after" handler="on_hyperlink_clicked_cb" swapped="no" />
+                    <signal name="event-after" handler="on_hyperlink_clicked_cb" swapped="no" /> -->
                   </object>
                 </child>
               </object>
@@ -230,13 +230,13 @@
 
   <object class="GtkPopover" id="date_popover">
     <property name="can_focus">False</property>
-    <property name="border_width">12</property>
     <property name="position">bottom</property>
     <child>
       <object class="GtkBox" id="date_popover_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
+        <property name="margin">12</property>
         <property name="spacing">12</property>
         <child>
           <object class="GtkCalendar" id="calendar">

@@ -23,9 +23,13 @@
 
 G_BEGIN_DECLS
 
-void                 gtd_row_get_preferred_width_with_max        (GtkWidget          *widget,
-                                                                  gint               *minimum_width,
-                                                                  gint               *natural_width);
+void                 gtd_row_measure_with_max                    (GtkWidget          *widget,
+                                                                  GtkOrientation      orientation,
+                                                                  gint                for_size,
+                                                                  gint               *minimum,
+                                                                  gint               *natural,
+                                                                  gint               *minimum_baseline,
+                                                                  gint               *natural_baseline);
 
 G_END_DECLS
 

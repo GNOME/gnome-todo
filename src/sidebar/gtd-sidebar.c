@@ -66,7 +66,6 @@ add_task_list (GtdSidebar  *self,
   g_debug ("Adding task list '%s'", gtd_task_list_get_name (list));
 
   row = gtd_sidebar_list_row_new (list);
-  gtk_widget_show (row);
 
   gtk_list_box_prepend (self->listbox, row);
 }
@@ -80,7 +79,6 @@ add_panel (GtdSidebar *self,
   g_debug ("Adding panel '%s'", gtd_panel_get_panel_name (panel));
 
   row = gtd_sidebar_panel_row_new (panel);
-  gtk_widget_show (row);
 
   gtk_list_box_prepend (self->listbox, row);
 }
@@ -94,7 +92,6 @@ add_provider (GtdSidebar  *self,
   g_debug ("Adding provider '%s'", gtd_provider_get_name (provider));
 
   row = gtd_sidebar_provider_row_new (provider);
-  gtk_widget_show (row);
 
   gtk_list_box_prepend (self->listbox, row);
 }
@@ -224,16 +221,24 @@ on_panel_removed_cb (GtdManager *manager,
 }
 
 static gboolean
-on_listbox_button_released_cb (GtkListBox     *listbox,
-                               GdkEventButton *event_button,
-                               GtdSidebar     *self)
+on_listbox_button_released_cb (GtkListBox *listbox,
+                               GdkEvent   *event,
+                               GtdSidebar *self)
 {
   GtkListBoxRow *row;
+  gdouble y;
+  guint button;
 
-  if (event_button->type != GDK_BUTTON_RELEASE || event_button->button != 3)
-    return GDK_EVENT_PROPAGATE;
+  if (gdk_event_get_event_type (event) != GDK_BUTTON_RELEASE ||
+      !gdk_event_get_button (event, &button) ||
+      button != 3)
+    {
+      return GDK_EVENT_PROPAGATE;
+    }
 
-  row = gtk_list_box_get_row_at_y (listbox, event_button->y);
+  gdk_event_get_coords (event, NULL, &y);
+
+  row = gtk_list_box_get_row_at_y (listbox, y);
 
   if (!row || GTD_IS_SIDEBAR_PANEL_ROW (row))
     return GDK_EVENT_PROPAGATE;

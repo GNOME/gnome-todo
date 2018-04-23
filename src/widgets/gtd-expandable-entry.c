@@ -24,6 +24,8 @@ struct _GtdExpandableEntry
 {
   GtkEntry            parent;
 
+  GtkEventController *motion_gesture;
+
   gboolean            propagate_natural_width;
 };
 
@@ -42,24 +44,6 @@ static GParamSpec *properties [N_PROPS];
 /*
  * GtkWidget overrides
  */
-
-static gboolean
-gtd_expandable_entry_event (GtkWidget *widget,
-                            GdkEvent  *event)
-{
-  if (gdk_event_get_event_type (event) == GDK_ENTER_NOTIFY)
-    {
-      gtk_widget_set_state_flags (widget, GTK_STATE_FLAG_PRELIGHT, FALSE);
-      gtk_widget_queue_draw (widget);
-    }
-  else if (gdk_event_get_event_type (event) == GDK_LEAVE_NOTIFY)
-    {
-      gtk_widget_unset_state_flags (widget, GTK_STATE_FLAG_PRELIGHT);
-      gtk_widget_queue_draw (widget);
-    }
-
-  return GDK_EVENT_PROPAGATE;
-}
 
 static void
 gtd_expandable_entry_measure (GtkWidget      *widget,
@@ -178,7 +162,6 @@ gtd_expandable_entry_class_init (GtdExpandableEntryClass *klass)
   object_class->get_property = gtd_expandable_entry_get_property;
   object_class->set_property = gtd_expandable_entry_set_property;
 
-  widget_class->event = gtd_expandable_entry_event;
   widget_class->measure = gtd_expandable_entry_measure;
 
   properties[PROP_PROPAGATE_NATURAL_WIDTH] = g_param_spec_boolean ("propagate-natural-width",

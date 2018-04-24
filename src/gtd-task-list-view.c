@@ -32,6 +32,7 @@
 #include "gtd-task.h"
 #include "gtd-task-list.h"
 #include "gtd-task-row.h"
+#include "gtd-utils-private.h"
 #include "gtd-window.h"
 
 #include <glib.h>
@@ -1694,14 +1695,14 @@ gtd_task_list_view_init (GtdTaskListView *self)
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  set_active_row (self, GTK_WIDGET (self->priv->new_task_row));
+  set_active_row (self, GTK_WIDGET (priv->new_task_row));
 
-  gtk_drag_dest_set (GTK_WIDGET (self->priv->listbox),
+  gtk_drag_dest_set (GTK_WIDGET (priv->listbox),
                      0,
-                     NULL,
+                     _gtd_get_content_formats (),
                      GDK_ACTION_MOVE);
 
-  self->priv->renderer = gtd_markdown_renderer_new ();
+  priv->renderer = gtd_markdown_renderer_new ();
 }
 
 /**

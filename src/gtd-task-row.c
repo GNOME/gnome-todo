@@ -29,8 +29,10 @@
 #include "gtd-task.h"
 #include "gtd-task-list.h"
 #include "gtd-task-list-view.h"
+#include "gtd-utils-private.h"
 
 #include <glib/gi18n.h>
+#include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
 struct _GtdTaskRow
@@ -281,34 +283,6 @@ on_remove_task_cb (GtdEditPane *edit_panel,
                    GtdTaskRow  *self)
 {
   g_signal_emit (self, signals[REMOVE_TASK], 0);
-}
-
-static void
-on_header_enter_cb (GtkEventController *controller,
-                    GtdTaskRow         *self)
-{
-  gtk_widget_set_cursor_from_name (self->header_event_box, "pointer");
-}
-
-static void
-on_header_leave_cb (GtkEventController *controller,
-                    GtdTaskRow         *self)
-{
-  gtk_widget_set_cursor_from_name (self->header_event_box, NULL);
-}
-
-static void
-on_dnd_icon_enter_cb (GtkEventController *controller,
-                      GtdTaskRow         *self)
-{
-  gtk_widget_set_cursor_from_name (self->dnd_icon, "grab");
-}
-
-static void
-on_dnd_icon_leave_cb (GtkEventController *controller,
-                      GtdTaskRow         *self)
-{
-  gtk_widget_set_cursor_from_name (self->dnd_icon, NULL);
 }
 
 static gboolean
@@ -756,8 +730,9 @@ gtd_task_row_init (GtdTaskRow *self)
 
   gtk_drag_source_set (self->dnd_icon,
                        GDK_BUTTON1_MASK,
-                       NULL,
+                       _gtd_get_content_formats (),
                        GDK_ACTION_MOVE);
+  gtk_widget_set_cursor_from_name (self->dnd_icon, "grab");
 
   gtk_widget_add_controller (self->dnd_icon, controller);
 
@@ -768,10 +743,12 @@ gtd_task_row_init (GtdTaskRow *self)
 
   gtk_drag_source_set (self->header_event_box,
                        GDK_BUTTON1_MASK,
-                       NULL,
+                       _gtd_get_content_formats (),
                        GDK_ACTION_MOVE);
 
   gtk_widget_add_controller (self->header_event_box, controller);
+
+  gtk_widget_set_cursor_from_name (self->header_event_box, "pointer");
 }
 
 GtkWidget*
@@ -890,13 +867,10 @@ gtd_task_row_set_handle_subtasks (GtdTaskRow *self,
 
   if (handle_subtasks)
     {
-      /*
       gtk_drag_source_set (self->header_event_box,
                            GDK_BUTTON1_MASK,
-                           NULL,
-                           0,
+                           _gtd_get_content_formats (),
                            GDK_ACTION_MOVE);
-       */
     }
   else
     {

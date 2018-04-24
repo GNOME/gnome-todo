@@ -19,8 +19,22 @@
  */
 
 #include "gtd-utils.h"
+#include "gtd-utils-private.h"
+
+#include <gtk/gtk.h>
 
 #include <string.h>
+
+GdkContentFormats*
+_gtd_get_content_formats (void)
+{
+  static GdkContentFormats *content_formats = NULL;
+
+  if (!content_formats)
+    content_formats = gdk_content_formats_new_for_gtype (GTK_TYPE_WIDGET);
+
+  return content_formats;
+}
 
 gchar*
 gtd_str_replace (const gchar *source,

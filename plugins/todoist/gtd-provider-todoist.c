@@ -19,7 +19,7 @@
 
 #define G_LOG_DOMAIN "GtdProviderTodoist"
 
-#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE 700
 
 #include "gtd-debug.h"
 #include "gtd-provider-todoist.h"

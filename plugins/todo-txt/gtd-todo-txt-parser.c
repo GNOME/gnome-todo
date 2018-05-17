@@ -38,7 +38,9 @@ typedef enum
   TOKEN_TITLE,
   TOKEN_LIST_NAME,
   TOKEN_LIST_COLOR,
-  TOKEN_DUE_DATE
+  TOKEN_DUE_DATE,
+  TOKEN_IN_DESCRIPTION,
+  TOKEN_NOTES
 } Token;
 
 static gint
@@ -126,7 +128,16 @@ parse_token_id (const gchar *token,
 
   if (g_str_has_prefix (token , "due:"))
     return TOKEN_DUE_DATE;
-
+  
+  if (g_str_has_prefix (token , "notes:"))
+    return TOKEN_NOTES;
+  
+  if (last_read == TOKEN_NOTES ||
+      last_read == TOKEN_IN_DESCRIPTION)
+    {
+      return TOKEN_IN_DESCRIPTION;
+    }
+    
   if (last_read == TOKEN_START ||
       last_read == TOKEN_DATE ||
       last_read == TOKEN_PRIORITY ||
@@ -165,6 +176,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   g_autoptr (GString) parent_task_name = NULL;
   g_autoptr (GString) list_name = NULL;
   g_autoptr (GString) title = NULL;
+  g_autoptr (GString) notes = NULL;
   g_autoptr (GtdTask) task = NULL;
   g_auto (GStrv) tokens = NULL;
   GDateTime *dt;
@@ -175,6 +187,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   dt = NULL;
   title = g_string_new (NULL);
   list_name = g_string_new (NULL);
+  notes = g_string_new (NULL);
   parent_task_name = g_string_new (NULL);
   last_token = TOKEN_START;
 
@@ -184,6 +197,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   for (i = 0; tokens && tokens[i]; i++)
     {
       const gchar *token;
+      gchar *esc_token;
 
       token = tokens[i];
       token_id = parse_token_id (token, last_token);
@@ -220,7 +234,21 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
           dt = parse_date (token + strlen ("due:"));
           gtd_task_set_due_date (task, dt);
           break;
-
+        
+        case TOKEN_NOTES:
+          /* remove the extra "\" added for escaping special character */
+          esc_token = g_strcompress (token + strlen("notes:"));
+          g_string_append (notes, esc_token);
+          g_free (esc_token);
+          break;
+        
+        case TOKEN_IN_DESCRIPTION:
+          esc_token = g_strcompress (token);
+          g_string_append (notes, " ");
+          g_string_append (notes, esc_token);
+          g_free(esc_token);
+          break;
+          
         case TOKEN_LIST_COLOR:
         case TOKEN_START:
         default:
@@ -235,6 +263,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   g_strstrip (title->str);
 
   gtd_task_set_title (task, title->str);
+  gtd_task_set_description (task, notes->str);
 
   if (out_list_name)
     *out_list_name = g_strdup (list_name->str + 1);
@@ -402,7 +431,15 @@ gtd_todo_txt_parser_get_line_type (const gchar  *line,
             }
 
           break;
-
+        
+        case TOKEN_NOTES:
+          line_type = GTD_TODO_TXT_LINE_TYPE_TASK;
+          break;
+          
+        case TOKEN_IN_DESCRIPTION:
+          line_type = GTD_TODO_TXT_LINE_TYPE_TASK;
+          break;
+          
         case TOKEN_START:
           /* Nothing */
           break;

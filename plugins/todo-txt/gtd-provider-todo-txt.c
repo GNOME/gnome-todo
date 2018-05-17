@@ -84,6 +84,7 @@ print_task (GString *output,
 {
   GtdTaskList *list;
   GDateTime *dt;
+  const gchar *description;
   gint priority;
   gboolean is_complete;
 
@@ -91,6 +92,7 @@ print_task (GString *output,
   priority = gtd_task_get_priority (task);
   dt = gtd_task_get_due_date (task);
   list = gtd_task_get_list (task);
+  description = gtd_task_get_description (task);
 
   if (is_complete)
     g_string_append (output, "x ");
@@ -114,6 +116,13 @@ print_task (GString *output,
     {
       g_autofree gchar *formatted_time = g_date_time_format (dt, "%F");
       g_string_append_printf (output, " due:%s", formatted_time);
+    }
+
+  if (description)
+    {
+      /* escape special character in description by placing an extra "\" */ 
+      g_autofree gchar *new_description = g_strescape (description, NULL); 
+      g_string_append_printf (output, " notes:%s", new_description);
     }
 
   g_string_append (output, "\n");

@@ -38,8 +38,15 @@ typedef enum
   TOKEN_TITLE,
   TOKEN_LIST_NAME,
   TOKEN_LIST_COLOR,
-  TOKEN_DUE_DATE
+  TOKEN_DUE_DATE,
+  TOKEN_NOTE
 } Token;
+
+typedef struct
+{
+  Token               last_token;
+  gboolean            in_description;
+} GtdTodoTxtParserState;
 
 static gint
 parse_priority (const gchar *token)
@@ -98,9 +105,51 @@ is_date (const gchar *dt)
   return g_date_valid (&date);
 }
 
+static void
+append_note (const gchar           *token,
+             GString               *note,
+             GtdTodoTxtParserState *state)
+{
+  g_autofree gchar *esc_token = NULL;
+
+  if (!state->in_description && g_str_has_prefix (token , "note:"))
+    {
+      /* Remove the extra "\" added for escaping special character */
+      esc_token = g_strcompress (token + strlen ("note:\""));
+      g_string_append (note, esc_token);
+      g_string_append (note, " ");
+      state->in_description = TRUE;
+    }
+  else if (state->in_description)
+    {
+      if (g_str_has_suffix (token, "\""))
+        {
+          g_autofree gchar *new_token = NULL;
+
+          new_token = g_strdup (token);
+          /* Remove the last "\"" */
+          new_token [strlen (new_token) - 1] = '\0';
+
+          /* Remove the extra "\" added for escaping special character */
+          esc_token = g_strcompress (new_token);
+          g_string_append (note, esc_token);
+
+          /* Revert back parser state in_description to FALSE */
+          state->in_description = FALSE;
+        }
+      else
+        {
+          /* Remove the extra "\" added for escaping special character */
+          esc_token = g_strcompress (token);
+          g_string_append (note, esc_token);
+          g_string_append (note, " ");
+        }
+    }
+}
+
 static Token
-parse_token_id (const gchar *token,
-                gint         last_read)
+parse_token_id (const gchar           *token,
+                GtdTodoTxtParserState *state)
 {
   gint token_length;
 
@@ -127,15 +176,21 @@ parse_token_id (const gchar *token,
   if (g_str_has_prefix (token , "due:"))
     return TOKEN_DUE_DATE;
 
-  if (last_read == TOKEN_START ||
-      last_read == TOKEN_DATE ||
-      last_read == TOKEN_PRIORITY ||
-      last_read == TOKEN_COMPLETE||
-      last_read == TOKEN_TITLE)
+  if ((!state->in_description && g_str_has_prefix (token , "note:")) ||
+      (state->last_token == TOKEN_NOTE && state->in_description))
+    {
+      return TOKEN_NOTE;
+    }
+
+  if (state->last_token == TOKEN_START ||
+      state->last_token == TOKEN_DATE ||
+      state->last_token == TOKEN_PRIORITY ||
+      state->last_token == TOKEN_COMPLETE||
+      state->last_token == TOKEN_TITLE)
     {
       return TOKEN_TITLE;
     }
-  else if (last_read == TOKEN_LIST_NAME)
+  else if (state->last_token == TOKEN_LIST_NAME)
     {
       return TOKEN_LIST_NAME;
     }
@@ -165,18 +220,21 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   g_autoptr (GString) parent_task_name = NULL;
   g_autoptr (GString) list_name = NULL;
   g_autoptr (GString) title = NULL;
+  g_autoptr (GString) note = NULL;
   g_autoptr (GtdTask) task = NULL;
+  GtdTodoTxtParserState state;
   g_auto (GStrv) tokens = NULL;
   GDateTime *dt;
-  Token last_token;
   Token token_id;
   guint i;
 
   dt = NULL;
   title = g_string_new (NULL);
   list_name = g_string_new (NULL);
+  note = g_string_new (NULL);
   parent_task_name = g_string_new (NULL);
-  last_token = TOKEN_START;
+  state.last_token = TOKEN_START;
+  state.in_description = FALSE;
 
   task = gtd_provider_todo_txt_generate_task (GTD_PROVIDER_TODO_TXT (provider));
   tokens = tokenize_line (line);
@@ -186,7 +244,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
       const gchar *token;
 
       token = tokens[i];
-      token_id = parse_token_id (token, last_token);
+      token_id = parse_token_id (token, &state);
 
       switch (token_id)
         {
@@ -198,7 +256,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
           return NULL;
 
         case TOKEN_PRIORITY:
-          last_token = TOKEN_PRIORITY;
+          state.last_token = TOKEN_PRIORITY;
           gtd_task_set_priority (task, parse_priority (token));
           break;
 
@@ -221,13 +279,17 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
           gtd_task_set_due_date (task, dt);
           break;
 
+        case TOKEN_NOTE:
+          append_note (token, note, &state);
+          break;
+
         case TOKEN_LIST_COLOR:
         case TOKEN_START:
         default:
           break;
         }
 
-      last_token = token_id;
+      state.last_token = token_id;
     }
 
   g_strstrip (parent_task_name->str);
@@ -235,6 +297,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   g_strstrip (title->str);
 
   gtd_task_set_title (task, title->str);
+  gtd_task_set_description (task, note->str);
 
   if (out_list_name)
     *out_list_name = g_strdup (list_name->str + 1);
@@ -327,15 +390,15 @@ gtd_todo_txt_parser_get_line_type (const gchar  *line,
 {
   GtdTodoTxtLineType line_type;
   g_auto (GStrv) tokens;
+  GtdTodoTxtParserState state;
   gboolean task_list_name_tk;
-  Token last_read;
   Token token_id;
   gint i;
 
   GTD_ENTRY;
 
   tokens = tokenize_line (line);
-  last_read = TOKEN_START;
+  state.last_token = TOKEN_START;
   line_type = GTD_TODO_TXT_LINE_TYPE_TASKLIST;
   task_list_name_tk = FALSE;
 
@@ -343,12 +406,12 @@ gtd_todo_txt_parser_get_line_type (const gchar  *line,
     {
       const gchar *token = tokens[i];
 
-      token_id = parse_token_id (token, last_read);
+      token_id = parse_token_id (token, &state);
 
       switch (token_id)
         {
         case TOKEN_COMPLETE:
-          if (last_read == TOKEN_START)
+          if (state.last_token == TOKEN_START)
             line_type = GTD_TODO_TXT_LINE_TYPE_TASK;
           break;
 
@@ -356,12 +419,12 @@ gtd_todo_txt_parser_get_line_type (const gchar  *line,
           return GTD_TODO_TXT_LINE_TYPE_TASKLIST;
 
         case TOKEN_PRIORITY:
-          if (last_read <= TOKEN_COMPLETE)
+          if (state.last_token <= TOKEN_COMPLETE)
             line_type = GTD_TODO_TXT_LINE_TYPE_TASK;
           break;
 
         case TOKEN_DATE:
-          if (last_read <= TOKEN_PRIORITY)
+          if (state.last_token <= TOKEN_PRIORITY)
             {
               line_type = GTD_TODO_TXT_LINE_TYPE_TASK;
 
@@ -403,12 +466,17 @@ gtd_todo_txt_parser_get_line_type (const gchar  *line,
 
           break;
 
+        case TOKEN_NOTE:
+          state.in_description = TRUE;
+          line_type = GTD_TODO_TXT_LINE_TYPE_TASK;
+          break;
+
         case TOKEN_START:
           /* Nothing */
           break;
         }
 
-      last_read = token_id;
+      state.last_token = token_id;
     }
 
   if (!task_list_name_tk)

@@ -6,13 +6,14 @@ data/org.gnome.todo.gschema.xml
 data/ui/edit-pane.ui
 data/ui/empty-list.ui
 data/ui/initial-setup.ui
-data/ui/list-selector-panel.ui
 data/ui/list-view.ui
 data/ui/new-task-row.ui
 data/ui/plugin-dialog.ui
 data/ui/provider-popover.ui
 data/ui/provider-row.ui
 data/ui/provider-selector.ui
+data/ui/sidebar-list-row.ui
+data/ui/sidebar-provider-row.ui
 data/ui/task-row.ui
 data/ui/window.ui
 plugins/background/gtd-plugin-background.c
@@ -22,6 +23,7 @@ plugins/eds/gtd-plugin-eds.c
 plugins/eds/gtd-provider-eds.c
 plugins/eds/gtd-provider-local.c
 plugins/eds/gtd-task-list-eds.c
+plugins/next-week-panel/gtd-next-week-panel.c
 plugins/scheduled-panel/gtd-panel-scheduled.c
 plugins/score/score/__init__.py
 plugins/today-panel/gtd-panel-today.c
@@ -40,5 +42,4 @@ src/gtd-task-list-view.c
 src/gtd-task-row.c
 src/gtd-window.c
 src/main.c
-src/views/gtd-list-selector-grid-item.c
-src/views/gtd-list-selector-panel.c
+src/sidebar/gtd-sidebar-list-row.c

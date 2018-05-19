@@ -8,6 +8,7 @@
         "devel"
     ],
     "desktop-file-name-prefix" : "(Development) ",
+    "rename-desktop-file" : "org.gnome.Todo.desktop",
     "finish-args" : [
         "--share=ipc",
         "--socket=x11",

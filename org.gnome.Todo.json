@@ -96,10 +96,13 @@
                 "-DENABLE_VALA_BINDINGS=ON",
                 "-DENABLE_WEATHER=OFF",
                 "-DWITH_OPENLDAP=OFF",
+                "-DWITH_LIBDB=OFF",
                 "-DENABLE_INTROSPECTION=ON",
                 "-DENABLE_INSTALLED_TESTS=OFF",
                 "-DENABLE_GTK_DOC=OFF",
-                "-DENABLE_EXAMPLES=OFF"
+                "-DENABLE_EXAMPLES=OFF",
+                "-DENABLE_VALA_BINDINGS=OFF",
+                "-DENABLE_INTROSPECTION=OFF"
             ],
             "cmake" : true,
             "sources" : [

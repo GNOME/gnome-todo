@@ -176,6 +176,7 @@ src_inc = include_directories('src', 'src/engine', 'src/interfaces', 'src/notifi
 data_dir = join_paths(meson.source_root(), 'data')
 po_dir = join_paths(meson.source_root(), 'po')
 
+subdir('build-aux')
 subdir('plugins')
 subdir('src')
 subdir('data')
@@ -185,8 +186,6 @@ enable_gtk_doc = get_option('gtk_doc')
 if enable_gtk_doc
   subdir('doc/reference')
 endif
-
-meson.add_install_script('meson_post_install.py')
 
 output = '\n        gnome-todo ' + gnome_todo_version + '\n'
 output += '        ==================\n\n'

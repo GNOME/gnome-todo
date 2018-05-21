@@ -61,7 +61,10 @@ ubuntu:devel:
 flatpak:master:
     image: registry.gitlab.com/alatiera/gnome-nightly-oci/gnome-master:latest
     stage: flatpak
+    variables:
+      FLATPAK_MANIFEST_FILE: build-aux/flatpak/org.gnome.Todo.json
     script:
+    - cp ${FLATPAK_MANIFEST_FILE} . || true
     - flatpak-builder --stop-at=gnome-todo app org.gnome.Todo.json
     - flatpak build app meson --prefix /app -Dtracing=true _build
     - flatpak build app ninja -C _build install

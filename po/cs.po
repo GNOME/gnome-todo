@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2018-03-09 02:49+0000\n"
-"PO-Revision-Date: 2018-03-09 08:26+0100\n"
+"POT-Creation-Date: 2018-05-19 17:50+0000\n"
+"PO-Revision-Date: 2018-05-21 09:46+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -22,8 +22,8 @@ msgstr ""
 "X-Project-Style: gnome\n"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in:7
-#: data/org.gnome.Todo.desktop.in:3 src/gtd-application.c:156
-#: src/gtd-window.c:799 src/gtd-window.c:830 src/main.c:35
+#: data/org.gnome.Todo.desktop.in:3 src/gtd-application.c:157
+#: src/gtd-window.c:760 src/gtd-window.c:791 src/main.c:35
 msgid "To Do"
 msgstr "Úkoly"
 
@@ -154,44 +154,44 @@ msgstr ""
 msgid "_Notes"
 msgstr "Poz_námky"
 
-#: data/ui/edit-pane.ui:93
+#: data/ui/edit-pane.ui:95
 msgid "D_ue Date"
 msgstr "Dat_um splnění"
 
-#: data/ui/edit-pane.ui:111
+#: data/ui/edit-pane.ui:113
 msgid "_Today"
 msgstr "Dne_s"
 
-#: data/ui/edit-pane.ui:121
+#: data/ui/edit-pane.ui:123
 msgid "To_morrow"
 msgstr "_Zítra"
 
-#: data/ui/edit-pane.ui:169
+#: data/ui/edit-pane.ui:171
 msgid "_Priority"
 msgstr "_Priorita"
 
-#: data/ui/edit-pane.ui:187
+#: data/ui/edit-pane.ui:189
 msgctxt "taskpriority"
 msgid "None"
 msgstr "žádná"
 
-#: data/ui/edit-pane.ui:188
+#: data/ui/edit-pane.ui:190
 msgid "Low"
 msgstr "nízká"
 
-#: data/ui/edit-pane.ui:189
+#: data/ui/edit-pane.ui:191
 msgid "Medium"
 msgstr "střední"
 
-#: data/ui/edit-pane.ui:190
+#: data/ui/edit-pane.ui:192
 msgid "High"
 msgstr "vysoká"
 
-#: data/ui/edit-pane.ui:198 data/ui/list-selector-panel.ui:93
+#: data/ui/edit-pane.ui:200
 msgid "_Delete"
 msgstr "O_dstranit"
 
-#: data/ui/edit-pane.ui:249
+#: data/ui/edit-pane.ui:251
 msgctxt "taskdate"
 msgid "None"
 msgstr "Žádné"
@@ -209,7 +209,7 @@ msgid "To Do Setup"
 msgstr "Nastavení aplikace Úkoly"
 
 #: data/ui/initial-setup.ui:70 data/ui/provider-popover.ui:43
-#: data/ui/window.ui:74
+#: data/ui/window.ui:123
 msgid "_Cancel"
 msgstr "_Zrušit"
 
@@ -217,35 +217,7 @@ msgstr "_Zrušit"
 msgid "_Done"
 msgstr "_Hotovo"
 
-#: data/ui/list-selector-panel.ui:79 data/ui/list-selector-panel.ui:173
-msgid "_Rename"
-msgstr "Přej_menovat"
-
-#: data/ui/list-selector-panel.ui:119 src/views/gtd-list-selector-panel.c:469
-msgid "Lists"
-msgstr "Seznamy"
-
-#: data/ui/list-selector-panel.ui:129
-msgid "Tasks"
-msgstr "Úkoly"
-
-#: data/ui/list-selector-panel.ui:147
-msgid "Name of the task list"
-msgstr "Název seznamu úkolů"
-
-#: data/ui/list-selector-panel.ui:263
-msgid "_New List"
-msgstr "_Nový seznam"
-
-#: data/ui/list-view.ui:113
-msgid "Show or hide completed tasks"
-msgstr "Zobrazit nebo skrýt splněné úkoly"
-
-#: data/ui/list-view.ui:140 src/gtd-task-list-view.c:379
-msgid "Done"
-msgstr "Hotovo"
-
-#: data/ui/new-task-row.ui:29
+#: data/ui/new-task-row.ui:31
 msgid "New task…"
 msgstr "Nový úkol…"
 
@@ -296,6 +268,18 @@ msgstr "Microsoft Exchange"
 #: data/ui/provider-selector.ui:154
 msgid "Or you can just store your tasks on this computer"
 msgstr "Nebo můžete své úkoly jednoduše ukládat na tomto počítači."
+
+#: data/ui/sidebar-list-row.ui:54
+msgid "Delete"
+msgstr "Odstranit"
+
+#: data/ui/sidebar-provider-row.ui:100
+msgid "Loading…"
+msgstr "Načítá se…"
+
+#: data/ui/window.ui:78
+msgid "_New List"
+msgstr "_Nový seznam"
 
 #: plugins/background/gtd-plugin-background.c:150
 #, c-format
@@ -349,53 +333,76 @@ msgstr "Po té, co se Úkoly spustí, zobrazit úvodní upozornění"
 msgid "Error loading GNOME Online Accounts"
 msgstr "Chyba při načítání Účtů on-line GNOME"
 
-#: plugins/eds/gtd-provider-eds.c:139
+#: plugins/eds/gtd-provider-eds.c:140
 msgid "Failed to connect to task list"
 msgstr "Připojení k seznamu úkolů selhalo"
 
-#: plugins/eds/gtd-provider-eds.c:351
+#: plugins/eds/gtd-provider-eds.c:361
 msgid "An error occurred while creating a task"
 msgstr "Při vytváření úkolu se vyskytla chyba"
 
-#: plugins/eds/gtd-provider-eds.c:383
+#: plugins/eds/gtd-provider-eds.c:393
 msgid "An error occurred while modifying a task"
 msgstr "Při změně úkolu se vyskytla chyba"
 
-#: plugins/eds/gtd-provider-eds.c:404
+#: plugins/eds/gtd-provider-eds.c:414
 msgid "An error occurred while removing a task"
 msgstr "Při odstraňování úkolu se vyskytla chyba"
 
-#: plugins/eds/gtd-provider-eds.c:422
+#: plugins/eds/gtd-provider-eds.c:432
 msgid "An error occurred while creating a task list"
 msgstr "Při vytváření seznamu úkolů se vyskytla chyba"
 
-#: plugins/eds/gtd-provider-eds.c:444 plugins/eds/gtd-provider-eds.c:467
+#: plugins/eds/gtd-provider-eds.c:454 plugins/eds/gtd-provider-eds.c:477
 msgid "An error occurred while modifying a task list"
 msgstr "Při změně seznamu úkolů se vyskytla chyba"
 
 #: plugins/eds/gtd-provider-local.c:50
-msgid "Local"
-msgstr "Místní"
-
-#: plugins/eds/gtd-provider-local.c:56
 msgid "On This Computer"
 msgstr "Na tomto počítači"
 
-#: plugins/eds/gtd-task-list-eds.c:277 plugins/eds/gtd-task-list-eds.c:307
-#: plugins/eds/gtd-task-list-eds.c:331
+#: plugins/eds/gtd-provider-local.c:62
+msgid "Local"
+msgstr "Místní"
+
+#: plugins/eds/gtd-task-list-eds.c:277 plugins/eds/gtd-task-list-eds.c:310
+#: plugins/eds/gtd-task-list-eds.c:334
 msgid "Error fetching tasks from list"
 msgstr "Chyba při získávání úkolů ze seznamu"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:89 src/gtd-edit-pane.c:110
+#: plugins/next-week-panel/gtd-next-week-panel.c:107
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:102 src/gtd-edit-pane.c:112
 msgid "No date set"
 msgstr "Nebylo nastaveno datum"
+
+#: plugins/next-week-panel/gtd-next-week-panel.c:115
+#: plugins/today-panel/gtd-panel-today.c:201
+msgid "Overdue"
+msgstr "Ve skluzu"
+
+#: plugins/next-week-panel/gtd-next-week-panel.c:119
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:123
+#: plugins/score/score/__init__.py:101
+#: plugins/today-panel/gtd-panel-today.c:210
+#: plugins/today-panel/gtd-panel-today.c:276 src/gtd-task-row.c:144
+msgid "Today"
+msgstr "Dnes"
+
+#: plugins/next-week-panel/gtd-next-week-panel.c:123
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:127 src/gtd-task-row.c:148
+msgid "Tomorrow"
+msgstr "Zítra"
+
+#: plugins/next-week-panel/gtd-next-week-panel.c:372
+msgid "Next 7 Days"
+msgstr "Příštích 7 dní"
 
 #. Translators: This message will never be used with '1 day ago'
 #. * but the singular form is required because some languages do not
 #. * have plurals, some languages reuse the singular form for numbers
 #. * like 21, 31, 41, etc.
 #.
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:102
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:115
 #, c-format
 msgid "%d day ago"
 msgid_plural "%d days ago"
@@ -403,32 +410,16 @@ msgstr[0] "Před %d dnem"
 msgstr[1] "Před %d dny"
 msgstr[2] "Před %d dny"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:106 src/gtd-task-row.c:148
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:119 src/gtd-task-row.c:152
 msgid "Yesterday"
 msgstr "Včera"
 
-#. Setup a title
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:110
-#: plugins/score/score/__init__.py:101
-#: plugins/today-panel/gtd-panel-today.c:134
-#: plugins/today-panel/gtd-panel-today.c:139
-#: plugins/today-panel/gtd-panel-today.c:273 src/gtd-task-row.c:140
-msgid "Today"
-msgstr "Dnes"
-
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:114 src/gtd-task-row.c:144
-msgid "Tomorrow"
-msgstr "Zítra"
-
-#. Setup a title
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:365
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:370
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:507
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:378
 msgid "Scheduled"
 msgstr "Naplánováno"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:512
-#: plugins/today-panel/gtd-panel-today.c:278
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:535
+#: plugins/today-panel/gtd-panel-today.c:432
 #: plugins/unscheduled-panel/unscheduled-panel/__init__.py:58
 msgid "Clear completed tasks…"
 msgstr "Vymazat splněné úkoly…"
@@ -437,21 +428,21 @@ msgstr "Vymazat splněné úkoly…"
 msgid "No task completed today"
 msgstr "Dnes nebyl dokončen žádný úkol"
 
-#: plugins/todoist/gtd-provider-todoist.c:212
+#: plugins/todoist/gtd-provider-todoist.c:213
 msgid "Error fetching Todoist account key"
 msgstr "Chyba při získávání klíče účtu Todoist"
 
-#: plugins/todoist/gtd-provider-todoist.c:213
+#: plugins/todoist/gtd-provider-todoist.c:214
 msgid "Please ensure that Todoist account is correctly configured."
 msgstr "Zkontrolujte prosím, jestli je účet Todoist správně nastavený."
 
-#: plugins/todoist/gtd-provider-todoist.c:557
+#: plugins/todoist/gtd-provider-todoist.c:558
 #, c-format
 msgid ""
 "GNOME To Do doesn’t have the necessary permissions to perform this action: %s"
 msgstr "Úkoly GNOME nemají dostatečná oprávnění k provedení této činnosti: %s"
 
-#: plugins/todoist/gtd-provider-todoist.c:565
+#: plugins/todoist/gtd-provider-todoist.c:566
 #, c-format
 msgid ""
 "Invalid response received from Todoist servers. Please reload GNOME To Do."
@@ -459,23 +450,23 @@ msgstr ""
 "Obdržena neplatná odpověď od serverů Todoist. Načtěte prosím znovu Úkoly "
 "GNOME."
 
-#: plugins/todoist/gtd-provider-todoist.c:865
+#: plugins/todoist/gtd-provider-todoist.c:866
 msgid "An error occurred while updating a Todoist task"
 msgstr "Při aktualizaci úkolu Todoist se vyskytla chyba"
 
-#: plugins/todoist/gtd-provider-todoist.c:982
+#: plugins/todoist/gtd-provider-todoist.c:983
 msgid "An error occurred while retrieving Todoist data"
 msgstr "Při získávání data Todoist se vyskytla chyba"
 
-#: plugins/todoist/gtd-provider-todoist.c:1057
+#: plugins/todoist/gtd-provider-todoist.c:1058
 msgid "An error occurred while updating Todoist"
 msgstr "Při aktualizaci Todoist se vyskytla chyba"
 
-#: plugins/todoist/gtd-provider-todoist.c:1117
+#: plugins/todoist/gtd-provider-todoist.c:1118
 msgid "Todoist"
 msgstr "Todoist"
 
-#: plugins/todoist/gtd-provider-todoist.c:1426
+#: plugins/todoist/gtd-provider-todoist.c:1433
 #, c-format
 msgid "Todoist: %s"
 msgstr "Todoist: %s"
@@ -516,15 +507,15 @@ msgstr ""
 "narazit na nestabilitu, chyby a případně i přijít o data. Nedoporučuje se "
 "nasazovat používání Todo.txt na produkčních systémech."
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:326
+#: plugins/todo-txt/gtd-provider-todo-txt.c:327
 msgid "Error while opening the file monitor. Todo.txt will not be monitored"
 msgstr "Chyba při otevírání sledování souboru. Todo.txt nebude sledován"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:395
+#: plugins/todo-txt/gtd-provider-todo-txt.c:396
 msgid "Todo.txt"
 msgstr "Todo.txt"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:401
+#: plugins/todo-txt/gtd-provider-todo-txt.c:408
 msgid "On the Todo.txt file"
 msgstr "V souboru Todo.txt"
 
@@ -548,25 +539,25 @@ msgstr "Neplánováno"
 msgid "Unscheduled (%d)"
 msgstr "Neplánováno (%d)"
 
-#: src/gtd-application.c:72
+#: src/gtd-application.c:73
 msgid "Quit GNOME To Do"
 msgstr "Ukončit Úkoly GNOME"
 
-#: src/gtd-application.c:73
+#: src/gtd-application.c:74
 msgid "Enable debug messages"
 msgstr "Zapnout ladicí zprávy"
 
-#: src/gtd-application.c:146
+#: src/gtd-application.c:147
 #, c-format
 msgid "Copyright © %1$d The To Do authors"
 msgstr "Copyright © %1$d autoři programu Úkoly"
 
-#: src/gtd-application.c:151
+#: src/gtd-application.c:152
 #, c-format
 msgid "Copyright © %1$d–%2$d The To Do authors"
 msgstr "Copyright © %1$d – %2$d autoři programu Úkoly"
 
-#: src/gtd-application.c:163
+#: src/gtd-application.c:164
 msgid "translator-credits"
 msgstr ""
 "Zdeněk Hataš <zdenek.hatas@gmail.com>\n"
@@ -624,70 +615,76 @@ msgstr "Chyba při načítaní rozšíření"
 msgid "Error unloading extension"
 msgstr "Chyba při uzavírání rozšíření"
 
-#: src/gtd-task-list-view.c:293
+#: src/gtd-task-list-view.c:351
 msgid "Removing this task will also remove its subtasks. Remove anyway?"
 msgstr ""
 "Odstraněním tohoto úkolu se odstraní i jeho dílčí části. Má se i tak "
 "odstranit?"
 
-#: src/gtd-task-list-view.c:296
+#: src/gtd-task-list-view.c:354
 msgid "Once removed, the tasks cannot be recovered."
 msgstr "Jakmile jej odstraníte, již jej nelze obnovit."
 
-#: src/gtd-task-list-view.c:299 src/views/gtd-list-selector-panel.c:388
+#: src/gtd-task-list-view.c:357
 msgid "Cancel"
 msgstr "Zrušit"
 
-#: src/gtd-task-list-view.c:301
+#: src/gtd-task-list-view.c:359
 msgid "Remove"
 msgstr "Odstranit"
 
-#: src/gtd-task-list-view.c:381
-#, c-format
-msgid "Done (%d)"
-msgstr "Hotovo (%d)"
-
-#: src/gtd-task-list-view.c:661
+#: src/gtd-task-list-view.c:801
 #, c-format
 msgid "Task <b>%s</b> removed"
 msgstr "Úkol <b>%s</b> byl odstraněn"
 
-#: src/gtd-task-list-view.c:685
+#: src/gtd-task-list-view.c:825 src/sidebar/gtd-sidebar-list-row.c:254
 msgid "Undo"
 msgstr "Zpět"
 
-#: src/gtd-window.c:476
+#: src/gtd-window.c:447
 msgid "Details"
 msgstr "Podrobnosti"
 
-#: src/gtd-window.c:689
-msgid "Loading your task lists…"
-msgstr "Načítají se vaše seznamy úkolů…"
-
-#: src/gtd-window.c:793
+#: src/gtd-window.c:755
 msgid "Click a task list to select"
 msgstr "Kliknutím vyberte seznam úkolů"
 
-#.
-#. * If there's no task available, draw a "No tasks" string at
-#. * the middle of the list thumbnail.
-#.
-#: src/views/gtd-list-selector-grid-item.c:250
-msgid "No tasks"
-msgstr "Žádné úkoly"
+#~ msgid "_Rename"
+#~ msgstr "Přej_menovat"
 
-#: src/views/gtd-list-selector-panel.c:381
-msgid "Remove the selected task lists?"
-msgstr "Odstranit vybrané seznamy úkolů?"
+#~ msgid "Lists"
+#~ msgstr "Seznamy"
 
-#: src/views/gtd-list-selector-panel.c:384
-msgid "Once removed, the task lists cannot be recovered."
-msgstr "Jakmile seznamy úkolů odstraníte, již je nelze obnovit."
+#~ msgid "Tasks"
+#~ msgstr "Úkoly"
 
-#: src/views/gtd-list-selector-panel.c:396
-msgid "Remove task lists"
-msgstr "Odstranit seznamy úkolů"
+#~ msgid "Name of the task list"
+#~ msgstr "Název seznamu úkolů"
 
-#: src/views/gtd-list-selector-panel.c:709
-msgid "Clear completed tasks"
-msgstr "Vymazat splněné úkoly"
+#~ msgid "Show or hide completed tasks"
+#~ msgstr "Zobrazit nebo skrýt splněné úkoly"
+
+#~ msgid "Done"
+#~ msgstr "Hotovo"
+
+#~ msgid "Done (%d)"
+#~ msgstr "Hotovo (%d)"
+
+#~ msgid "Loading your task lists…"
+#~ msgstr "Načítají se vaše seznamy úkolů…"
+
+#~ msgid "No tasks"
+#~ msgstr "Žádné úkoly"
+
+#~ msgid "Remove the selected task lists?"
+#~ msgstr "Odstranit vybrané seznamy úkolů?"
+
+#~ msgid "Once removed, the task lists cannot be recovered."
+#~ msgstr "Jakmile seznamy úkolů odstraníte, již je nelze obnovit."
+
+#~ msgid "Remove task lists"
+#~ msgstr "Odstranit seznamy úkolů"
+
+#~ msgid "Clear completed tasks"
+#~ msgstr "Vymazat splněné úkoly"

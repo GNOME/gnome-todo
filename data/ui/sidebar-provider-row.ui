@@ -62,16 +62,12 @@
 
                 <!-- Drop down icon -->
                 <child>
-                  <object class="GtkImage">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">pan-down-symbolic</property>
-                    <style>
-                      <class name="dim-label"/>
-                    </style>
                   </object>
                   <packing>
-                    <property name="name">icon</property>
+                    <property name="name">empty</property>
                   </packing>
                 </child>
 

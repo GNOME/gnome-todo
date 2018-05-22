@@ -113,7 +113,7 @@ update_loading_state (GtdSidebarProviderRow *self)
   is_loading = gtd_object_get_loading (GTD_OBJECT (self->provider));
   has_lists = lists != NULL;
 
-  gtk_stack_set_visible_child_name (self->stack, is_loading ? "spinner" : "icon");
+  gtk_stack_set_visible_child_name (self->stack, is_loading ? "spinner" : "empty");
   gtk_widget_set_visible (self->loading_label, is_loading && !has_lists);
 }
 

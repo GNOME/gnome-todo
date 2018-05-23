@@ -18,6 +18,8 @@
 
 #define G_LOG_DOMAIN "GtdWindow"
 
+#include "config.h"
+
 #include "interfaces/gtd-activatable.h"
 #include "interfaces/gtd-provider.h"
 #include "interfaces/gtd-panel.h"
@@ -100,6 +102,28 @@ enum
 };
 
 
+static void
+setup_development_build (GtdWindow *self)
+{
+  GtkStyleContext *context;
+
+  g_message (_("This is a development build of To Do. You may experience errors, wrong behaviors, "
+               "and data loss."));
+
+  context = gtk_widget_get_style_context (GTK_WIDGET (self));
+
+  gtk_style_context_add_class (context, "development-version");
+}
+
+static gboolean
+is_development_build (void)
+{
+#ifdef DEVELOPMENT_BUILD
+  return TRUE;
+#else
+  return FALSE;
+#endif
+}
 
 static void
 add_widgets (GtdWindow *self,
@@ -663,6 +687,10 @@ gtd_window_init (GtdWindow *self)
 
   gtd_sidebar_set_panel_stack (self->sidebar, GTK_STACK (self->stack));
   gtd_sidebar_set_task_list_panel (self->sidebar, self->task_list_panel);
+
+  /* Development build */
+  if (is_development_build ())
+    setup_development_build (self);
 }
 
 GtkWidget*

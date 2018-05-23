@@ -45,6 +45,9 @@ config_h = configuration_data()
 
 config_h.set_quoted('GETTEXT_PACKAGE', meson.project_name())
 
+# development build
+config_h.set('DEVELOPMENT_BUILD', gnome_todo_minor_version.is_odd())
+
 # debug options
 config_h.set('GNOME_TODO_ENABLE_DEBUG', gnome_todo_debug)
 config_h.set('ENABLE_TRACING', gnome_todo_tracing)

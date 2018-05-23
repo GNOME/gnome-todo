@@ -139,3 +139,10 @@ sidebar row image.color-circle-icon { -gtk-icon-shadow: 0 1px alpha(black, 0.18)
 .titlebar > headerbar:first-child:dir(ltr) { margin-right: 1px; }
 .titlebar > separator:dir(rtl) { margin-right: -1px; }
 .titlebar > headerbar:first-child:dir(rtl) { margin-left: 1px; }
+
+window.development-version headerbar {
+  background: @theme_bg_color linear-gradient(to top,
+                                              alpha(@theme_selected_bg_color, 0.34),
+                                              alpha(@theme_selected_bg_color, 0.27) 2px,
+                                              alpha(@theme_selected_bg_color, 0.20) 3px);
+}

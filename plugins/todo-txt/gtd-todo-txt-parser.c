@@ -110,14 +110,15 @@ append_note (const gchar           *token,
              GString               *note,
              GtdTodoTxtParserState *state)
 {
-  g_autofree gchar *esc_token = NULL;
+  g_autofree gchar *escaped_token = NULL;
 
   if (!state->in_description && g_str_has_prefix (token , "note:"))
     {
       /* Remove the extra "\" added for escaping special character */
-      esc_token = g_strcompress (token + strlen ("note:\""));
-      g_string_append (note, esc_token);
+      escaped_token = g_strcompress (token + strlen ("note:\""));
+      g_string_append (note, escaped_token);
       g_string_append (note, " ");
+
       state->in_description = TRUE;
     }
   else if (state->in_description)
@@ -127,12 +128,13 @@ append_note (const gchar           *token,
           g_autofree gchar *new_token = NULL;
 
           new_token = g_strdup (token);
+
           /* Remove the last "\"" */
           new_token [strlen (new_token) - 1] = '\0';
 
           /* Remove the extra "\" added for escaping special character */
-          esc_token = g_strcompress (new_token);
-          g_string_append (note, esc_token);
+          escaped_token = g_strcompress (new_token);
+          g_string_append (note, escaped_token);
 
           /* Revert back parser state in_description to FALSE */
           state->in_description = FALSE;
@@ -140,8 +142,8 @@ append_note (const gchar           *token,
       else
         {
           /* Remove the extra "\" added for escaping special character */
-          esc_token = g_strcompress (token);
-          g_string_append (note, esc_token);
+          escaped_token = g_strcompress (token);
+          g_string_append (note, escaped_token);
           g_string_append (note, " ");
         }
     }

@@ -51,7 +51,7 @@ gtd_str_replace (const gchar *source,
        source_aux != NULL;
        source_aux = g_strstr_len (source_aux + search_len, -1, search))
     {
-       n_ocurrences++;
+      n_ocurrences++;
     }
 
   /* Calculate size of the new string */

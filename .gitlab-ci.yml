@@ -59,7 +59,7 @@ ubuntu:devel:
 ##################
 
 flatpak:master:
-    image: registry.gitlab.com/alatiera/gnome-nightly-oci/gnome-master:latest
+    image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.28
     stage: flatpak
     variables:
       FLATPAK_MANIFEST_FILE: build-aux/flatpak/org.gnome.Todo.json

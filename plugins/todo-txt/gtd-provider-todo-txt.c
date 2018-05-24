@@ -73,6 +73,24 @@ enum
   LAST_PROP
 };
 
+typedef gboolean (*GtdLineParserFunc) (GtdProviderTodoTxt *self,
+                                       const gchar        *line);
+
+static gboolean parse_lists_line (GtdProviderTodoTxt *self,
+                                  const gchar        *line);
+
+static gboolean parse_list_colors_line (GtdProviderTodoTxt *self,
+                                        const gchar        *line);
+struct
+{
+  GtdTodoTxtLineType  type;
+  const gchar        *identifier;
+  GtdLineParserFunc   parse;
+} parser_vtable[] =
+{
+  { GTD_TODO_TXT_LINE_TYPE_TASKLIST,    "Lists",  parse_lists_line },
+  { GTD_TODO_TXT_LINE_TYPE_LIST_COLORS, "Colors", parse_list_colors_line }
+};
 
 /*
  * Auxiliary methods
@@ -154,7 +172,25 @@ update_source (GtdProviderTodoTxt *self)
         print_task (contents, l->data);
     }
 
+  /* Add a h:1 List to denote list line */
+  g_string_append_printf (contents, "h:1 Lists ");
+
   /* Then the task lists */
+  for (i = 0; i < self->cache->len; i++)
+    {
+      list = g_ptr_array_index (self->cache, i);
+
+      g_string_append_printf (contents,
+                              "@%s",
+                              gtd_task_list_get_name (list));
+
+      if (i < self->cache->len - 1)
+        g_string_append (contents, " ");
+    }
+  g_string_append (contents, "\n");
+  g_string_append_printf (contents, "h:1 Colors ");
+
+  /* Then the task lists color */
   for (i = 0; i < self->cache->len; i++)
     {
       g_autofree gchar *color_str = NULL;
@@ -167,10 +203,14 @@ update_source (GtdProviderTodoTxt *self)
       color_str = gdk_rgba_to_string (color);
 
       g_string_append_printf (contents,
-                              "h:1 @%s color:%s\n",
+                              "%s:%s",
                               gtd_task_list_get_name (list),
                               color_str);
+
+      if (i < self->cache->len - 1)
+        g_string_append (contents, " ");
     }
+  g_string_append (contents, "\n");
 
   output_path = g_file_get_path (self->source_file);
   g_file_set_contents (output_path, contents->str, contents->len, &error);
@@ -199,18 +239,31 @@ add_task_list (GtdProviderTodoTxt *self,
   self->task_lists = g_list_append (self->task_lists, list);
 }
 
-static void
-parse_task_list (GtdProviderTodoTxt *self,
-                 const gchar        *line)
+static gboolean
+parse_lists_line (GtdProviderTodoTxt *self,
+                  const gchar        *line)
 {
-  g_autoptr (GtdTaskList) list = NULL;
+  g_autoptr (GPtrArray) lists = NULL;
+  guint i;
 
-  list = gtd_todo_txt_parser_parse_task_list (GTD_PROVIDER (self), line);
+  lists = gtd_todo_txt_parser_parse_task_list (GTD_PROVIDER (self), line);
 
-  if (!list)
-    return;
+  if (!lists)
+    return FALSE;
 
-  add_task_list (self, g_steal_pointer (&list));
+  for (i = 0; i < lists->len; i++)
+    add_task_list (self, g_ptr_array_index (lists, i));
+
+  return TRUE;
+}
+
+static gboolean
+parse_list_colors_line (GtdProviderTodoTxt *self,
+                        const gchar        *line)
+{
+  gtd_todo_txt_parser_parse_task_list_color (self->lists, line);
+
+  return TRUE;
 }
 
 static void
@@ -260,7 +313,7 @@ reload_tasks (GtdProviderTodoTxt *self)
   g_autofree gchar *file_contents = NULL;
   g_autoptr (GError) error = NULL;
   g_auto (GStrv) lines = NULL;
-  guint i;
+  guint i, vtable_len, n_lines;
 
   GTD_ENTRY;
 
@@ -279,11 +332,30 @@ reload_tasks (GtdProviderTodoTxt *self)
   self->task_counter = 0;
 
   lines = g_strsplit (file_contents, "\n", -1);
+  n_lines = g_strv_length (lines) - 1;
+  vtable_len = G_N_ELEMENTS (parser_vtable);
+  printf("n_lines:%d, vtable_len:%d\n", n_lines, vtable_len);
+  /* First parse the custom lines at the end of todo.txt */
 
-  for (i = 0; lines && lines[i]; i++)
+  for (i = 0; i < vtable_len; i++)
+    {
+      const gchar *line;
+
+      line = lines[n_lines - vtable_len + i];
+      printf ("custom %s\n", line);
+
+      if (g_strcmp0 (parser_vtable[i].identifier, "Lists"))
+        parser_vtable[i].parse (self, line);
+
+      if (g_strcmp0 (parser_vtable[i].identifier, "Colors"))
+        parser_vtable[i].parse (self, line);
+    }
+
+  /* Then regular task lines */
+  for (i = 0; lines && lines[i] && i < n_lines - vtable_len; i++)
     {
       GtdTodoTxtLineType line_type;
-      gchar *line;
+      const gchar *line;
 
       line = lines[i];
 
@@ -307,11 +379,13 @@ reload_tasks (GtdProviderTodoTxt *self)
       switch (line_type)
         {
         case GTD_TODO_TXT_LINE_TYPE_TASKLIST:
-          parse_task_list (self, line);
           break;
 
         case GTD_TODO_TXT_LINE_TYPE_TASK:
           parse_task (self, line);
+          break;
+
+        default:
           break;
         }
     }

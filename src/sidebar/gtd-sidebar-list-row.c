@@ -246,10 +246,12 @@ on_delete_action_activated_cb (GSimpleAction *action,
 {
   GtdSidebarListRow *self;
   GtdNotification *notification;
+  g_autofree gchar *title = NULL;
 
   self = GTD_SIDEBAR_LIST_ROW (user_data);
 
-  notification = gtd_notification_new ("", 6000.0);
+  title = g_strdup_printf (_("Task list <b>%s</b> removed"), gtd_task_list_get_name (self->list));
+  notification = gtd_notification_new (title, 6000.0);
   gtd_notification_set_primary_action (notification, delete_list_cb, self->list);
   gtd_notification_set_secondary_action (notification, _("Undo"), undo_delete_list_cb, self);
 

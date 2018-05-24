@@ -4,5 +4,8 @@ stamp-h1
 **/*.valid
 _build
 .gitlab
+.gitlab-ci.yml
+.gitignore
+.editorconfig
 .buildconfig
 **/*~

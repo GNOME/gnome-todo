@@ -29,6 +29,7 @@ G_BEGIN_DECLS
 typedef enum
 {
   GTD_TODO_TXT_PARSER_INVALID_DUE_DATE,
+  GTD_TODO_TXT_PARSER_INVALID_COLOR_HEX,
   GTD_TODO_TXT_PARSER_INVALID_LINE,
   GTD_TODO_TXT_PARSER_UNSUPPORTED_TOKEN,
   GTD_TODO_TXT_PARSER_WRONG_LINE_TYPE,
@@ -38,6 +39,8 @@ typedef enum
 {
   GTD_TODO_TXT_LINE_TYPE_TASKLIST,
   GTD_TODO_TXT_LINE_TYPE_TASK,
+  GTD_TODO_TXT_LINE_TYPE_LIST_COLORS,
+  GTD_TODO_TXT_LINE_TYPE_UNKNOWN
 } GtdTodoTxtLineType;
 
 #define GTD_TODO_TXT_PARSER_ERROR (gtd_todo_txt_parser_error_quark ())
@@ -47,12 +50,17 @@ GQuark               gtd_todo_txt_parser_error_quark             (void);
 GtdTodoTxtLineType   gtd_todo_txt_parser_get_line_type           (const gchar       *line,
                                                                   GError           **error);
 
-GtdTaskList*         gtd_todo_txt_parser_parse_task_list         (GtdProvider       *provider,
-                                                                  const gchar       *line);
+GPtrArray*           gtd_todo_txt_parser_parse_task_lists        (GtdProvider       *provider,
+                                                                  const gchar       *line,
+                                                                  GError           **error);
 
 GtdTask*             gtd_todo_txt_parser_parse_task              (GtdProvider       *provider,
                                                                   const gchar       *line,
                                                                   gchar            **out_list_name);
+
+gboolean             gtd_todo_txt_parser_parse_task_list_color   (GHashTable        *name_to_tasklist,
+                                                                  const gchar       *line,
+                                                                  GError           **error);
 
 G_END_DECLS
 

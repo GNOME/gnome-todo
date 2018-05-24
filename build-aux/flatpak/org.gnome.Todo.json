@@ -138,14 +138,14 @@
         {
             "name" : "gnome-todo",
             "buildsystem" : "meson",
+            "config-opts" : [
+                "-Dtracing=true"
+            ],
             "sources" : [
                 {
                     "type" : "git",
                     "url" : "https://gitlab.gnome.org/GNOME/gnome-todo.git"
                 }
-            ],
-            "config-opts" : [
-                "-Dtracing=true"
             ]
         }
     ]

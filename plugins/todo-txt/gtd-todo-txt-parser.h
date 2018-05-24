@@ -37,6 +37,8 @@ typedef enum
 {
   GTD_TODO_TXT_LINE_TYPE_TASKLIST,
   GTD_TODO_TXT_LINE_TYPE_TASK,
+  GTD_TODO_TXT_LINE_TYPE_LIST_COLORS,
+  GTD_TODO_TXT_LINE_TYPE_UNKNOWN
 } GtdTodoTxtLineType;
 
 #define GTD_TODO_TXT_PARSER_ERROR (gtd_todo_txt_parser_error_quark ())
@@ -46,12 +48,15 @@ GQuark               gtd_todo_txt_parser_error_quark             (void);
 GtdTodoTxtLineType   gtd_todo_txt_parser_get_line_type           (const gchar       *line,
                                                                   GError           **error);
 
-GtdTaskList*         gtd_todo_txt_parser_parse_task_list         (GtdProvider       *provider,
+GPtrArray*           gtd_todo_txt_parser_parse_task_list         (GtdProvider       *provider,
                                                                   const gchar       *line);
 
 GtdTask*             gtd_todo_txt_parser_parse_task              (GtdProvider       *provider,
                                                                   const gchar       *line,
                                                                   gchar            **out_list_name);
+
+void                 gtd_todo_txt_parser_parse_task_list_color   (GHashTable        *map,
+                                                                  const gchar       *line);
 
 G_END_DECLS
 

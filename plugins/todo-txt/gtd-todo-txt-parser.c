@@ -201,12 +201,13 @@ parse_token_id (const gchar           *token,
 }
 
 static GStrv
-tokenize_line (const gchar *line)
+tokenize_line (const gchar *line,
+               const gchar *delimiter)
 {
   GStrv tokens = NULL;
   gsize i;
 
-  tokens = g_strsplit (line, " ", -1);
+  tokens = g_strsplit (line, delimiter, -1);
 
   for (i = 0; tokens && tokens[i]; i++)
     g_strstrip (tokens[i]);
@@ -239,7 +240,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   state.in_description = FALSE;
 
   task = gtd_provider_todo_txt_generate_task (GTD_PROVIDER_TODO_TXT (provider));
-  tokens = tokenize_line (line);
+  tokens = tokenize_line (line, " ");
 
   for (i = 0; tokens && tokens[i]; i++)
     {
@@ -312,69 +313,108 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
  * provider: the @GtdProvider of the new tasklist
  * @line: the tasklist line to be parsed
  *
- * Parses a @GtdTaskList from @line. If there is a 'color:' token,
- * it is taken into account.
+ * Parses a list of @GtdTaskList from @line.
  *
- * Returns: (transfer full)(nullable): A @GtdTaskList
+ * Returns: (transfer full)(nullable): A @GPtrArray
  */
-GtdTaskList*
+GPtrArray*
 gtd_todo_txt_parser_parse_task_list (GtdProvider *provider,
                                      const gchar *line)
 {
-  g_autoptr (GtdTaskList) new_list = NULL;
-  g_autoptr (GString) list_name = NULL;
-  g_autofree gchar *color = NULL;
-  g_auto (GStrv) tokens = NULL;
+  g_auto (GStrv) lists = NULL;
+  g_autoptr (GPtrArray) l = NULL;
   guint i;
 
-  tokens = tokenize_line (line);
-  list_name = g_string_new (NULL);
+  l = g_ptr_array_new ();
+  lists = tokenize_line (line + strlen("h:1 Lists "), " ");
 
   GTD_TRACE_MSG ("Parsing tasklist from line '%s'", line);
 
-  for (i = 0; tokens && tokens[i]; i++)
+  for (i = 0; lists && lists[i]; i++)
     {
-      const gchar *token = tokens[i];
+      g_autoptr (GtdTaskList) new_list = NULL;
+      g_autoptr (GString) list_name = NULL;
+      g_autofree gchar *color = NULL;
+      g_auto (GStrv) tokens = NULL;
+      const gchar *token = lists[i];
 
       if (!token)
         break;
 
-      /* Color */
-      if (g_str_has_prefix (token, "color:"))
-        {
-          color = g_strdup (token + strlen ("color:"));
-          continue;
-        }
+      list_name = g_string_new (NULL);
+      g_string_append_printf (list_name, "%s ", token[0] == '@' ? token + 1 : token);
 
-      /* Hidden token */
-      if (g_str_has_prefix (token, "h:1"))
+      if (list_name->len == 0)
         continue;
 
-      /* Title */
-      g_string_append_printf (list_name, "%s ", token[0] == '@' ? token + 1 : token);
+      g_strstrip (list_name->str);
+
+      new_list = g_object_new (GTD_TYPE_TASK_LIST,
+                               "provider", provider,
+                               "name", list_name->str,
+                               "is-removable", TRUE,
+                               NULL);
+
+      g_ptr_array_add (l, g_steal_pointer (&new_list));
     }
 
-  if (list_name->len == 0)
-    return NULL;
+  return g_steal_pointer (&l);
+}
 
-  g_strstrip (list_name->str);
+/**
+ * gtd_todo_txt_parser_parse_task_list_color:
+ * map: the @GHashTable of task lists
+ * @line: the tasklist line to be parsed
+ *
+ * Parses colors from line and set the corresponding
+ * list color.
+ *
+ * Returns: null
+ */
+void
+gtd_todo_txt_parser_parse_task_list_color (GHashTable  *map,
+                                           const gchar *line)
+{
+  g_auto (GStrv) lists = NULL;
+  guint i;
 
-  new_list = g_object_new (GTD_TYPE_TASK_LIST,
-                           "provider", provider,
-                           "name", list_name->str,
-                           "is-removable", TRUE,
-                           NULL);
+  lists = tokenize_line (line + strlen("h:1 Colors "), " ");
 
-  if (color)
+  GTD_TRACE_MSG ("Parsing colors from line '%s'", line);
+
+  for (i = 0; lists && lists[i]; i++)
     {
-      GdkRGBA rgba;
+      gchar *list_name = NULL;
+      g_auto (GStrv) tokens = NULL;
+      const gchar *color = NULL;
+      const gchar *list = lists[i];
+      GtdTaskList *task_list;
 
-      gdk_rgba_parse (&rgba, color);
+      if (!list)
+        break;
 
-      gtd_task_list_set_color (new_list, &rgba);
+      tokens = tokenize_line (list, ":");
+
+      list_name = tokens[0];
+      color = tokens[1];
+
+      g_strstrip (list_name);
+
+      task_list = g_hash_table_lookup (map, list_name);
+
+      if (!task_list)
+        continue;
+
+      if (color && g_strcmp0 (color, "") != 0 &&
+          g_strcmp0 (color, "null") != 0)
+        {
+          GdkRGBA rgba;
+
+          gdk_rgba_parse (&rgba, color);
+
+          gtd_task_list_set_color (task_list, &rgba);
+        }
     }
-
-  return g_steal_pointer (&new_list);
 }
 
 /**
@@ -391,17 +431,23 @@ gtd_todo_txt_parser_get_line_type (const gchar  *line,
                                    GError      **error)
 {
   GtdTodoTxtLineType line_type;
-  g_auto (GStrv) tokens;
+  g_auto (GStrv) tokens = NULL;
   GtdTodoTxtParserState state;
   gboolean task_list_name_tk;
   Token token_id;
   gint i;
 
   GTD_ENTRY;
+  
+  if (g_str_has_prefix (line, "h:1 Lists"))
+    return GTD_TODO_TXT_LINE_TYPE_TASKLIST;
 
-  tokens = tokenize_line (line);
+  if (g_str_has_prefix (line, "h:1 Colors"))
+    return GTD_TODO_TXT_LINE_TYPE_LIST_COLORS;
+    
+  tokens = tokenize_line (line, " ");
   state.last_token = TOKEN_START;
-  line_type = GTD_TODO_TXT_LINE_TYPE_TASKLIST;
+  line_type = GTD_TODO_TXT_LINE_TYPE_UNKNOWN;
   task_list_name_tk = FALSE;
 
   for (i = 0; tokens && tokens[i]; i++)

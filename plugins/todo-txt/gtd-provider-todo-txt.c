@@ -154,6 +154,9 @@ update_source (GtdProviderTodoTxt *self)
         print_task (contents, l->data);
     }
 
+  /* Add a h:1 List to denote list line */
+  g_string_append_printf (contents, "h:1 List ");
+
   /* Then the task lists */
   for (i = 0; i < self->cache->len; i++)
     {
@@ -167,9 +170,10 @@ update_source (GtdProviderTodoTxt *self)
       color_str = gdk_rgba_to_string (color);
 
       g_string_append_printf (contents,
-                              "h:1 @%s color:%s\n",
+                              "@%s color:%s%s",
                               gtd_task_list_get_name (list),
-                              color_str);
+                              color_str,
+                              i == self->cache->len - 1? "":", ");
     }
 
   output_path = g_file_get_path (self->source_file);
@@ -203,14 +207,16 @@ static void
 parse_task_list (GtdProviderTodoTxt *self,
                  const gchar        *line)
 {
-  g_autoptr (GtdTaskList) list = NULL;
+  g_autoptr (GPtrArray) lists = NULL;
+  guint i;
 
-  list = gtd_todo_txt_parser_parse_task_list (GTD_PROVIDER (self), line);
+  lists = gtd_todo_txt_parser_parse_task_list (GTD_PROVIDER (self), line);
 
-  if (!list)
+  if (!lists)
     return;
 
-  add_task_list (self, g_steal_pointer (&list));
+  for (i = 0; i < lists->len; i++)
+    add_task_list (self, g_ptr_array_index (lists, i));
 }
 
 static void

@@ -46,7 +46,7 @@ GQuark               gtd_todo_txt_parser_error_quark             (void);
 GtdTodoTxtLineType   gtd_todo_txt_parser_get_line_type           (const gchar       *line,
                                                                   GError           **error);
 
-GtdTaskList*         gtd_todo_txt_parser_parse_task_list         (GtdProvider       *provider,
+GPtrArray*           gtd_todo_txt_parser_parse_task_list         (GtdProvider       *provider,
                                                                   const gchar       *line);
 
 GtdTask*             gtd_todo_txt_parser_parse_task              (GtdProvider       *provider,

@@ -148,6 +148,7 @@ typedef struct
 #define DND_SCROLL_OFFSET            24 //px
 #define LUMINANCE(c)                 (0.299 * c->red + 0.587 * c->green + 0.114 * c->blue)
 #define TASK_REMOVED_NOTIFICATION_ID "task-removed-id"
+#define N_TASKS_BEFORE_LOAD          50
 
 
 static gboolean      idle_process_items_cb                       (gpointer            data);
@@ -622,7 +623,7 @@ idle_process_items_cb (gpointer data)
    * finished. Only do that if we're going to idle more than 30 tasks. This
    * number is arbitrary
    */
-  if (n_added_items > 30)
+  if (n_added_items >= N_TASKS_BEFORE_LOAD)
     {
       gtk_widget_hide (GTK_WIDGET (priv->listbox));
       gtk_stack_set_visible_child_name (priv->stack, "loading");
@@ -651,7 +652,7 @@ idle_process_items_cb (gpointer data)
    */
   add_task (idle_data->self,
             g_ptr_array_index (idle_data->added, idle_data->current_item - n_removed_items),
-            n_added_items < 30);
+            n_added_items < N_TASKS_BEFORE_LOAD);
 
   /* Next item */
   idle_data->current_item += 1;

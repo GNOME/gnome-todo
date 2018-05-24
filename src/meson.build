@@ -119,15 +119,7 @@ cflags = [
   '-DUI_DATA_DIR="@0@"'.format(join_paths(gnome_todo_pkgdatadir, 'style'))
 ]
 
-ldflags = [ '-Wl,--export-dynamic' ]
-
-if host_machine.system().contains('linux')
-  foreach ldflag: plugins_ldflags
-    if cc.has_argument(ldflag)
-      ldflags += ldflag
-    endif
-  endforeach
-endif
+ldflags = [ '-Wl,--export-dynamic' ] + plugins_ldflags
 
 
 #########

@@ -62,17 +62,22 @@ flatpak:master:
     image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.28
     stage: flatpak
     variables:
-      FLATPAK_MANIFEST_FILE: build-aux/flatpak/org.gnome.Todo.json
+      DEVELOPMENT_FLATPAK_ID: "TodoDevel"
+
     script:
-    - cp ${FLATPAK_MANIFEST_FILE} . || true
-    - flatpak-builder --stop-at=gnome-todo app org.gnome.Todo.json
-    - flatpak build app meson --prefix /app -Dtracing=true _build
-    - flatpak build app ninja -C _build install
-    - flatpak-builder --finish-only --repo=repo app org.gnome.Todo.json
-    - flatpak build-bundle repo gnome-todo-$CI_COMMIT_REF_SLUG.flatpak --runtime-repo=https://sdk.gnome.org/gnome-nightly.flatpakrepo org.gnome.Todo
+    # Print debug information
+    - build-aux/ci/debug.sh environment
+    - build-aux/ci/debug.sh git
+
+    # Setup the current directory
+    - build-aux/ci/setup.sh $DEVELOPMENT_FLATPAK_ID $CI_COMMIT_SHA
+
+    # Build and generate the bundle
+    - build-aux/ci/build-flatpak.sh $DEVELOPMENT_FLATPAK_ID
+
     artifacts:
         paths:
-        - gnome-todo-$CI_COMMIT_REF_SLUG.flatpak
+        - org.gnome.$DEVELOPMENT_FLATPAK_ID.flatpak
         - _build/meson-logs/meson-log.txt
         expire_in: 3 days
     cache:

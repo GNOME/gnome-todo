@@ -51,6 +51,27 @@
   </kudos>
 
   <releases>
+    <release date="2018-05-25" version="3.91.1">
+      <description>
+        <p>
+          We're proud to annouce GNOME To Do 3.91.1!
+        </p>
+        <p>
+          GNOME To Do 3.92.1 is the first alpha release of the next version, 4.0, and introduces a remarkable
+          change in the main user experiece by switching to a sidebar-based layout.
+        </p>
+        <p>
+          The new layout is more streamlined and suits better the needs of more advanced users, without letting
+          go of the simplicity that was always a signature of GNOME To Do.
+        </p>
+        <p>
+          This gives the flexibility needed for the introduction of new panels and plugins, which was simply
+          not possible with the previous layout.
+        </p>
+        <p>This release also updates translations, and adds new translations.</p>
+      </description>
+    </release>
+
     <release date="2018-03-12" version="3.28.0">
       <description>
         <p>

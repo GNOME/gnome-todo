@@ -118,7 +118,7 @@ print_task (GString *output,
       g_string_append_printf (output, " due:%s", formatted_time);
     }
 
-  if (description)
+  if (description && g_strcmp0 (description, "") != 0)
     {
       g_autofree gchar *new_description = g_strescape (description, NULL);
       g_string_append_printf (output, " note:\"%s\"", new_description);

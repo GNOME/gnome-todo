@@ -58,7 +58,7 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "https://git.gnome.org/browse/gnome-online-accounts"
+                    "url" : "https://gitlab.gnome.org/GNOME/gnome-online-accounts.git"
                 }
             ]
         },
@@ -104,11 +104,11 @@
                 "-DENABLE_VALA_BINDINGS=OFF",
                 "-DENABLE_INTROSPECTION=OFF"
             ],
-            "cmake" : true,
+            "buildsystem" : "cmake",
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "https://git.gnome.org/browse/evolution-data-server"
+                    "url" : "https://gitlab.gnome.org/GNOME/evolution-data-server.git"
                 }
             ]
         },
@@ -121,7 +121,7 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "https://git.gnome.org/browse/libpeas"
+                    "url" : "https://gitlab.gnome.org/GNOME/libpeas.git"
                 }
             ]
         },
@@ -131,7 +131,7 @@
                 {
                     "type" : "git",
                     "branch" : "librest-0-7",
-                    "url" : "https://git.gnome.org/browse/librest"
+                    "url" : "https://gitlab.gnome.org/GNOME/librest.git"
                 }
             ]
         },

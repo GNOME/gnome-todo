@@ -174,6 +174,58 @@ gtd_task_eds_set_uid (GtdObject   *object,
  * GtdTask overrides
  */
 
+static GDateTime*
+gtd_task_eds_get_completion_date (GtdTask *task)
+{
+  icaltimetype *idt;
+  GtdTaskEds *self;
+  GDateTime *dt;
+
+  self = GTD_TASK_EDS (task);
+  idt = NULL;
+  dt = NULL;
+
+  e_cal_component_get_completed (self->component, &idt);
+
+  if (idt)
+    dt = convert_icaltime (idt);
+
+  g_clear_pointer (&idt, e_cal_component_free_icaltimetype);
+
+  return dt;
+}
+
+static void
+gtd_task_eds_set_completion_date (GtdTask   *task,
+                                  GDateTime *dt)
+{
+  GtdTaskEds *self;
+  icaltimetype *idt;
+
+  self = GTD_TASK_EDS (task);
+
+  idt = g_new0 (icaltimetype, 1);
+  idt->year = g_date_time_get_year (dt);
+  idt->month = g_date_time_get_month (dt);
+  idt->day = g_date_time_get_day_of_month (dt);
+  idt->hour = g_date_time_get_hour (dt);
+  idt->minute = g_date_time_get_minute (dt);
+  idt->second = g_date_time_get_seconds (dt);
+  idt->zone = icaltimezone_get_utc_timezone ();
+
+  /* convert timezone
+   *
+   * FIXME: This does not do anything until we have an ical
+   * timezone associated with the task
+   */
+  icaltimezone_convert_time (idt, NULL, icaltimezone_get_utc_timezone ());
+
+  e_cal_component_set_completed (self->component, idt);
+
+  if (idt)
+    e_cal_component_free_icaltimetype (idt);
+}
+
 static gboolean
 gtd_task_eds_get_complete (GtdTask *task)
 {
@@ -196,48 +248,27 @@ gtd_task_eds_set_complete (GtdTask  *task,
                            gboolean  complete)
 {
   icalproperty_status status;
-  icaltimetype *dt;
   GtdTaskEds *self;
   gint percent;
+  g_autoptr (GDateTime) now = NULL;
 
   self = GTD_TASK_EDS (task);
+  now = g_date_time_new_now_utc ();
 
   if (complete)
     {
-      g_autoptr (GDateTime) now = g_date_time_new_now_utc ();
-
       percent = 100;
       status = ICAL_STATUS_COMPLETED;
-
-      dt = g_new0 (icaltimetype, 1);
-      dt->year = g_date_time_get_year (now);
-      dt->month = g_date_time_get_month (now);
-      dt->day = g_date_time_get_day_of_month (now);
-      dt->hour = g_date_time_get_hour (now);
-      dt->minute = g_date_time_get_minute (now);
-      dt->second = g_date_time_get_seconds (now);
-      dt->zone = icaltimezone_get_utc_timezone ();
-
-      /* convert timezone
-       *
-       * FIXME: This does not do anything until we have an ical
-       * timezone associated with the task
-       */
-      icaltimezone_convert_time (dt, NULL, icaltimezone_get_utc_timezone ());
     }
   else
     {
-      dt = NULL;
       percent = 0;
       status = ICAL_STATUS_NEEDSACTION;
     }
 
   e_cal_component_set_percent_as_int (self->component, percent);
   e_cal_component_set_status (self->component, status);
-  e_cal_component_set_completed (self->component, dt);
-
-  if (dt)
-    e_cal_component_free_icaltimetype (dt);
+  gtd_task_eds_set_completion_date (task, now);
 }
 
 static GDateTime*
@@ -560,6 +591,8 @@ gtd_task_eds_class_init (GtdTaskEdsClass *klass)
   task_class->set_complete = gtd_task_eds_set_complete;
   task_class->get_creation_date = gtd_task_eds_get_creation_date;
   task_class->set_creation_date = gtd_task_eds_set_creation_date;
+  task_class->get_completion_date = gtd_task_eds_get_completion_date;
+  task_class->set_completion_date = gtd_task_eds_set_completion_date;
   task_class->get_description = gtd_task_eds_get_description;
   task_class->set_description = gtd_task_eds_set_description;
   task_class->get_due_date = gtd_task_eds_get_due_date;

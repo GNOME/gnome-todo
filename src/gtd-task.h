@@ -41,6 +41,10 @@ struct _GtdTaskClass
   void          (*set_creation_date)                  (GtdTask              *self,
                                                        GDateTime            *dt);
 
+  GDateTime*    (*get_completion_date)                (GtdTask              *self);
+  void          (*set_completion_date)                (GtdTask              *self,
+                                                       GDateTime            *dt);
+
   const gchar*  (*get_description)                    (GtdTask              *self);
   void          (*set_description)                    (GtdTask              *self,
                                                        const gchar          *description);
@@ -83,6 +87,8 @@ GDateTime*          gtd_task_get_creation_date        (GtdTask              *tas
 
 void                gtd_task_set_creation_date        (GtdTask              *task,
                                                        GDateTime            *dt);
+
+GDateTime*          gtd_task_get_completion_date      (GtdTask              *task);
 
 const gchar*        gtd_task_get_description          (GtdTask              *task);
 

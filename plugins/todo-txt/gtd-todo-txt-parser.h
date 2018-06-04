@@ -20,6 +20,7 @@
 #define GTD_TODO_TXT_PARSE_H
 
 #include "gnome-todo.h"
+#include "gtd-task-todo-txt.h"
 
 #include <glib.h>
 
@@ -49,7 +50,7 @@ GtdTodoTxtLineType   gtd_todo_txt_parser_get_line_type           (const gchar   
 GtdTaskList*         gtd_todo_txt_parser_parse_task_list         (GtdProvider       *provider,
                                                                   const gchar       *line);
 
-GtdTask*             gtd_todo_txt_parser_parse_task              (GtdProvider       *provider,
+GtdTaskTodoTxt*      gtd_todo_txt_parser_parse_task              (GtdProvider       *provider,
                                                                   const gchar       *line,
                                                                   gchar            **out_list_name);
 

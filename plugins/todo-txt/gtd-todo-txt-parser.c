@@ -210,7 +210,7 @@ tokenize_line (const gchar *line)
   return tokens;
 }
 
-GtdTask*
+GtdTaskTodoTxt*
 gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
                                 const gchar  *line,
                                 gchar       **out_list_name)
@@ -219,7 +219,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   g_autoptr (GString) list_name = NULL;
   g_autoptr (GString) title = NULL;
   g_autoptr (GString) note = NULL;
-  g_autoptr (GtdTask) task = NULL;
+  g_autoptr (GtdTaskTodoTxt) task = NULL;
   GtdTodoTxtParserState state;
   g_auto (GStrv) tokens = NULL;
   GDateTime *dt;
@@ -247,7 +247,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
       switch (token_id)
         {
         case TOKEN_COMPLETE:
-          gtd_task_set_complete (task, TRUE);
+          gtd_task_set_complete (GTD_TASK (task), TRUE);
           break;
 
         case TOKEN_HIDDEN:
@@ -255,7 +255,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
 
         case TOKEN_PRIORITY:
           state.last_token = TOKEN_PRIORITY;
-          gtd_task_set_priority (task, parse_priority (token));
+          gtd_task_set_priority (GTD_TASK (task), parse_priority (token));
           break;
 
         case TOKEN_DATE:
@@ -274,7 +274,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
 
         case TOKEN_DUE_DATE:
           dt = parse_date (token + strlen ("due:"));
-          gtd_task_set_due_date (task, dt);
+          gtd_task_set_due_date (GTD_TASK (task), dt);
           break;
 
         case TOKEN_NOTE:
@@ -294,8 +294,8 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   g_strstrip (list_name->str);
   g_strstrip (title->str);
 
-  gtd_task_set_title (task, title->str);
-  gtd_task_set_description (task, note->str);
+  gtd_task_set_title (GTD_TASK (task), title->str);
+  gtd_task_set_description (GTD_TASK (task), note->str);
 
   if (out_list_name)
     *out_list_name = g_strdup (list_name->str + 1);

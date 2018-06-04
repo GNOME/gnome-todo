@@ -23,6 +23,7 @@
 #include "gtd-provider-todo-txt.h"
 #include "gtd-plugin-todo-txt.h"
 #include "gtd-todo-txt-parser.h"
+#include "gtd-task-todo-txt.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -79,8 +80,8 @@ enum
  */
 
 static void
-print_task (GString *output,
-            GtdTask *task)
+print_task (GString        *output,
+            GtdTaskTodoTxt *task)
 {
   GtdTaskList *list;
   GDateTime *dt;
@@ -88,11 +89,11 @@ print_task (GString *output,
   gint priority;
   gboolean is_complete;
 
-  is_complete = gtd_task_get_complete (task);
-  priority = gtd_task_get_priority (task);
-  dt = gtd_task_get_due_date (task);
-  list = gtd_task_get_list (task);
-  description = gtd_task_get_description (task);
+  is_complete = gtd_task_get_complete (GTD_TASK (task));
+  priority = gtd_task_get_priority (GTD_TASK (task));
+  dt = gtd_task_get_due_date (GTD_TASK (task));
+  list = gtd_task_get_list (GTD_TASK (task));
+  description = gtd_task_get_description (GTD_TASK (task));
 
   if (is_complete)
     g_string_append (output, "x ");
@@ -109,7 +110,7 @@ print_task (GString *output,
 
   g_string_append_printf (output,
                           "%s @%s",
-                          gtd_task_get_title (task),
+                          gtd_task_get_title (GTD_TASK (task)),
                           gtd_task_list_get_name (list));
 
   if (dt)
@@ -219,7 +220,7 @@ parse_task (GtdProviderTodoTxt *self,
 {
   g_autofree gchar *list_name = NULL;
   GtdTaskList *list;
-  GtdTask *task;
+  GtdTaskTodoTxt *task;
 
   task = gtd_todo_txt_parser_parse_task (GTD_PROVIDER (self), line, &list_name);
 
@@ -246,8 +247,8 @@ parse_task (GtdProviderTodoTxt *self,
       list = g_hash_table_lookup (self->lists, list_name);
     }
 
-  gtd_task_set_list (task, list);
-  gtd_task_list_save_task (list, task);
+  gtd_task_set_list (GTD_TASK (task), list);
+  gtd_task_list_save_task (list, GTD_TASK (task));
 
   g_hash_table_insert (self->tasks, (gpointer) gtd_object_get_uid (GTD_OBJECT (task)), task);
   self->task_counter++;
@@ -437,17 +438,17 @@ gtd_provider_todo_txt_create_task (GtdProvider *provider,
                                    GDateTime   *due_date)
 {
   GtdProviderTodoTxt *self;
-  g_autoptr (GtdTask) new_task = NULL;
+  g_autoptr (GtdTaskTodoTxt) new_task = NULL;
 
   self = GTD_PROVIDER_TODO_TXT (provider);
 
   /* Create the new task */
   new_task = gtd_provider_todo_txt_generate_task (self);
-  gtd_task_set_due_date (new_task, due_date);
-  gtd_task_set_list (new_task, list);
-  gtd_task_set_title (new_task, title);
+  gtd_task_set_due_date (GTD_TASK (new_task), due_date);
+  gtd_task_set_list (GTD_TASK (new_task), list);
+  gtd_task_set_title (GTD_TASK (new_task), title);
 
-  gtd_task_list_save_task (list, new_task);
+  gtd_task_list_save_task (list, GTD_TASK (new_task));
 
   update_source (GTD_PROVIDER_TODO_TXT (provider));
 }
@@ -688,7 +689,7 @@ gtd_provider_todo_txt_new (GFile *source_file)
                        NULL);
 }
 
-GtdTask*
+GtdTaskTodoTxt*
 gtd_provider_todo_txt_generate_task (GtdProviderTodoTxt *self)
 {
   g_autofree gchar *uid = NULL;
@@ -696,5 +697,5 @@ gtd_provider_todo_txt_generate_task (GtdProviderTodoTxt *self)
   g_return_val_if_fail (GTD_IS_PROVIDER_TODO_TXT (self), NULL);
   uid = g_uuid_string_random ();
 
-  return g_object_new (GTD_TYPE_TASK, "uid", uid, NULL);
+  return g_object_new (GTD_TYPE_TASK_TODO_TXT, "uid", uid, NULL);
 }

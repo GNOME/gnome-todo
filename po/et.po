@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2018-03-09 07:31+0000\n"
-"PO-Revision-Date: 2018-03-09 11:10+0200\n"
+"POT-Creation-Date: 2018-06-03 06:05+0000\n"
+"PO-Revision-Date: 2018-06-04 16:40+0300\n"
 "Last-Translator: Liivia Lilleväli <liivia.l10n@gmail.com>\n"
 "Language-Team: Estonian <gnome-et-list@gnome.org>\n"
 "Language: et\n"
@@ -19,8 +19,8 @@ msgstr ""
 "X-Generator: Poedit 2.0.6\n"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in:7
-#: data/org.gnome.Todo.desktop.in:3 src/gtd-application.c:156
-#: src/gtd-window.c:799 src/gtd-window.c:830 src/main.c:35
+#: data/org.gnome.Todo.desktop.in:3 src/gtd-application.c:157
+#: src/gtd-window.c:788 src/gtd-window.c:819 src/main.c:35
 msgid "To Do"
 msgstr "Ülesanded"
 
@@ -150,44 +150,44 @@ msgstr "Aktiivse loendi valija. Võib olla “grid” või “list”."
 msgid "_Notes"
 msgstr "Mä_rkmed"
 
-#: data/ui/edit-pane.ui:93
+#: data/ui/edit-pane.ui:95
 msgid "D_ue Date"
 msgstr "Täht_aeg"
 
-#: data/ui/edit-pane.ui:111
+#: data/ui/edit-pane.ui:113
 msgid "_Today"
 msgstr "_Täna"
 
-#: data/ui/edit-pane.ui:121
+#: data/ui/edit-pane.ui:123
 msgid "To_morrow"
 msgstr "H_omme"
 
-#: data/ui/edit-pane.ui:169
+#: data/ui/edit-pane.ui:171
 msgid "_Priority"
 msgstr "Tä_htsus"
 
-#: data/ui/edit-pane.ui:187
+#: data/ui/edit-pane.ui:189
 msgctxt "taskpriority"
 msgid "None"
 msgstr "Puudub"
 
-#: data/ui/edit-pane.ui:188
+#: data/ui/edit-pane.ui:190
 msgid "Low"
 msgstr "Madal"
 
-#: data/ui/edit-pane.ui:189
+#: data/ui/edit-pane.ui:191
 msgid "Medium"
 msgstr "Keskmine"
 
-#: data/ui/edit-pane.ui:190
+#: data/ui/edit-pane.ui:192
 msgid "High"
 msgstr "Kõrge"
 
-#: data/ui/edit-pane.ui:198 data/ui/list-selector-panel.ui:93
+#: data/ui/edit-pane.ui:200
 msgid "_Delete"
 msgstr "_Kustuta"
 
-#: data/ui/edit-pane.ui:249
+#: data/ui/edit-pane.ui:251
 msgctxt "taskdate"
 msgid "None"
 msgstr "Puudub"
@@ -205,7 +205,7 @@ msgid "To Do Setup"
 msgstr "Rakenduse Ülesanded seadistamine"
 
 #: data/ui/initial-setup.ui:70 data/ui/provider-popover.ui:43
-#: data/ui/window.ui:74
+#: data/ui/window.ui:123
 msgid "_Cancel"
 msgstr "_Loobu"
 
@@ -213,35 +213,7 @@ msgstr "_Loobu"
 msgid "_Done"
 msgstr "_Valmis"
 
-#: data/ui/list-selector-panel.ui:79 data/ui/list-selector-panel.ui:173
-msgid "_Rename"
-msgstr "Muuda _nime"
-
-#: data/ui/list-selector-panel.ui:119 src/views/gtd-list-selector-panel.c:469
-msgid "Lists"
-msgstr "Loendid"
-
-#: data/ui/list-selector-panel.ui:129
-msgid "Tasks"
-msgstr "Ülesanded"
-
-#: data/ui/list-selector-panel.ui:147
-msgid "Name of the task list"
-msgstr "Ülesandeloendi nimi"
-
-#: data/ui/list-selector-panel.ui:263
-msgid "_New List"
-msgstr "_Uus loend"
-
-#: data/ui/list-view.ui:113
-msgid "Show or hide completed tasks"
-msgstr "Näitab või peidab täidetud ülesanded"
-
-#: data/ui/list-view.ui:140 src/gtd-task-list-view.c:388
-msgid "Done"
-msgstr "Tehtud"
-
-#: data/ui/new-task-row.ui:29
+#: data/ui/new-task-row.ui:31
 msgid "New task…"
 msgstr "Uus ülesanne…"
 
@@ -293,6 +265,18 @@ msgstr "Microsoft Exchange"
 msgid "Or you can just store your tasks on this computer"
 msgstr "Samuti võid oma ülesanded lihtsalt siia arvutisse talletada"
 
+#: data/ui/sidebar-list-row.ui:54
+msgid "Delete"
+msgstr "Kustuta"
+
+#: data/ui/sidebar-provider-row.ui:96
+msgid "Loading…"
+msgstr "Laadimine…"
+
+#: data/ui/window.ui:78
+msgid "_New List"
+msgstr "_Uus loend"
+
 #: plugins/background/gtd-plugin-background.c:150
 #, c-format
 msgid "%1$s and one more task"
@@ -343,85 +327,92 @@ msgstr "Teate näitamine rakenduse käivitamisel"
 msgid "Error loading GNOME Online Accounts"
 msgstr "Viga GNOME Veebikontode laadimisel"
 
-#: plugins/eds/gtd-provider-eds.c:139
+#: plugins/eds/gtd-provider-eds.c:140
 msgid "Failed to connect to task list"
 msgstr "Ülesandeloendiga ühendumine nurjus"
 
-#: plugins/eds/gtd-provider-eds.c:351
+#: plugins/eds/gtd-provider-eds.c:361
 msgid "An error occurred while creating a task"
 msgstr "Viga ülesande loomisel"
 
-#: plugins/eds/gtd-provider-eds.c:383
+#: plugins/eds/gtd-provider-eds.c:393
 msgid "An error occurred while modifying a task"
 msgstr "Viga ülesande muutmisel"
 
-#: plugins/eds/gtd-provider-eds.c:404
+#: plugins/eds/gtd-provider-eds.c:414
 msgid "An error occurred while removing a task"
 msgstr "Viga ülesande eemaldamisel"
 
-#: plugins/eds/gtd-provider-eds.c:422
+#: plugins/eds/gtd-provider-eds.c:432
 msgid "An error occurred while creating a task list"
 msgstr "Viga ülesandeloendi loomisel"
 
-#: plugins/eds/gtd-provider-eds.c:444 plugins/eds/gtd-provider-eds.c:467
+#: plugins/eds/gtd-provider-eds.c:454 plugins/eds/gtd-provider-eds.c:477
 msgid "An error occurred while modifying a task list"
 msgstr "Viga ülesandeloendi eemaldamisel"
 
 #: plugins/eds/gtd-provider-local.c:50
-msgid "Local"
-msgstr "Kohalik"
-
-#: plugins/eds/gtd-provider-local.c:56
 msgid "On This Computer"
 msgstr "Kohalikus arvutis"
 
-#: plugins/eds/gtd-task-list-eds.c:277 plugins/eds/gtd-task-list-eds.c:307
-#: plugins/eds/gtd-task-list-eds.c:331
+#: plugins/eds/gtd-provider-local.c:62
+msgid "Local"
+msgstr "Kohalik"
+
+#: plugins/eds/gtd-task-list-eds.c:277 plugins/eds/gtd-task-list-eds.c:310
+#: plugins/eds/gtd-task-list-eds.c:334
 msgid "Error fetching tasks from list"
 msgstr "Viga ülesannete võtmisel loendist"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:89 src/gtd-edit-pane.c:110
+#: plugins/next-week-panel/gtd-next-week-panel.c:107
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:102 src/gtd-edit-pane.c:112
 msgid "No date set"
 msgstr "Tähtaeg puudub"
+
+#: plugins/next-week-panel/gtd-next-week-panel.c:115
+#: plugins/today-panel/gtd-panel-today.c:201
+msgid "Overdue"
+msgstr "Hilinenud"
+
+#: plugins/next-week-panel/gtd-next-week-panel.c:119
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:123
+#: plugins/score/score/__init__.py:101
+#: plugins/today-panel/gtd-panel-today.c:210
+#: plugins/today-panel/gtd-panel-today.c:276 src/gtd-task-row.c:144
+msgid "Today"
+msgstr "Täna"
+
+#: plugins/next-week-panel/gtd-next-week-panel.c:123
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:127 src/gtd-task-row.c:148
+msgid "Tomorrow"
+msgstr "Homme"
+
+#: plugins/next-week-panel/gtd-next-week-panel.c:372
+msgid "Next 7 Days"
+msgstr "Järgmised 7 päeva"
 
 #. Translators: This message will never be used with '1 day ago'
 #. * but the singular form is required because some languages do not
 #. * have plurals, some languages reuse the singular form for numbers
 #. * like 21, 31, 41, etc.
 #.
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:102
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:115
 #, c-format
 msgid "%d day ago"
 msgid_plural "%d days ago"
 msgstr[0] "%d päev tagasi"
 msgstr[1] "%d päeva tagasi"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:106 src/gtd-task-row.c:148
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:119 src/gtd-task-row.c:152
 msgid "Yesterday"
 msgstr "Eile"
 
-#. Setup a title
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:110
-#: plugins/score/score/__init__.py:101
-#: plugins/today-panel/gtd-panel-today.c:134
-#: plugins/today-panel/gtd-panel-today.c:139
-#: plugins/today-panel/gtd-panel-today.c:273 src/gtd-task-row.c:140
-msgid "Today"
-msgstr "Täna"
-
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:114 src/gtd-task-row.c:144
-msgid "Tomorrow"
-msgstr "Homme"
-
-#. Setup a title
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:365
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:370
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:507
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:378
 msgid "Scheduled"
 msgstr "Ajastatud"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:512
-#: plugins/today-panel/gtd-panel-today.c:278
+#: plugins/scheduled-panel/gtd-panel-scheduled.c:535
+#: plugins/today-panel/gtd-panel-today.c:432
 #: plugins/unscheduled-panel/unscheduled-panel/__init__.py:58
 msgid "Clear completed tasks…"
 msgstr "Kustuta täidetud ülesanded…"
@@ -430,15 +421,15 @@ msgstr "Kustuta täidetud ülesanded…"
 msgid "No task completed today"
 msgstr "Täna pole ühtki ülesannet täidetud"
 
-#: plugins/todoist/gtd-provider-todoist.c:212
+#: plugins/todoist/gtd-provider-todoist.c:213
 msgid "Error fetching Todoist account key"
 msgstr "Viga Todoisti konto võtme hankimisel"
 
-#: plugins/todoist/gtd-provider-todoist.c:213
+#: plugins/todoist/gtd-provider-todoist.c:214
 msgid "Please ensure that Todoist account is correctly configured."
 msgstr "Palun veendu, et see Todoisti konto on õigesti seadistatud."
 
-#: plugins/todoist/gtd-provider-todoist.c:557
+#: plugins/todoist/gtd-provider-todoist.c:558
 #, c-format
 msgid ""
 "GNOME To Do doesn’t have the necessary permissions to perform this action: %s"
@@ -446,30 +437,30 @@ msgstr ""
 "Rakendusel GNOME Ülesanded ei ole vajalikke õigusi, et seda toimingut "
 "sooritada: %s"
 
-#: plugins/todoist/gtd-provider-todoist.c:565
+#: plugins/todoist/gtd-provider-todoist.c:566
 #, c-format
 msgid ""
 "Invalid response received from Todoist servers. Please reload GNOME To Do."
 msgstr ""
 "Todoisti serveritelt saabus vigane vastus. Palun taaskäivita GNOME Ülesanded."
 
-#: plugins/todoist/gtd-provider-todoist.c:865
+#: plugins/todoist/gtd-provider-todoist.c:866
 msgid "An error occurred while updating a Todoist task"
 msgstr "Viga Todoisti ülesande uuendamisel"
 
-#: plugins/todoist/gtd-provider-todoist.c:982
+#: plugins/todoist/gtd-provider-todoist.c:983
 msgid "An error occurred while retrieving Todoist data"
 msgstr "Viga Todoisti andmete hankimisel"
 
-#: plugins/todoist/gtd-provider-todoist.c:1057
+#: plugins/todoist/gtd-provider-todoist.c:1058
 msgid "An error occurred while updating Todoist"
 msgstr "Viga Todoisti uuendamisel"
 
-#: plugins/todoist/gtd-provider-todoist.c:1117
+#: plugins/todoist/gtd-provider-todoist.c:1118
 msgid "Todoist"
 msgstr "Todoist"
 
-#: plugins/todoist/gtd-provider-todoist.c:1426
+#: plugins/todoist/gtd-provider-todoist.c:1433
 #, c-format
 msgid "Todoist: %s"
 msgstr "Todoist: %s"
@@ -510,15 +501,15 @@ msgstr ""
 "esineda ebastabiilsust, vigu ja ka andmekadu. Todo.txt-i integratsiooni ei "
 "ole soovitatav kasutada süsteemides, mille töökindlus on oluline."
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:326
+#: plugins/todo-txt/gtd-provider-todo-txt.c:335
 msgid "Error while opening the file monitor. Todo.txt will not be monitored"
 msgstr "Viga failimonitori avamisel. Todo.txt-i ei monitoorita"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:395
+#: plugins/todo-txt/gtd-provider-todo-txt.c:404
 msgid "Todo.txt"
 msgstr "Todo.txt"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:401
+#: plugins/todo-txt/gtd-provider-todo-txt.c:416
 msgid "On the Todo.txt file"
 msgstr "Todo.txt failis"
 
@@ -542,25 +533,25 @@ msgstr "Ajastamata"
 msgid "Unscheduled (%d)"
 msgstr "Ajastamata (%d)"
 
-#: src/gtd-application.c:72
+#: src/gtd-application.c:73
 msgid "Quit GNOME To Do"
 msgstr "Sulge GNOME Ülesanded"
 
-#: src/gtd-application.c:73
+#: src/gtd-application.c:74
 msgid "Enable debug messages"
 msgstr "Silumisteadete lubamine"
 
-#: src/gtd-application.c:146
+#: src/gtd-application.c:147
 #, c-format
 msgid "Copyright © %1$d The To Do authors"
 msgstr "Autoriõigused © %1$d To Do autorid"
 
-#: src/gtd-application.c:151
+#: src/gtd-application.c:152
 #, c-format
 msgid "Copyright © %1$d–%2$d The To Do authors"
 msgstr "Autoriõigused © %1$d–%2$d To Do autorid"
 
-#: src/gtd-application.c:163
+#: src/gtd-application.c:164
 msgid "translator-credits"
 msgstr "Liivia Lilleväli <liivia.l10n@gmail.com>, 2018"
 
@@ -616,73 +607,92 @@ msgstr "Laienduse laadimisel tekkis viga"
 msgid "Error unloading extension"
 msgstr "Laienduse mahalaadimisel tekkis viga"
 
-#: src/gtd-task-list-view.c:292
+#: src/gtd-task-list-view.c:352
 msgid "Removing this task will also remove its subtasks. Remove anyway?"
 msgstr ""
 "Selle ülesande eemaldamine eemaldab ka selle alamülesanded. Kas soovid "
 "siiski eemaldada?"
 
-#: src/gtd-task-list-view.c:295
+#: src/gtd-task-list-view.c:355
 msgid "Once removed, the tasks cannot be recovered."
 msgstr "Eemaldatud ülesandeid ei ole võimalik taastada."
 
-#: src/gtd-task-list-view.c:298 src/views/gtd-list-selector-panel.c:388
+#: src/gtd-task-list-view.c:358
 msgid "Cancel"
 msgstr "Loobu"
 
-#: src/gtd-task-list-view.c:300
+#: src/gtd-task-list-view.c:360
 msgid "Remove"
 msgstr "Eemalda"
 
-#: src/gtd-task-list-view.c:390
-#, c-format
-msgid "Done (%d)"
-msgstr "Tehtud (%d)"
-
-#: src/gtd-task-list-view.c:660
+#: src/gtd-task-list-view.c:802
 #, c-format
 msgid "Task <b>%s</b> removed"
 msgstr "Ülesanne <b>%s</b> eemaldati"
 
-#: src/gtd-task-list-view.c:684
+#: src/gtd-task-list-view.c:826 src/sidebar/gtd-sidebar-list-row.c:256
 msgid "Undo"
 msgstr "Võta tagasi"
 
-#: src/gtd-window.c:476
+#: src/gtd-window.c:110
+msgid ""
+"This is a development build of To Do. You may experience errors, wrong "
+"behaviors, and data loss."
+msgstr ""
+"See on Ülesannete arendusversioon. Võib esineda vigu, valet toimimist ja "
+"andmekadu."
+
+#: src/gtd-window.c:471
 msgid "Details"
 msgstr "Üksikasjad"
 
-#: src/gtd-window.c:689
-msgid "Loading your task lists…"
-msgstr "Ülesandeloendite laadimine…"
-
-#: src/gtd-window.c:793
+#: src/gtd-window.c:783
 msgid "Click a task list to select"
 msgstr "Ülesandeloendi valimiseks klõpsa sellel"
 
-#.
-#. * If there's no task available, draw a "No tasks" string at
-#. * the middle of the list thumbnail.
-#.
-#: src/views/gtd-list-selector-grid-item.c:250
-msgid "No tasks"
-msgstr "Ülesanded puuduvad"
+#: src/sidebar/gtd-sidebar-list-row.c:253
+#, c-format
+msgid "Task list <b>%s</b> removed"
+msgstr "Ülesandeloend <b>%s</b> eemaldati"
 
-#: src/views/gtd-list-selector-panel.c:381
-msgid "Remove the selected task lists?"
-msgstr "Kas soovid valitud ülesandeloendid eemaldada?"
+#~ msgid "_Rename"
+#~ msgstr "Muuda _nime"
 
-#: src/views/gtd-list-selector-panel.c:384
-msgid "Once removed, the task lists cannot be recovered."
-msgstr "Eemaldatud loendeid ei ole võimalik taastada."
+#~ msgid "Lists"
+#~ msgstr "Loendid"
 
-#: src/views/gtd-list-selector-panel.c:396
-msgid "Remove task lists"
-msgstr "Eemalda ülesandeloendid"
+#~ msgid "Tasks"
+#~ msgstr "Ülesanded"
 
-#: src/views/gtd-list-selector-panel.c:709
-msgid "Clear completed tasks"
-msgstr "Kustuta täidetud ülesanded"
+#~ msgid "Name of the task list"
+#~ msgstr "Ülesandeloendi nimi"
+
+#~ msgid "Show or hide completed tasks"
+#~ msgstr "Näitab või peidab täidetud ülesanded"
+
+#~ msgid "Done"
+#~ msgstr "Tehtud"
+
+#~ msgid "Done (%d)"
+#~ msgstr "Tehtud (%d)"
+
+#~ msgid "Loading your task lists…"
+#~ msgstr "Ülesandeloendite laadimine…"
+
+#~ msgid "No tasks"
+#~ msgstr "Ülesanded puuduvad"
+
+#~ msgid "Remove the selected task lists?"
+#~ msgstr "Kas soovid valitud ülesandeloendid eemaldada?"
+
+#~ msgid "Once removed, the task lists cannot be recovered."
+#~ msgstr "Eemaldatud loendeid ei ole võimalik taastada."
+
+#~ msgid "Remove task lists"
+#~ msgstr "Eemalda ülesandeloendid"
+
+#~ msgid "Clear completed tasks"
+#~ msgstr "Kustuta täidetud ülesanded"
 
 #~ msgid "Error creating new task list"
 #~ msgstr "Uue ülesandeloendi loomisel tekkis viga"
@@ -695,9 +705,6 @@ msgstr "Kustuta täidetud ülesanded"
 
 #~ msgid "Priority"
 #~ msgstr "Tähtsus"
-
-#~ msgid "Delete"
-#~ msgstr "Kustuta"
 
 #~ msgid "Error loading Evolution-Data-Server backend"
 #~ msgstr "Viga Evolution-Data-Serveri taustaprogrammi laadimisel"

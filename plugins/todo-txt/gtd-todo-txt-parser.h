@@ -20,6 +20,7 @@
 #define GTD_TODO_TXT_PARSE_H
 
 #include "gnome-todo.h"
+#include "gtd-task-todo-txt.h"
 
 #include <glib.h>
 

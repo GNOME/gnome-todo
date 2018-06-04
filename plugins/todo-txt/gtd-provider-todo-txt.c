@@ -23,6 +23,7 @@
 #include "gtd-provider-todo-txt.h"
 #include "gtd-plugin-todo-txt.h"
 #include "gtd-todo-txt-parser.h"
+#include "gtd-task-todo-txt.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -442,7 +443,7 @@ gtd_provider_todo_txt_create_task (GtdProvider *provider,
   self = GTD_PROVIDER_TODO_TXT (provider);
 
   /* Create the new task */
-  new_task = gtd_provider_todo_txt_generate_task (self);
+  new_task = GTD_TASK (gtd_provider_todo_txt_generate_task (self));
   gtd_task_set_due_date (new_task, due_date);
   gtd_task_set_list (new_task, list);
   gtd_task_set_title (new_task, title);
@@ -688,7 +689,7 @@ gtd_provider_todo_txt_new (GFile *source_file)
                        NULL);
 }
 
-GtdTask*
+GtdTaskTodoTxt*
 gtd_provider_todo_txt_generate_task (GtdProviderTodoTxt *self)
 {
   g_autofree gchar *uid = NULL;
@@ -696,5 +697,5 @@ gtd_provider_todo_txt_generate_task (GtdProviderTodoTxt *self)
   g_return_val_if_fail (GTD_IS_PROVIDER_TODO_TXT (self), NULL);
   uid = g_uuid_string_random ();
 
-  return g_object_new (GTD_TYPE_TASK, "uid", uid, NULL);
+  return g_object_new (GTD_TYPE_TASK_TODO_TXT, "uid", uid, NULL);
 }

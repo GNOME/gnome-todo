@@ -88,6 +88,8 @@ print_task (GString *output,
 {
   GtdTaskList *list;
   GDateTime *dt;
+  GDateTime *completion_dt;
+  GDateTime *creation_dt;
   const gchar *description;
   gint priority;
   gboolean is_complete;
@@ -97,6 +99,8 @@ print_task (GString *output,
   dt = gtd_task_get_due_date (task);
   list = gtd_task_get_list (task);
   description = gtd_task_get_description (task);
+  creation_dt = gtd_task_get_creation_date (task);
+  completion_dt = gtd_task_get_completion_date (task);
 
   if (is_complete)
     g_string_append (output, "x ");
@@ -109,6 +113,22 @@ print_task (GString *output,
         g_string_append (output, "(B) ");
       else if (priority == 3)
         g_string_append (output, "(A) ");
+    }
+
+  if (is_complete && completion_dt)
+    {
+      g_autofree gchar *formatted_time = g_date_time_format (completion_dt, "%F");
+      g_string_append_printf (output, "%s ", formatted_time);
+    }
+
+  /*
+   * Creation date is only specified if completion date is specified
+   * and it comes just after completion date as per todo.txt format
+   */
+  if (is_complete && completion_dt && creation_dt)
+    {
+      g_autofree gchar *formatted_time = g_date_time_format (creation_dt, "%F");
+      g_string_append_printf (output, "%s ", formatted_time);
     }
 
   g_string_append_printf (output,
@@ -578,6 +598,7 @@ gtd_provider_todo_txt_create_task (GtdProvider *provider,
   gtd_task_set_due_date (new_task, due_date);
   gtd_task_set_list (new_task, list);
   gtd_task_set_title (new_task, title);
+  gtd_task_set_creation_date (new_task, g_date_time_new_now_local ());
 
   gtd_task_list_save_task (list, new_task);
 

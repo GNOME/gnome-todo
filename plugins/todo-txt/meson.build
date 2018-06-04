@@ -5,7 +5,8 @@ plugins_ldflags += ['-Wl,--undefined=gtd_plugin_todo_txt_register_types']
 sources = files(
   'gtd-plugin-' + plugin_name + '.c',
   'gtd-provider-' + plugin_name + '.c',
-  'gtd-' + plugin_name + '-parser.c'
+  'gtd-' + plugin_name + '-parser.c',
+  'gtd-' + 'task-' + plugin_name + '.c'
 )
 
 plugins_libs += static_library(

@@ -234,7 +234,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   state.last_token = TOKEN_START;
   state.in_description = FALSE;
 
-  task = gtd_provider_todo_txt_generate_task (GTD_PROVIDER_TODO_TXT (provider));
+  task = GTD_TASK (gtd_provider_todo_txt_generate_task (GTD_PROVIDER_TODO_TXT (provider)));
   tokens = tokenize_line (line);
 
   for (i = 0; tokens && tokens[i]; i++)

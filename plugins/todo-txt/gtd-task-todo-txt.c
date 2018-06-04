@@ -1,6 +1,6 @@
-/* gtd-provider-todo-txt.h
+/* gtd-task-todo-txt.c
  *
- * Copyright (C) 2016 Rohit Kaushik <kaushikrohit325@gmail.com>
+ * Copyright (C) 2018 Rohit Kaushik <kaushikrohit325@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,24 +16,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GTD_PROVIDER_TODO_TXT_H
-#define GTD_PROVIDER_TODO_TXT_H
+#define G_LOG_DOMAIN "GtdTaskTodoTxt"
 
-#include "gnome-todo.h"
 #include "gtd-task-todo-txt.h"
 
-#include <glib.h>
+struct _GtdTaskTodoTxt
+{
+  GtdTask             parent;
+};
 
-G_BEGIN_DECLS
+G_DEFINE_TYPE (GtdTaskTodoTxt, gtd_task_todo_txt, GTD_TYPE_TASK)
 
-#define GTD_TYPE_PROVIDER_TODO_TXT (gtd_provider_todo_txt_get_type())
+void
+gtd_task_todo_txt_set_completion_date (GtdTask   *task,
+									   GDateTime *dt)
+{
+  GTD_TASK_CLASS (gtd_task_todo_txt_parent_class)->set_completion_date (task, dt);
+}
 
-G_DECLARE_FINAL_TYPE (GtdProviderTodoTxt, gtd_provider_todo_txt, GTD, PROVIDER_TODO_TXT, GtdObject)
+static void
+gtd_task_todo_txt_class_init (GtdTaskTodoTxtClass *klass)
+{
+}
 
-GtdProviderTodoTxt*    gtd_provider_todo_txt_new                     (GFile         *source_file);
+static void
+gtd_task_todo_txt_init (GtdTaskTodoTxt *self)
+{
+}
 
-GtdTaskTodoTxt*        gtd_provider_todo_txt_generate_task           (GtdProviderTodoTxt *self);
-
-G_END_DECLS
-
-#endif /* GTD_PROVIDER_TODO_TXT_H */
+GtdTask*
+gtd_task_todo_txt_new (void)
+{
+  return g_object_new (GTD_TYPE_TASK_TODO_TXT, NULL);
+}

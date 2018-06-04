@@ -34,7 +34,8 @@ typedef enum
   TOKEN_HIDDEN,
   TOKEN_COMPLETE,
   TOKEN_PRIORITY,
-  TOKEN_DATE,
+  TOKEN_CREATION_DATE,
+  TOKEN_COMPLETION_DATE,
   TOKEN_TITLE,
   TOKEN_LIST_NAME,
   TOKEN_LIST_COLOR,
@@ -162,8 +163,15 @@ parse_token_id (const gchar           *token,
   if (token_length == 3 && token[0] == '(' && token[2] == ')')
     return TOKEN_PRIORITY;
 
-  if (!g_str_has_prefix (token , "due:") && is_date (token))
-    return TOKEN_DATE;
+  if ((state->last_token == TOKEN_PRIORITY ||
+       state-> last_token == TOKEN_COMPLETE) &&
+      !g_str_has_prefix (token , "due:") && is_date (token))
+    {
+      return TOKEN_COMPLETION_DATE;
+    }
+
+  if (state->last_token == TOKEN_COMPLETION_DATE && !g_str_has_prefix (token , "due:") && is_date (token))
+    return TOKEN_CREATION_DATE;
 
   if (g_str_has_prefix (token , "color:"))
     return TOKEN_LIST_COLOR;
@@ -181,7 +189,8 @@ parse_token_id (const gchar           *token,
     }
 
   if (state->last_token == TOKEN_START ||
-      state->last_token == TOKEN_DATE ||
+      state->last_token == TOKEN_CREATION_DATE ||
+      state->last_token == TOKEN_COMPLETION_DATE ||
       state->last_token == TOKEN_PRIORITY ||
       state->last_token == TOKEN_COMPLETE||
       state->last_token == TOKEN_TITLE)
@@ -259,8 +268,14 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
           gtd_task_set_priority (task, parse_priority (token));
           break;
 
-        case TOKEN_DATE:
+        case TOKEN_CREATION_DATE:
           dt = parse_date (token);
+          gtd_task_set_creation_date (task, dt);
+          break;
+
+        case TOKEN_COMPLETION_DATE:
+          dt = parse_date (token);
+          gtd_task_todo_txt_set_completion_date (GTD_TASK_TODO_TXT (task), dt);
           break;
 
         case TOKEN_TITLE:
@@ -495,8 +510,25 @@ gtd_todo_txt_parser_get_line_type (const gchar  *line,
             line_type = GTD_TODO_TXT_LINE_TYPE_TASK;
           break;
 
-        case TOKEN_DATE:
+        case TOKEN_COMPLETION_DATE:
           if (state.last_token <= TOKEN_PRIORITY)
+            {
+              line_type = GTD_TODO_TXT_LINE_TYPE_TASK;
+
+              if (!is_date (token))
+                {
+                  g_set_error (error,
+                               GTD_TODO_TXT_PARSER_ERROR,
+                               GTD_TODO_TXT_PARSER_INVALID_DUE_DATE,
+                               "Invalid date found");
+
+                  GTD_RETURN (-1);
+                }
+            }
+          break;
+
+        case TOKEN_CREATION_DATE:
+          if (state.last_token == TOKEN_COMPLETION_DATE)
             {
               line_type = GTD_TODO_TXT_LINE_TYPE_TASK;
 

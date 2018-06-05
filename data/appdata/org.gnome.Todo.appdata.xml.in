@@ -2,45 +2,46 @@
 <!-- Copyleft 2015 Georges Basile Stavracas Neto <georges.stavracas@gmail.com> -->
 <component type="desktop">
   <id>org.gnome.Todo.desktop</id>
-  <metadata_license>CC0</metadata_license>
+  <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+</project_license>
   <name>To Do</name>
   <summary>Task manager for GNOME</summary>
 
   <description>
     <p>
-      GNOME To Do is a task management application designed to integrate with GNOME. It
-      is extensible through plugins and supports custom task providers.
+      GNOME To Do is a task management application designed to integrate with GNOME. Save and order your todos. 
+      Manage multiple todo lists. Keep your todos on your computer or sync them with cloud providers. 
+      Customize your experience with plugins.
     </p>
   </description>
 
   <url type="homepage">https://wiki.gnome.org/Apps/Todo</url>
-  <url type="bugtracker">https://bugzilla.gnome.org/enter_bug.cgi?product=gnome-todo</url>
+  <url type="bugtracker">https://gitlab.gnome.org/GNOME/gnome-todo/issues</url>
   <project_group>GNOME</project_group>
 
   <screenshots>
     <screenshot width="1200" height="675">
-      <image>https://git.gnome.org/browse/gnome-todo/plain/data/appdata/dark-theme.png</image>
+      <image>https://gitlab.gnome.org/GNOME/gnome-todo/raw/master/data/appdata/dark-theme.png</image>
       <caption>GNOME To Do with the dark theme variant</caption>
     </screenshot>
     <screenshot width="1200" height="675">
-      <image>https://git.gnome.org/browse/gnome-todo/plain/data/appdata/editing-tasklist.png</image>
+      <image>https://gitlab.gnome.org/GNOME/gnome-todo/raw/master/data/appdata/editing-tasklist.png</image>
       <caption>Editing a tasklist with GNOME To Do</caption>
     </screenshot>
     <screenshot width="1200" height="675">
-      <image>https://git.gnome.org/browse/gnome-todo/plain/data/appdata/grid-view.png</image>
+      <image>https://gitlab.gnome.org/GNOME/gnome-todo/raw/master/data/appdata/grid-view.png</image>
       <caption>Task lists displayed on grid mode</caption>
     </screenshot>
     <screenshot width="1200" height="675">
-      <image>https://git.gnome.org/browse/gnome-todo/plain/data/appdata/list-view.png</image>
+      <image>https://gitlab.gnome.org/GNOME/gnome-todo/raw/master/data/appdata/list-view.png</image>
       <caption>Task lists displayed on list mode</caption>
     </screenshot>
     <screenshot width="1200" height="675">
-      <image>https://git.gnome.org/browse/gnome-todo/plain/data/appdata/plugins.png</image>
+      <image>https://gitlab.gnome.org/GNOME/gnome-todo/raw/master/data/appdata/plugins.png</image>
       <caption>Available plugins for GNOME To Do</caption>
     </screenshot>
     <screenshot width="1200" height="675">
-      <image>https://git.gnome.org/browse/gnome-todo/plain/data/appdata/today-panel.png</image>
+      <image>https://gitlab.gnome.org/GNOME/gnome-todo/raw/master/data/appdata/today-panel.png</image>
       <caption>Visualizing tasks for today on GNOME To Do’s Today panel</caption>
     </screenshot>
   </screenshots>
@@ -216,7 +217,35 @@
       </description>
     </release>
   </releases>
-
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-cartoon">none</content_attribute>
+    <content_attribute id="violence-fantasy">none</content_attribute>
+    <content_attribute id="violence-realistic">none</content_attribute>
+    <content_attribute id="violence-bloodshed">none</content_attribute>
+    <content_attribute id="violence-sexual">none</content_attribute>
+    <content_attribute id="violence-desecration">none</content_attribute>
+    <content_attribute id="violence-slavery">none</content_attribute>
+    <content_attribute id="violence-worship">none</content_attribute>
+    <content_attribute id="drugs-alcohol">none</content_attribute>
+    <content_attribute id="drugs-narcotics">none</content_attribute>
+    <content_attribute id="drugs-tobacco">none</content_attribute>
+    <content_attribute id="sex-nudity">none</content_attribute>
+    <content_attribute id="sex-themes">none</content_attribute>
+    <content_attribute id="sex-homosexuality">none</content_attribute>
+    <content_attribute id="sex-prostitution">none</content_attribute>
+    <content_attribute id="sex-adultery">none</content_attribute>
+    <content_attribute id="sex-appearance">none</content_attribute>
+    <content_attribute id="language-profanity">none</content_attribute>
+    <content_attribute id="language-humor">none</content_attribute>
+    <content_attribute id="language-discrimination">none</content_attribute>
+    <content_attribute id="social-chat">none</content_attribute>
+    <content_attribute id="social-info">none</content_attribute>
+    <content_attribute id="social-audio">none</content_attribute>
+    <content_attribute id="social-location">none</content_attribute>
+    <content_attribute id="social-contacts">none</content_attribute>
+    <content_attribute id="money-purchasing">none</content_attribute>
+    <content_attribute id="money-gambling">none</content_attribute>
+  </content_rating>
   <update_contact>georges.stavracas@gmail.com</update_contact>
   <translation type="gettext">gnome-todo</translation>
 </component>

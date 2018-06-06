@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2018-05-19 17:50+0000\n"
-"PO-Revision-Date: 2018-05-21 09:46+0200\n"
+"POT-Creation-Date: 2018-05-24 15:12+0000\n"
+"PO-Revision-Date: 2018-06-06 10:22+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -23,7 +23,7 @@ msgstr ""
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in:7
 #: data/org.gnome.Todo.desktop.in:3 src/gtd-application.c:157
-#: src/gtd-window.c:760 src/gtd-window.c:791 src/main.c:35
+#: src/gtd-window.c:788 src/gtd-window.c:819 src/main.c:35
 msgid "To Do"
 msgstr "Úkoly"
 
@@ -273,7 +273,7 @@ msgstr "Nebo můžete své úkoly jednoduše ukládat na tomto počítači."
 msgid "Delete"
 msgstr "Odstranit"
 
-#: data/ui/sidebar-provider-row.ui:100
+#: data/ui/sidebar-provider-row.ui:96
 msgid "Loading…"
 msgstr "Načítá se…"
 
@@ -507,15 +507,15 @@ msgstr ""
 "narazit na nestabilitu, chyby a případně i přijít o data. Nedoporučuje se "
 "nasazovat používání Todo.txt na produkčních systémech."
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:327
+#: plugins/todo-txt/gtd-provider-todo-txt.c:335
 msgid "Error while opening the file monitor. Todo.txt will not be monitored"
 msgstr "Chyba při otevírání sledování souboru. Todo.txt nebude sledován"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:396
+#: plugins/todo-txt/gtd-provider-todo-txt.c:404
 msgid "Todo.txt"
 msgstr "Todo.txt"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:408
+#: plugins/todo-txt/gtd-provider-todo-txt.c:416
 msgid "On the Todo.txt file"
 msgstr "V souboru Todo.txt"
 
@@ -638,53 +638,27 @@ msgstr "Odstranit"
 msgid "Task <b>%s</b> removed"
 msgstr "Úkol <b>%s</b> byl odstraněn"
 
-#: src/gtd-task-list-view.c:825 src/sidebar/gtd-sidebar-list-row.c:254
+#: src/gtd-task-list-view.c:825 src/sidebar/gtd-sidebar-list-row.c:256
 msgid "Undo"
 msgstr "Zpět"
 
-#: src/gtd-window.c:447
+#: src/gtd-window.c:110
+msgid ""
+"This is a development build of To Do. You may experience errors, wrong "
+"behaviors, and data loss."
+msgstr ""
+"Jedná se o vývojové sestavení aplikace Úkoly. Proto se můžete setkat s "
+"chybami, nesprávným chováním a ztrátou dat."
+
+#: src/gtd-window.c:471
 msgid "Details"
 msgstr "Podrobnosti"
 
-#: src/gtd-window.c:755
+#: src/gtd-window.c:783
 msgid "Click a task list to select"
 msgstr "Kliknutím vyberte seznam úkolů"
 
-#~ msgid "_Rename"
-#~ msgstr "Přej_menovat"
-
-#~ msgid "Lists"
-#~ msgstr "Seznamy"
-
-#~ msgid "Tasks"
-#~ msgstr "Úkoly"
-
-#~ msgid "Name of the task list"
-#~ msgstr "Název seznamu úkolů"
-
-#~ msgid "Show or hide completed tasks"
-#~ msgstr "Zobrazit nebo skrýt splněné úkoly"
-
-#~ msgid "Done"
-#~ msgstr "Hotovo"
-
-#~ msgid "Done (%d)"
-#~ msgstr "Hotovo (%d)"
-
-#~ msgid "Loading your task lists…"
-#~ msgstr "Načítají se vaše seznamy úkolů…"
-
-#~ msgid "No tasks"
-#~ msgstr "Žádné úkoly"
-
-#~ msgid "Remove the selected task lists?"
-#~ msgstr "Odstranit vybrané seznamy úkolů?"
-
-#~ msgid "Once removed, the task lists cannot be recovered."
-#~ msgstr "Jakmile seznamy úkolů odstraníte, již je nelze obnovit."
-
-#~ msgid "Remove task lists"
-#~ msgstr "Odstranit seznamy úkolů"
-
-#~ msgid "Clear completed tasks"
-#~ msgstr "Vymazat splněné úkoly"
+#: src/sidebar/gtd-sidebar-list-row.c:253
+#, c-format
+msgid "Task list <b>%s</b> removed"
+msgstr "Seznam úkolů <b>%s</b> byl odstraněn"

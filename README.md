@@ -38,8 +38,8 @@ respectful and kind.
 Stop by and say hello!
 
 
-[code-style]: https://gitlab.gnome.org/GNOME/gnome-todo/blob/master/HACKING.md
-[contribution-guidelines]: https://gitlab.gnome.org/GNOME/gnome-todo/blob/master/CONTRIBUTING.md
+[code-style]: https://gitlab.gnome.org/GNOME/gnome-todo/blob/master/doc/HACKING.md
+[contribution-guidelines]: https://gitlab.gnome.org/GNOME/gnome-todo/blob/master/doc/CONTRIBUTING.md
 [gitlab]: https://gitlab.gnome.org/GNOME/gnome-todo
 [irc-channel]: irc://irc.gnome.org/gnome-todo
 [irc-wiki-page]: https://wiki.gnome.org/Community/GettingInTouch/IRC

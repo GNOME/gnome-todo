@@ -7,6 +7,8 @@ rules. Please read them carefully and, if in doubt, ask a maintainer for directi
 
 The most important rule is: **see the surrounding code, and copy its style**.
 
+GNOME To Do's line length is 120 columns.
+
 Another rule that applies to function declarations is that all parameters are
 aligned by the last '*'. There are plenty of examples below.
 
@@ -81,19 +83,21 @@ do_something_on_data (Foo *data,
 ### Signal Callbacks
 
 Signal callback names must have the name of the signal in the past. They **don't** have
-the `gtd_class_name` prefix as well, but have a `_cb` suffix. For example:
+the `gtd_class_name` prefix as well, but have a `on_` prefix and `_cb` suffix. For example:
 
 ```c
 static void
-size_allocated_cb (GtkWidget     *widget,
-                   GtkAllocation *allocation,
-                   gpointer       user_data)
+on_size_allocated_cb (GtkWidget     *widget,
+                      GtkAllocation *allocation,
+                      gpointer       user_data)
 {
   /* ... */
 }
 ```
 
 ### Line Splitting
+
+GNOME To Do's line length is 120 columns.
 
 Line splitting works following the GTK code style, but legibility comes over above
 all. If a function call looks unbalanced following the GTK style, it is fine to
@@ -116,7 +120,7 @@ comparison, it will look better if written like this:
 
 ```c
 foo_bar_do_somthing_sync (a, 1, object, data,
-                          something
+                          something,
                           cancellable,
                           &error);
 ```

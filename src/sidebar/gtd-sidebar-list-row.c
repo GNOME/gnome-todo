@@ -51,7 +51,6 @@ struct _GtdSidebarListRow
 
 static void          on_list_changed_cb                          (GtdSidebarListRow  *self);
 
-
 static void          on_list_color_changed_cb                    (GtdTaskList        *list,
                                                                   GParamSpec         *pspec,
                                                                   GtdSidebarListRow  *self);
@@ -456,7 +455,8 @@ gtd_sidebar_list_row_class_init (GtdSidebarListRowClass *klass)
 static void
 gtd_sidebar_list_row_init (GtdSidebarListRow *self)
 {
-  const GActionEntry entries[] = {
+  const GActionEntry entries[] =
+  {
     { "delete", on_delete_action_activated_cb },
     { "rename", on_rename_action_activated_cb },
   };

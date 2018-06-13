@@ -47,9 +47,74 @@
     </child>
   </template>
 
+  <!-- Rename popover -->
+  <object class="GtkPopover" id="rename_popover">
+    <property name="can_focus">False</property>
+    <property name="position">right</property>
+    <signal name="hide" handler="on_rename_popover_hidden_cb" object="GtdSidebarListRow" swapped="no" />
+
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">12</property>
+        <property name="margin">12</property>
+
+        <child>
+          <object class="GtkLabel" id="rename_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="xalign">0.0</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="spacing">12</property>
+
+            <!-- Entry -->
+            <child>
+              <object class="GtkEntry" id="rename_entry">
+                <property name="visible">True</property>
+                <signal name="activate" handler="on_rename_entry_activated_cb" object="GtdSidebarListRow" swapped="no" />
+                <signal name="notify::text" handler="on_rename_entry_text_changed_cb" object="GtdSidebarListRow" swapped="no" />
+              </object>
+            </child>
+
+            <!-- Button -->
+            <child>
+              <object class="GtkButton" id="rename_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Rename</property>
+                <signal name="clicked" handler="on_rename_button_clicked_cb" object="GtdSidebarListRow" swapped="no" />
+                <style>
+                  <class name="destructive-action"/>
+                </style>
+              </object>
+            </child>
+
+          </object>
+        </child>
+
+      </object>
+    </child>
+  </object>
+
   <!-- Right-click menu -->
   <menu id="menu">
     <section>
+      <item>
+        <attribute name="label" translatable="yes">Rename</attribute>
+        <attribute name="action">list-row.rename</attribute>
+      </item>
       <item>
         <attribute name="label" translatable="yes">Delete</attribute>
         <attribute name="action">list-row.delete</attribute>

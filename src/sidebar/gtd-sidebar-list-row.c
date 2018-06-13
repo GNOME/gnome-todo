@@ -36,6 +36,10 @@ struct _GtdSidebarListRow
 
   GtkImage           *color_icon;
   GtkLabel           *name_label;
+  GtkWidget          *rename_button;
+  GtkEntry           *rename_entry;
+  GtkLabel           *rename_label;
+  GtkPopover         *rename_popover;
   GtkLabel           *tasks_counter_label;
 
   GActionMap         *action_group;
@@ -211,6 +215,28 @@ set_list (GtdSidebarListRow *self,
                           G_BINDING_DEFAULT | G_BINDING_SYNC_CREATE);
 }
 
+static void
+rename_list (GtdSidebarListRow *self)
+{
+  g_assert (gtk_widget_get_visible (GTK_WIDGET (self->rename_popover)));
+  g_assert (g_utf8_validate (gtk_entry_get_text (self->rename_entry), -1, NULL));
+
+  /*
+   * Even though the Rename button is insensitive, we may still reach here
+   * by activating the entry.
+   */
+  if (gtk_entry_get_text_length (self->rename_entry) == 0)
+    return;
+
+  if (g_strcmp0 (gtk_entry_get_text (self->rename_entry), gtd_task_list_get_name (self->list)) != 0)
+    {
+      gtd_task_list_set_name (self->list, gtk_entry_get_text (self->rename_entry));
+      gtd_provider_update_task_list (gtd_task_list_get_provider (self->list), self->list);
+    }
+
+  gtk_popover_popdown (self->rename_popover);
+}
+
 
 /*
  * Callbacks
@@ -268,6 +294,27 @@ on_delete_action_activated_cb (GSimpleAction *action,
 }
 
 static void
+on_rename_action_activated_cb (GSimpleAction *action,
+                               GVariant      *parameters,
+                               gpointer       user_data)
+{
+  GtdSidebarListRow *self;
+  g_autofree gchar *text;
+
+  self = GTD_SIDEBAR_LIST_ROW (user_data);
+
+  g_assert (self->list != NULL);
+
+  text = g_strdup_printf (_("Rename %s"), gtd_task_list_get_name (self->list));
+  gtk_label_set_label (self->rename_label, text);
+
+  gtk_entry_set_text (self->rename_entry, gtd_task_list_get_name (self->list));
+
+  gtk_popover_set_relative_to (self->rename_popover, GTK_WIDGET (self));
+  gtk_popover_popup (self->rename_popover);
+}
+
+static void
 on_list_changed_cb (GtdSidebarListRow *self)
 {
   update_counter_label (self);
@@ -279,6 +326,42 @@ on_list_color_changed_cb (GtdTaskList       *list,
                           GtdSidebarListRow *self)
 {
   update_color_icon (self);
+}
+
+static void
+on_rename_button_clicked_cb (GtkButton         *button,
+                             GtdSidebarListRow *self)
+{
+  rename_list (self);
+}
+
+static void
+on_rename_entry_activated_cb (GtkEntry          *entry,
+                              GtdSidebarListRow *self)
+{
+  rename_list (self);
+}
+
+static void
+on_rename_entry_text_changed_cb (GtkEntry          *entry,
+                                 GParamSpec        *pspec,
+                                 GtdSidebarListRow *self)
+{
+  gboolean valid = gtk_entry_get_text_length (entry) > 0;
+
+  gtk_widget_set_sensitive (self->rename_button, valid);
+}
+
+static void
+on_rename_popover_hidden_cb (GtkPopover        *popover,
+                             GtdSidebarListRow *self)
+{
+  /*
+   * Remove the relative to, to remove the popover from the widget
+   * list and avoid parsing any CSS for it. It's a small performance
+   * improvement.
+   */
+  gtk_popover_set_relative_to (popover, NULL);
 }
 
 
@@ -358,7 +441,16 @@ gtd_sidebar_list_row_class_init (GtdSidebarListRowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, color_icon);
   gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, menu);
   gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, name_label);
+  gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, rename_button);
+  gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, rename_entry);
+  gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, rename_label);
+  gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, rename_popover);
   gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, tasks_counter_label);
+
+  gtk_widget_class_bind_template_callback (widget_class, on_rename_button_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_rename_entry_activated_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_rename_entry_text_changed_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_rename_popover_hidden_cb);
 }
 
 static void
@@ -366,6 +458,7 @@ gtd_sidebar_list_row_init (GtdSidebarListRow *self)
 {
   const GActionEntry entries[] = {
     { "delete", on_delete_action_activated_cb },
+    { "rename", on_rename_action_activated_cb },
   };
 
   gtk_widget_init_template (GTK_WIDGET (self));

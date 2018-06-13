@@ -39,7 +39,8 @@ typedef enum
   TOKEN_LIST_NAME,
   TOKEN_LIST_COLOR,
   TOKEN_DUE_DATE,
-  TOKEN_NOTE
+  TOKEN_NOTE,
+  TOKEN_TASK_UID
 } Token;
 
 typedef struct
@@ -168,6 +169,9 @@ parse_token_id (const gchar           *token,
   if (g_str_has_prefix (token , "color:"))
     return TOKEN_LIST_COLOR;
 
+  if (g_str_has_prefix (token, "task-uid:"))
+    return TOKEN_TASK_UID;
+
   if (token_length > 1 && token[0] == '@')
     return TOKEN_LIST_NAME;
 
@@ -279,6 +283,10 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
 
         case TOKEN_NOTE:
           append_note (token, note, &state);
+          break;
+
+        case TOKEN_TASK_UID:
+          gtd_object_set_uid (GTD_OBJECT (task), token + strlen ("task-uid:"));
           break;
 
         case TOKEN_LIST_COLOR:
@@ -466,6 +474,10 @@ gtd_todo_txt_parser_get_line_type (const gchar  *line,
 
         case TOKEN_NOTE:
           state.in_description = TRUE;
+          line_type = GTD_TODO_TXT_LINE_TYPE_TASK;
+          break;
+
+        case TOKEN_TASK_UID:
           line_type = GTD_TODO_TXT_LINE_TYPE_TASK;
           break;
 

@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2018-06-08 14:17+0000\n"
-"PO-Revision-Date: 2018-06-09 00:19+0800\n"
-"Last-Translator: Cheng-Chia Tseng <pswo10680@gmail.com>\n"
+"POT-Creation-Date: 2018-06-13 03:09+0000\n"
+"PO-Revision-Date: 2018-06-13 16:48+0800\n"
+"Last-Translator: pan93412 <pan93412@gmail.com>\n"
 "Language-Team: Chinese (Taiwan) <chinese-l10n@googlegroups.com>\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
@@ -265,7 +265,11 @@ msgstr "Microsoft Exchange"
 msgid "Or you can just store your tasks on this computer"
 msgstr "或者您可以只將事項儲存於這臺電腦"
 
-#: data/ui/sidebar-list-row.ui:54
+#: data/ui/sidebar-list-row.ui:96 data/ui/sidebar-list-row.ui:115
+msgid "Rename"
+msgstr "重新命名"
+
+#: data/ui/sidebar-list-row.ui:119
 msgid "Delete"
 msgstr "刪除"
 
@@ -623,7 +627,7 @@ msgstr "移除"
 msgid "Task <b>%s</b> removed"
 msgstr "事項 <b>%s</b> 已被移除"
 
-#: src/gtd-task-list-view.c:826 src/sidebar/gtd-sidebar-list-row.c:256
+#: src/gtd-task-list-view.c:826 src/sidebar/gtd-sidebar-list-row.c:281
 msgid "Undo"
 msgstr "復原"
 
@@ -642,10 +646,15 @@ msgstr "詳細資料"
 msgid "Click a task list to select"
 msgstr "點選事項列表來選取"
 
-#: src/sidebar/gtd-sidebar-list-row.c:253
+#: src/sidebar/gtd-sidebar-list-row.c:278
 #, c-format
 msgid "Task list <b>%s</b> removed"
 msgstr "事項列表 <b>%s</b> 已被移除"
+
+#: src/sidebar/gtd-sidebar-list-row.c:307
+#, c-format
+msgid "Rename %s"
+msgstr "重新命名 %s"
 
 #~ msgid "_Rename"
 #~ msgstr "重新命名(_R)"
@@ -791,9 +800,6 @@ msgstr "事項列表 <b>%s</b> 已被移除"
 
 #~ msgid "Next Week"
 #~ msgstr "下一週"
-
-#~ msgid "Rename"
-#~ msgstr "重新命名"
 
 #~ msgid "New List"
 #~ msgstr "新增列表"

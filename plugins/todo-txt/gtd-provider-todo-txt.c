@@ -37,13 +37,14 @@ struct _GtdProviderTodoTxt
   GIcon              *icon;
 
   GHashTable         *lists;
-  GHashTable         *tasks;
 
   GFileMonitor       *monitor;
   GFile              *source_file;
 
   GList              *task_lists;
   GPtrArray          *cache;
+
+  GRand              *random_gen;
 
   guint64             task_counter;
   gboolean            should_reload;
@@ -91,6 +92,7 @@ print_task (GString *output,
   GDateTime *completion_dt;
   GDateTime *creation_dt;
   const gchar *description;
+  const gchar *uid;
   gint priority;
   gboolean is_complete;
 
@@ -101,6 +103,7 @@ print_task (GString *output,
   description = gtd_task_get_description (task);
   creation_dt = gtd_task_get_creation_date (task);
   completion_dt = gtd_task_get_completion_date (task);
+  uid = gtd_object_get_uid (GTD_OBJECT (task));
 
   if (is_complete)
     g_string_append (output, "x ");
@@ -148,6 +151,9 @@ print_task (GString *output,
       g_string_append_printf (output, " note:\"%s\"", new_description);
     }
 
+  if (uid && uid[0] != '\0')
+    g_string_append_printf (output, " task-uid:%s", uid);
+
   g_string_append (output, "\n");
 }
 
@@ -163,6 +169,40 @@ rgba_to_hex (GdkRGBA *color)
   sscanf (color_str, "rgb(%d,%d,%d)", &r, &g, &b);
 
   return g_strdup_printf ("#%02x%02x%02x", r, g, b);
+}
+
+static void
+assign_task_uid (GtdProviderTodoTxt *self,
+                 GtdTask            *task)
+{
+  guint NUMBER_OF_LETTER_IN_UID = 5;
+  const gchar *title;
+  gchar first_five_char[NUMBER_OF_LETTER_IN_UID + 1];
+  GString *uid;
+  guint i;
+
+  uid = g_string_new ("");
+  title = gtd_task_get_title (task);
+
+  /*
+   * If the title length is less than 5 then use
+   * complete title as first part of uid
+   */
+  if (strlen (title) <= NUMBER_OF_LETTER_IN_UID)
+    {
+      g_string_append_printf (uid, "%s%d", title, g_rand_int (self->random_gen));
+    }
+  else
+    {
+      for (i = 0; i < NUMBER_OF_LETTER_IN_UID; i++)
+        first_five_char[i] = title[i];
+
+      first_five_char[NUMBER_OF_LETTER_IN_UID] = '\0';
+
+      g_string_append_printf (uid, "%s%d", first_five_char, g_rand_int (self->random_gen));
+    }
+
+  gtd_object_set_uid (GTD_OBJECT (task), uid->str);
 }
 
 static void
@@ -193,7 +233,17 @@ update_source (GtdProviderTodoTxt *self)
 
       /* And now each task */
       for (l = tasks; l; l = l->next)
-        print_task (contents, l->data);
+        {
+          const gchar *uid;
+
+          uid = gtd_object_get_uid (l->data);
+
+          /* First set uid if not set already */
+          if (!uid || uid[0] == '\0')
+            assign_task_uid (self, l->data);
+
+          print_task (contents, l->data);
+        }
     }
 
   /* Initialize lists & colors custom lines */
@@ -291,6 +341,7 @@ parse_task (GtdProviderTodoTxt *self,
   g_autofree gchar *list_name = NULL;
   GtdTaskList *list;
   GtdTask *task;
+  const gchar *uid;
 
   task = gtd_todo_txt_parser_parse_task (GTD_PROVIDER (self), line, &list_name);
 
@@ -317,10 +368,15 @@ parse_task (GtdProviderTodoTxt *self,
       list = g_hash_table_lookup (self->lists, list_name);
     }
 
+  uid = gtd_object_get_uid (GTD_OBJECT (task));
+
+  /* If task-uid is null, generate a new uid */
+  if (!uid || uid[0] == '\0')
+    assign_task_uid (self, task);
+
   gtd_task_set_list (task, list);
   gtd_task_list_save_task (list, task);
 
-  g_hash_table_insert (self->tasks, (gpointer) gtd_object_get_uid (GTD_OBJECT (task)), task);
   self->task_counter++;
 }
 
@@ -516,7 +572,6 @@ on_file_monitor_changed_cb (GFileMonitor       *monitor,
     }
 
   g_clear_pointer (&self->lists, g_hash_table_destroy);
-  g_clear_pointer (&self->tasks, g_hash_table_destroy);
   g_ptr_array_free (self->cache, TRUE);
 
   for (l = self->task_lists; l != NULL; l = l->next)
@@ -526,7 +581,6 @@ on_file_monitor_changed_cb (GFileMonitor       *monitor,
 
   self->task_lists = NULL;
   self->lists = g_hash_table_new ((GHashFunc) g_str_hash, (GEqualFunc) g_str_equal);
-  self->tasks = g_hash_table_new ((GHashFunc) g_str_hash, (GEqualFunc) g_str_equal);
   self->cache = g_ptr_array_new ();
 
   reload_tasks (self);
@@ -599,6 +653,7 @@ gtd_provider_todo_txt_create_task (GtdProvider *provider,
   gtd_task_set_list (new_task, list);
   gtd_task_set_title (new_task, title);
   gtd_task_set_creation_date (new_task, g_date_time_new_now_local ());
+  assign_task_uid (self, new_task);
 
   gtd_task_list_save_task (list, new_task);
 
@@ -724,9 +779,9 @@ gtd_provider_todo_txt_finalize (GObject *object)
   GtdProviderTodoTxt *self = (GtdProviderTodoTxt *)object;
 
   g_clear_pointer (&self->lists, g_hash_table_destroy);
-  g_clear_pointer (&self->tasks, g_hash_table_destroy);
   g_ptr_array_free (self->cache, TRUE);
   g_clear_pointer (&self->task_lists, g_clear_object);
+  g_clear_pointer (&self->random_gen, g_clear_object);
   g_clear_object (&self->source_file);
   g_clear_object (&self->icon);
 
@@ -825,8 +880,8 @@ gtd_provider_todo_txt_class_init (GtdProviderTodoTxtClass *klass)
 static void
 gtd_provider_todo_txt_init (GtdProviderTodoTxt *self)
 {
+  self->random_gen = g_rand_new_with_seed (42);
   self->lists = g_hash_table_new (g_str_hash, g_str_equal);
-  self->tasks = g_hash_table_new (g_str_hash, g_str_equal);
   self->cache = g_ptr_array_new ();
   self->should_reload = TRUE;
   self->icon = G_ICON (g_themed_icon_new_with_default_fallbacks ("computer-symbolic"));
@@ -844,10 +899,7 @@ gtd_provider_todo_txt_new (GFile *source_file)
 GtdTaskTodoTxt*
 gtd_provider_todo_txt_generate_task (GtdProviderTodoTxt *self)
 {
-  g_autofree gchar *uid = NULL;
-
   g_return_val_if_fail (GTD_IS_PROVIDER_TODO_TXT (self), NULL);
-  uid = g_uuid_string_random ();
 
-  return g_object_new (GTD_TYPE_TASK_TODO_TXT, "uid", uid, NULL);
+  return g_object_new (GTD_TYPE_TASK_TODO_TXT, NULL);
 }

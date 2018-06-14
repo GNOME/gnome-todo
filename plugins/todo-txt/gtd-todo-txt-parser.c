@@ -314,9 +314,9 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
  * Returns: (transfer full)(nullable): A @GPtrArray
  */
 GPtrArray*
-gtd_todo_txt_parser_parse_task_lists (GtdProvider *provider,
-                                      const gchar *line,
-                                      GError     **error)
+gtd_todo_txt_parser_parse_task_lists (GtdProvider  *provider,
+                                      const gchar  *line,
+                                      GError      **error)
 {
   g_auto (GStrv) lists = NULL;
   g_autoptr (GPtrArray) l = NULL;
@@ -331,8 +331,6 @@ gtd_todo_txt_parser_parse_task_lists (GtdProvider *provider,
     {
       g_autoptr (GtdTaskList) new_list = NULL;
       g_autoptr (GString) list_name = NULL;
-      g_autofree gchar *color = NULL;
-      g_auto (GStrv) tokens = NULL;
       const gchar *token = lists[i];
 
       if (!token)
@@ -370,9 +368,9 @@ gtd_todo_txt_parser_parse_task_lists (GtdProvider *provider,
  * %FALSE otherwise.
  */
 gboolean
-gtd_todo_txt_parser_parse_task_list_color (GHashTable  *name_to_tasklist,
-                                           const gchar *line,
-                                           GError     **error)
+gtd_todo_txt_parser_parse_task_list_color (GHashTable   *name_to_tasklist,
+                                           const gchar  *line,
+                                           GError      **error)
 {
   g_auto (GStrv) lists = NULL;
   guint tokens_len_after_split = 2;

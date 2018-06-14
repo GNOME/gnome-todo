@@ -316,30 +316,28 @@ struct
 };
 
 static GPtrArray*
-remove_irrelevant_lines (GStrv lines)
+remove_empty_lines (GStrv lines)
 {
-  g_autoptr (GPtrArray) l = NULL;
-  guint len;
+  g_autoptr (GPtrArray) valid_lines = NULL;
+  guint n_lines;
   guint i;
 
-  len = g_strv_length (lines);
-  l = g_ptr_array_new ();
+  n_lines = g_strv_length (lines);
+  valid_lines = g_ptr_array_sized_new (n_lines);
 
-  for (i = 0; i < len; i++)
+  for (i = 0; i < n_lines; i++)
     {
       gchar *line;
 
-      line = lines[i];
+      line = g_strstrip (lines[i]);
 
-      g_strstrip (line);
-
-      if (!line || g_str_equal (line, "") || g_str_equal (line, "\n"))
+      if (!line || line[0] == '\n' || line[0] == '\0')
         continue;
 
-      g_ptr_array_add (l, lines[i]);
+      g_ptr_array_add (valid_lines, lines[i]);
     }
 
-  return  g_steal_pointer (&l);
+  return g_steal_pointer (&valid_lines);
 }
 
 static void
@@ -347,8 +345,8 @@ reload_tasks (GtdProviderTodoTxt *self)
 {
   g_autofree gchar *input_path = NULL;
   g_autofree gchar *file_contents = NULL;
-  g_autoptr (GError) error = NULL;
   g_autoptr (GPtrArray) valid_lines = NULL;
+  g_autoptr (GError) error = NULL;
   g_auto (GStrv) lines = NULL;
   guint vtable_len;
   guint n_lines;
@@ -374,38 +372,35 @@ reload_tasks (GtdProviderTodoTxt *self)
     return;
 
   lines = g_strsplit (file_contents, "\n", -1);
-  valid_lines = remove_irrelevant_lines (lines);
+  valid_lines = remove_empty_lines (lines);
   n_lines = valid_lines->len;
   vtable_len = G_N_ELEMENTS (custom_lines_vtable);
 
-  /* First parse the custom lines at the end of todo.txt */
-
-  for (i = 0; i < vtable_len; i++)
+  /* First parse the custom lines at the end of the Todo.txt file, if possible */
+  for (i = 0; n_lines >= vtable_len && i < vtable_len; i++)
     {
+      g_autoptr (GError) line_error = NULL;
       GtdTodoTxtLineType line_type;
       const gchar *line;
+      guint line_number;
 
-      if (n_lines < vtable_len)
-        break;
+      line_number = n_lines - vtable_len + i;
+      line = g_ptr_array_index (valid_lines, line_number);
 
-      line = g_ptr_array_index(valid_lines, n_lines - vtable_len + i);
+      line_type = gtd_todo_txt_parser_get_line_type (line, &line_error);
 
-      line_type = gtd_todo_txt_parser_get_line_type (line, &error);
-
-      if (error)
+      if (line_error)
         {
-          g_warning ("Error parsing custom line %d: %s", n_lines - vtable_len + i, error->message);
-          g_clear_error (&error);
+          g_warning ("Error parsing custom line %d: %s", line_number, line_error->message);
           continue;
         }
 
       if (custom_lines_vtable[i].type == line_type)
-        custom_lines_vtable[i].parse (self, line, &error);
+        custom_lines_vtable[i].parse (self, line, &line_error);
 
-      if (error)
+      if (line_error)
         {
-          g_warning ("Error parsing custom line %d: %s", n_lines - vtable_len + i, error->message);
-          g_clear_error (&error);
+          g_warning ("Error parsing custom line %d: %s", line_number, line_error->message);
           continue;
         }
     }
@@ -413,6 +408,7 @@ reload_tasks (GtdProviderTodoTxt *self)
   /* Then regular task lines */
   for (i = 0; i < n_lines - vtable_len; i++)
     {
+      g_autoptr (GError) line_error = NULL;
       GtdTodoTxtLineType line_type;
       gchar *line;
 
@@ -422,16 +418,13 @@ reload_tasks (GtdProviderTodoTxt *self)
       if (!line || line[0] == '\0')
         break;
 
-      g_strstrip (line);
-
       GTD_TRACE_MSG ("Parsing line %d: %s", i, line);
 
-      line_type = gtd_todo_txt_parser_get_line_type (line, &error);
+      line_type = gtd_todo_txt_parser_get_line_type (line, &line_error);
 
-      if (error)
+      if (line_error)
         {
-          g_warning ("Error parsing line %d: %s", i + 1, error->message);
-          g_clear_error (&error);
+          g_warning ("Error parsing line %d: %s", i + 1, line_error->message);
           continue;
         }
 

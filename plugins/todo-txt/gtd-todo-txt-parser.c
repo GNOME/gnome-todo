@@ -17,6 +17,7 @@
  */
 
 #define G_LOG_DOMAIN "GtdTodoTxtParser"
+#define INDENTATION_LEN 4
 
 #include "gtd-debug.h"
 #include "gtd-todo-txt-parser.h"
@@ -220,10 +221,55 @@ tokenize_line (const gchar *line,
   return tokens;
 }
 
+/**
+ * get_line_indentation:
+ * @line: the tasklist line to be parsed
+ *
+ * Parses indentation level of a task line
+ *
+ * Returns: indentation level or -1 if error
+ */
+static gint
+get_line_indentation (const gchar  *line,
+                      GError      **error)
+{
+  guint indent_level = 0;
+  guint leading_space = 0;
+  guint i;
+
+  GTD_ENTRY;
+
+  for (i = 0; line[i] != '\0'; i++)
+    {
+      if (line[i] == ' ')
+        {
+          leading_space += 1;
+        }
+      else if (line[i] == '\t')
+        {
+          g_set_error (error,
+                       GTD_TODO_TXT_PARSER_ERROR,
+                       GTD_TODO_TXT_PARSER_INVALID_INDENT,
+                       "Invalid tabs found in task indentation");
+
+          GTD_RETURN (-1);
+        }
+      else
+        {
+          break;
+        }
+    }
+
+  indent_level = leading_space / INDENTATION_LEN;
+
+  GTD_RETURN (indent_level);
+}
+
 GtdTask*
 gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
                                 const gchar  *line,
-                                gchar       **out_list_name)
+                                gchar       **out_list_name,
+                                GError      **error)
 {
   g_autoptr (GString) parent_task_name = NULL;
   g_autoptr (GString) list_name = NULL;
@@ -234,6 +280,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   g_auto (GStrv) tokens = NULL;
   GDateTime *dt;
   Token token_id;
+  gint indent;
   guint i;
 
   dt = NULL;
@@ -243,6 +290,10 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   parent_task_name = g_string_new (NULL);
   state.last_token = TOKEN_START;
   state.in_description = FALSE;
+  indent = get_line_indentation (line, error);
+
+  if (indent == -1)
+    return NULL;
 
   task = GTD_TASK (gtd_provider_todo_txt_generate_task (GTD_PROVIDER_TODO_TXT (provider)));
   tokens = tokenize_line (line, " ");
@@ -312,6 +363,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
 
   gtd_task_set_title (task, title->str);
   gtd_task_set_description (task, note->str);
+  g_object_set_data (G_OBJECT (task), "indent", GINT_TO_POINTER (indent));
 
   if (out_list_name)
     *out_list_name = g_strdup (list_name->str + 1);

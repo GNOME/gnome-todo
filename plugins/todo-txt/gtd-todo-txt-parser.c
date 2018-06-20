@@ -456,6 +456,22 @@ gtd_todo_txt_parser_parse_task_list_color (GHashTable   *name_to_tasklist,
   return TRUE;
 }
 
+static guint
+get_line_indentation (const gchar *line)
+{
+  guint INDENTATION_LEN = 4;
+  guint indent_level = 0;
+  guint leading_space = 0;
+  guint i;
+
+  for (i = 0; line[i] != '\0' && line[i] == ' '; i++)
+    leading_space += 1;
+
+  indent_level = leading_space / INDENTATION_LEN;
+
+  return indent_level;
+}
+
 /**
  * gtd_todo_txt_parser_get_line_type:
  * @line: the line to parse
@@ -467,6 +483,7 @@ gtd_todo_txt_parser_parse_task_list_color (GHashTable   *name_to_tasklist,
  */
 GtdTodoTxtLineType
 gtd_todo_txt_parser_get_line_type (const gchar  *line,
+                                   guint        *indent,
                                    GError      **error)
 {
   GtdTodoTxtLineType line_type;
@@ -484,6 +501,7 @@ gtd_todo_txt_parser_get_line_type (const gchar  *line,
   if (g_str_has_prefix (line, "h:1 Colors"))
     return GTD_TODO_TXT_LINE_TYPE_LIST_COLORS;
 
+  *indent = get_line_indentation (line);
   tokens = tokenize_line (line, " ");
   state.last_token = TOKEN_START;
   line_type = GTD_TODO_TXT_LINE_TYPE_UNKNOWN;

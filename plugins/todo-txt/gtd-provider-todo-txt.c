@@ -37,7 +37,6 @@ struct _GtdProviderTodoTxt
   GIcon              *icon;
 
   GHashTable         *lists;
-  GHashTable         *tasks;
 
   GFileMonitor       *monitor;
   GFile              *source_file;
@@ -101,6 +100,8 @@ print_task (GString *output,
   description = gtd_task_get_description (task);
   creation_dt = gtd_task_get_creation_date (task);
   completion_dt = gtd_task_get_completion_date (task);
+
+  /* First add spaces for indentation */
 
   if (is_complete)
     g_string_append (output, "x ");
@@ -191,7 +192,10 @@ update_source (GtdProviderTodoTxt *self)
       list = g_ptr_array_index (self->cache, i);
       tasks = gtd_task_list_get_tasks (list);
 
-      /* And now each task */
+      /* First sort the tasks */
+      tasks = g_list_sort (tasks, (GCompareFunc) gtd_task_compare);
+
+      /* And now save each task */
       for (l = tasks; l; l = l->next)
         print_task (contents, l->data);
     }
@@ -286,13 +290,17 @@ parse_list_colors_line (GtdProviderTodoTxt *self,
 
 static void
 parse_task (GtdProviderTodoTxt *self,
-            const gchar        *line)
+            const gchar        *line,
+            GHashTable         *list_to_tasks,
+            guint               indent)
 {
   g_autofree gchar *list_name = NULL;
   GtdTaskList *list;
+  GPtrArray *tasks;
   GtdTask *task;
 
   task = gtd_todo_txt_parser_parse_task (GTD_PROVIDER (self), line, &list_name);
+  g_object_set_data (G_OBJECT (task), "indent", GINT_TO_POINTER (indent));
 
   /*
    * Create the list if it doesn't exist yet; this might happen with todo.txt files
@@ -317,10 +325,16 @@ parse_task (GtdProviderTodoTxt *self,
       list = g_hash_table_lookup (self->lists, list_name);
     }
 
+  /* Add to the temporary GPtrArray that will be consumed below */
+  if (!g_hash_table_contains (list_to_tasks, list_name))
+    g_hash_table_insert (list_to_tasks, list_name, g_ptr_array_new ());
+
+  tasks = g_hash_table_lookup (list_to_tasks, list_name);
+  g_ptr_array_add (tasks, task);
+
   gtd_task_set_list (task, list);
   gtd_task_list_save_task (list, task);
 
-  g_hash_table_insert (self->tasks, (gpointer) gtd_object_get_uid (GTD_OBJECT (task)), task);
   self->task_counter++;
 }
 
@@ -349,7 +363,11 @@ remove_empty_lines (GStrv lines)
     {
       gchar *line;
 
-      line = g_strstrip (lines[i]);
+      /*
+       * We can only remove the trailing space here since leading
+       * whitespace determine the indentation and subtasks
+       */
+      line = g_strchomp (lines[i]);
 
       if (!line || line[0] == '\n' || line[0] == '\0')
         continue;
@@ -363,11 +381,16 @@ remove_empty_lines (GStrv lines)
 static void
 reload_tasks (GtdProviderTodoTxt *self)
 {
+  g_autoptr (GHashTable) list_to_tasks = NULL;
   g_autofree gchar *input_path = NULL;
   g_autofree gchar *file_contents = NULL;
+  g_autofree gchar *list_name = NULL;
   g_autoptr (GPtrArray) valid_lines = NULL;
   g_autoptr (GError) error = NULL;
   g_auto (GStrv) lines = NULL;
+  GPtrArray *tasks;
+  GHashTableIter iter;
+  GQueue tasks_stack;
   guint vtable_len;
   guint n_lines;
   guint i;
@@ -401,13 +424,17 @@ reload_tasks (GtdProviderTodoTxt *self)
     {
       g_autoptr (GError) line_error = NULL;
       GtdTodoTxtLineType line_type;
-      const gchar *line;
+      gchar *line;
       guint line_number;
+      guint indent;
 
       line_number = n_lines - vtable_len + i;
       line = g_ptr_array_index (valid_lines, line_number);
 
-      line_type = gtd_todo_txt_parser_get_line_type (line, &line_error);
+      /* Since leading whitespace doesn't matter here, remove them */
+      line = g_strstrip (line);
+
+      line_type = gtd_todo_txt_parser_get_line_type (line, &indent, &line_error);
 
       if (line_error)
         {
@@ -425,12 +452,19 @@ reload_tasks (GtdProviderTodoTxt *self)
         }
     }
 
+  /* First, create all the tasks and store them temporarily in a GPtrArray */
+  list_to_tasks = g_hash_table_new_full (g_str_hash,
+                                         g_str_equal,
+                                         NULL,
+                                         (GDestroyNotify) g_ptr_array_unref);
+
   /* Then regular task lines */
   for (i = 0; i < n_lines - vtable_len; i++)
     {
       g_autoptr (GError) line_error = NULL;
       GtdTodoTxtLineType line_type;
       gchar *line;
+      guint indent;
 
       line = g_ptr_array_index (valid_lines, i);
 
@@ -440,7 +474,7 @@ reload_tasks (GtdProviderTodoTxt *self)
 
       GTD_TRACE_MSG ("Parsing line %d: %s", i, line);
 
-      line_type = gtd_todo_txt_parser_get_line_type (line, &line_error);
+      line_type = gtd_todo_txt_parser_get_line_type (line, &indent, &line_error);
 
       if (line_error)
         {
@@ -448,13 +482,16 @@ reload_tasks (GtdProviderTodoTxt *self)
           continue;
         }
 
+      /* Once we have indent we can remove leading whitespace */
+      line = g_strstrip (line);
+
       switch (line_type)
         {
         case GTD_TODO_TXT_LINE_TYPE_TASKLIST:
           break;
 
         case GTD_TODO_TXT_LINE_TYPE_TASK:
-          parse_task (self, line);
+          parse_task (self, line, list_to_tasks, indent);
           break;
 
         case GTD_TODO_TXT_LINE_TYPE_LIST_COLORS:
@@ -466,6 +503,61 @@ reload_tasks (GtdProviderTodoTxt *self)
         default:
           break;
         }
+    }
+
+  /*
+   * Now that all the tasks are created and properly stored in a GPtrArray,
+   * we have to go through each GPtrArray, sort it, and figure out the parent
+   * & children relationship between the tasks.
+   */
+  g_queue_init (&tasks_stack);
+  g_hash_table_iter_init (&iter, list_to_tasks);
+
+  while (g_hash_table_iter_next (&iter, (gpointer) &list_name, (gpointer) &tasks))
+    {
+      GtdTaskList *list;
+      gint64 previous_indent;
+      guint j;
+
+      list = g_hash_table_lookup (self->lists, list_name);
+      previous_indent = 0;
+
+      GTD_TRACE_MSG ("Setting up tasklist '%s'", gtd_task_list_get_name (list));
+
+      for (j = 0; tasks && j < tasks->len; i++)
+        {
+          GtdTask *parent_task;
+          GtdTask *task;
+          gint64 indent;
+          gint k;
+
+          task = g_ptr_array_index (tasks, j);
+          parent_task = NULL;
+          indent = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (task), "indent"));
+
+          GTD_TRACE_MSG ("  Adding task '%s' (%s)",
+                         gtd_task_get_title (task),
+                         gtd_object_get_uid (GTD_OBJECT (task)));
+
+          /* If the indent changed, remove from the difference in level from stack */
+          for (k = 0; k <= previous_indent - indent; k++)
+            g_queue_pop_head (&tasks_stack);
+
+          parent_task = g_queue_peek_head (&tasks_stack);
+
+          if (parent_task)
+            gtd_task_add_subtask (parent_task, task);
+
+          gtd_task_set_list (task, list);
+          gtd_task_list_save_task (list, task);
+
+          g_queue_push_head (&tasks_stack, task);
+
+          previous_indent = indent;
+        }
+
+      /* Clear the queue since we're changing projects */
+      g_queue_clear (&tasks_stack);
     }
 
   GTD_EXIT;
@@ -516,7 +608,6 @@ on_file_monitor_changed_cb (GFileMonitor       *monitor,
     }
 
   g_clear_pointer (&self->lists, g_hash_table_destroy);
-  g_clear_pointer (&self->tasks, g_hash_table_destroy);
   g_ptr_array_free (self->cache, TRUE);
 
   for (l = self->task_lists; l != NULL; l = l->next)
@@ -526,7 +617,6 @@ on_file_monitor_changed_cb (GFileMonitor       *monitor,
 
   self->task_lists = NULL;
   self->lists = g_hash_table_new ((GHashFunc) g_str_hash, (GEqualFunc) g_str_equal);
-  self->tasks = g_hash_table_new ((GHashFunc) g_str_hash, (GEqualFunc) g_str_equal);
   self->cache = g_ptr_array_new ();
 
   reload_tasks (self);
@@ -724,7 +814,6 @@ gtd_provider_todo_txt_finalize (GObject *object)
   GtdProviderTodoTxt *self = (GtdProviderTodoTxt *)object;
 
   g_clear_pointer (&self->lists, g_hash_table_destroy);
-  g_clear_pointer (&self->tasks, g_hash_table_destroy);
   g_ptr_array_free (self->cache, TRUE);
   g_clear_pointer (&self->task_lists, g_clear_object);
   g_clear_object (&self->source_file);
@@ -826,7 +915,6 @@ static void
 gtd_provider_todo_txt_init (GtdProviderTodoTxt *self)
 {
   self->lists = g_hash_table_new (g_str_hash, g_str_equal);
-  self->tasks = g_hash_table_new (g_str_hash, g_str_equal);
   self->cache = g_ptr_array_new ();
   self->should_reload = TRUE;
   self->icon = G_ICON (g_themed_icon_new_with_default_fallbacks ("computer-symbolic"));

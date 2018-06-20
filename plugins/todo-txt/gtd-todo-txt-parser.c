@@ -220,6 +220,22 @@ tokenize_line (const gchar *line,
   return tokens;
 }
 
+static guint
+get_line_indentation (const gchar *line)
+{
+  guint INDENTATION_LEN = 4;
+  guint indent_level = 0;
+  guint leading_space = 0;
+  guint i;
+
+  for (i = 0; line[i] != '\0' && line[i] == ' '; i++)
+    leading_space += 1;
+
+  indent_level = leading_space / INDENTATION_LEN;
+
+  return indent_level;
+}
+
 GtdTask*
 gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
                                 const gchar  *line,
@@ -234,6 +250,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   g_auto (GStrv) tokens = NULL;
   GDateTime *dt;
   Token token_id;
+  guint indent;
   guint i;
 
   dt = NULL;
@@ -243,6 +260,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
   parent_task_name = g_string_new (NULL);
   state.last_token = TOKEN_START;
   state.in_description = FALSE;
+  indent = get_line_indentation (line);
 
   task = GTD_TASK (gtd_provider_todo_txt_generate_task (GTD_PROVIDER_TODO_TXT (provider)));
   tokens = tokenize_line (line, " ");
@@ -312,6 +330,7 @@ gtd_todo_txt_parser_parse_task (GtdProvider  *provider,
 
   gtd_task_set_title (task, title->str);
   gtd_task_set_description (task, note->str);
+  g_object_set_data (G_OBJECT (task), "indent", GINT_TO_POINTER (indent));
 
   if (out_list_name)
     *out_list_name = g_strdup (list_name->str + 1);

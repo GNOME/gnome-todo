@@ -30,6 +30,7 @@ typedef enum
 {
   GTD_TODO_TXT_PARSER_INVALID_DUE_DATE,
   GTD_TODO_TXT_PARSER_INVALID_COLOR_HEX,
+  GTD_TODO_TXT_PARSER_INVALID_INDENT,
   GTD_TODO_TXT_PARSER_INVALID_LINE,
   GTD_TODO_TXT_PARSER_UNSUPPORTED_TOKEN,
   GTD_TODO_TXT_PARSER_WRONG_LINE_TYPE,
@@ -56,7 +57,8 @@ GPtrArray*           gtd_todo_txt_parser_parse_task_lists        (GtdProvider   
 
 GtdTask*             gtd_todo_txt_parser_parse_task              (GtdProvider       *provider,
                                                                   const gchar       *line,
-                                                                  gchar            **out_list_name);
+                                                                  gchar            **out_list_name,
+                                                                  GError           **error);
 
 gboolean             gtd_todo_txt_parser_parse_task_list_color   (GHashTable        *name_to_tasklist,
                                                                   const gchar       *line,

@@ -48,6 +48,7 @@ typedef enum
 GQuark               gtd_todo_txt_parser_error_quark             (void);
 
 GtdTodoTxtLineType   gtd_todo_txt_parser_get_line_type           (const gchar       *line,
+                                                                  guint             *indent,
                                                                   GError           **error);
 
 GPtrArray*           gtd_todo_txt_parser_parse_task_lists        (GtdProvider       *provider,

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo.master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2018-05-19 17:50+0000\n"
-"PO-Revision-Date: 2018-05-22 12:59+0200\n"
+"POT-Creation-Date: 2018-06-13 03:09+0000\n"
+"PO-Revision-Date: 2018-06-21 09:29+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: es <gnome-es-list@gnome.org>\n"
 "Language: \n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in:7
 #: data/org.gnome.Todo.desktop.in:3 src/gtd-application.c:157
-#: src/gtd-window.c:760 src/gtd-window.c:791 src/main.c:35
+#: src/gtd-window.c:788 src/gtd-window.c:819 src/main.c:35
 msgid "To Do"
 msgstr "Tareas pendientes"
 
@@ -30,35 +30,42 @@ msgid "Task manager for GNOME"
 msgstr "Gestor de tareas para GNOME"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in:11
+#| msgid ""
+#| "GNOME To Do is a task management application designed to integrate with "
+#| "GNOME. It is extensible through plugins and supports custom task "
+#| "providers."
 msgid ""
 "GNOME To Do is a task management application designed to integrate with "
-"GNOME. It is extensible through plugins and supports custom task providers."
+"GNOME. Save and order your todos. Manage multiple todo lists. Keep your "
+"todos on your computer or sync them with cloud providers. Customize your "
+"experience with plugins."
 msgstr ""
 "Tareas pendientes de GNOME es un sencillo gestor de tareas diseñado para "
-"integrarse con GNOME. Se puede ampliar mediante complementos y soporta "
-"proveedores de tareas personalizados."
+"integrarse con GNOME. Guarde y ordene sus tareas pendientes. Gestione varias "
+"listas. Guarde sus tareas en su equipo o sincronícelas con proveedores en la "
+"nube. Personalice su experiencia con complementos."
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:24
+#: data/appdata/org.gnome.Todo.appdata.xml.in:25
 msgid "GNOME To Do with the dark theme variant"
 msgstr "Tareas pendientes de GNOME con la variante oscura del tema"
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:28
+#: data/appdata/org.gnome.Todo.appdata.xml.in:29
 msgid "Editing a tasklist with GNOME To Do"
 msgstr "Editar una lista de tareas con Tareas pendientes de GNOME"
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:32
+#: data/appdata/org.gnome.Todo.appdata.xml.in:33
 msgid "Task lists displayed on grid mode"
 msgstr "Listas de tareas mostradas en modo de rejilla"
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:36
+#: data/appdata/org.gnome.Todo.appdata.xml.in:37
 msgid "Task lists displayed on list mode"
 msgstr "Listas de tareas mostradas en modo de lista"
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:40
+#: data/appdata/org.gnome.Todo.appdata.xml.in:41
 msgid "Available plugins for GNOME To Do"
 msgstr "Complementos disponibles para Tareas pendientes de GNOME"
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:44
+#: data/appdata/org.gnome.Todo.appdata.xml.in:45
 msgid "Visualizing tasks for today on GNOME To Do’s Today panel"
 msgstr "Viendo las tareas para hoy en el panel de tareas pendientes de GNOME"
 
@@ -267,11 +274,17 @@ msgstr "Microsoft Exchange"
 msgid "Or you can just store your tasks on this computer"
 msgstr "O simplemente puede guardar las tareas en este equipo"
 
-#: data/ui/sidebar-list-row.ui:54
+#: data/ui/sidebar-list-row.ui:96 data/ui/sidebar-list-row.ui:115
+#, fuzzy
+#| msgid "_Rename"
+msgid "Rename"
+msgstr "_Renombrar"
+
+#: data/ui/sidebar-list-row.ui:119
 msgid "Delete"
 msgstr "Eliminar"
 
-#: data/ui/sidebar-provider-row.ui:100
+#: data/ui/sidebar-provider-row.ui:96
 msgid "Loading…"
 msgstr "Cargando…"
 
@@ -506,16 +519,16 @@ msgstr ""
 "posible que experimente inestabilidad, errores y posibles pérdidas de datos. "
 "No se recomienda usar la integración de Todo.txt en sistemas en producción."
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:327
+#: plugins/todo-txt/gtd-provider-todo-txt.c:336
 msgid "Error while opening the file monitor. Todo.txt will not be monitored"
 msgstr ""
 "Error al abrir el archivo de monitorización. Todo.txt no se monitorizará"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:396
+#: plugins/todo-txt/gtd-provider-todo-txt.c:405
 msgid "Todo.txt"
 msgstr "Todo.txt"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:408
+#: plugins/todo-txt/gtd-provider-todo-txt.c:417
 msgid "On the Todo.txt file"
 msgstr "En el archivo Todo.txt"
 
@@ -613,42 +626,57 @@ msgstr "Error al cargar la extensión"
 msgid "Error unloading extension"
 msgstr "Error al descargar la extensión"
 
-#: src/gtd-task-list-view.c:351
+#: src/gtd-task-list-view.c:352
 msgid "Removing this task will also remove its subtasks. Remove anyway?"
 msgstr ""
 "Al quitar esta tarea también se quitarán sus subtareas. ¿Quiere continuar?"
 
-#: src/gtd-task-list-view.c:354
+#: src/gtd-task-list-view.c:355
 msgid "Once removed, the tasks cannot be recovered."
 msgstr "Una vez eliminada, las tareas no se pueden recuperar."
 
-#: src/gtd-task-list-view.c:357
+#: src/gtd-task-list-view.c:358
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: src/gtd-task-list-view.c:359
+#: src/gtd-task-list-view.c:360
 msgid "Remove"
 msgstr "Quitar"
 
-#: src/gtd-task-list-view.c:801
+#: src/gtd-task-list-view.c:802
 #, c-format
 msgid "Task <b>%s</b> removed"
 msgstr "Tarea <b>%s</b> eliminada"
 
-#: src/gtd-task-list-view.c:825 src/sidebar/gtd-sidebar-list-row.c:254
+#: src/gtd-task-list-view.c:826 src/sidebar/gtd-sidebar-list-row.c:281
 msgid "Undo"
 msgstr "Deshacer"
 
-#: src/gtd-window.c:447
+#: src/gtd-window.c:110
+msgid ""
+"This is a development build of To Do. You may experience errors, wrong "
+"behaviors, and data loss."
+msgstr ""
+
+#: src/gtd-window.c:471
 msgid "Details"
 msgstr "Detalles"
 
-#: src/gtd-window.c:755
+#: src/gtd-window.c:783
 msgid "Click a task list to select"
 msgstr "Pulse sobre una tarea para seleccionarla"
 
-#~ msgid "_Rename"
-#~ msgstr "_Renombrar"
+#: src/sidebar/gtd-sidebar-list-row.c:278
+#, fuzzy, c-format
+#| msgid "Task <b>%s</b> removed"
+msgid "Task list <b>%s</b> removed"
+msgstr "Tarea <b>%s</b> eliminada"
+
+#: src/sidebar/gtd-sidebar-list-row.c:307
+#, fuzzy, c-format
+#| msgid "_Rename"
+msgid "Rename %s"
+msgstr "_Renombrar"
 
 #~ msgid "Lists"
 #~ msgstr "Listas"

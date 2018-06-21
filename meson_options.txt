@@ -7,5 +7,5 @@ option('unscheduled_panel_plugin', type: 'boolean', value: true, description: 'e
 option('todo_txt_plugin', type: 'boolean', value: true, description: 'enable Todo.Txt plugin')
 option('todoist_plugin', type: 'boolean', value: true, description: 'enable Todoist plugin')
 option('tracing', type: 'boolean', value: false, description: 'enable application tracing')
-option('gtk_doc', type: 'boolean', value: false, description: 'use gtk-doc to build documentation')
+option('documentation', type: 'boolean', value: false, description: 'Use gtk-doc to build documentation')
 option('introspection', type: 'boolean', value: true, description: 'Enable GObject Introspection (depends on GObject)')

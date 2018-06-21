@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: gnome-todo.master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
 "POT-Creation-Date: 2018-06-13 03:09+0000\n"
-"PO-Revision-Date: 2018-06-21 09:29+0200\n"
+"PO-Revision-Date: 2018-06-21 09:46+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: es <gnome-es-list@gnome.org>\n"
 "Language: \n"
@@ -275,10 +275,9 @@ msgid "Or you can just store your tasks on this computer"
 msgstr "O simplemente puede guardar las tareas en este equipo"
 
 #: data/ui/sidebar-list-row.ui:96 data/ui/sidebar-list-row.ui:115
-#, fuzzy
 #| msgid "_Rename"
 msgid "Rename"
-msgstr "_Renombrar"
+msgstr "Renombrar"
 
 #: data/ui/sidebar-list-row.ui:119
 msgid "Delete"
@@ -657,6 +656,8 @@ msgid ""
 "This is a development build of To Do. You may experience errors, wrong "
 "behaviors, and data loss."
 msgstr ""
+"Esta es una versión de desarrollo de Tareas pendientes. Puede que tenga "
+"errores, comportamientos incorrectos y pérdida de datos."
 
 #: src/gtd-window.c:471
 msgid "Details"
@@ -667,16 +668,16 @@ msgid "Click a task list to select"
 msgstr "Pulse sobre una tarea para seleccionarla"
 
 #: src/sidebar/gtd-sidebar-list-row.c:278
-#, fuzzy, c-format
+#, c-format
 #| msgid "Task <b>%s</b> removed"
 msgid "Task list <b>%s</b> removed"
-msgstr "Tarea <b>%s</b> eliminada"
+msgstr "Lista de tareas <b>%s</b> eliminada"
 
 #: src/sidebar/gtd-sidebar-list-row.c:307
-#, fuzzy, c-format
+#, c-format
 #| msgid "_Rename"
 msgid "Rename %s"
-msgstr "_Renombrar"
+msgstr "Renombrar %s"
 
 #~ msgid "Lists"
 #~ msgstr "Listas"

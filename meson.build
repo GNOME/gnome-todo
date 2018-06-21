@@ -115,31 +115,10 @@ compiler_flags = []
 
 if gnome_todo_debug
   test_cflags = [
-    '-fno-strict-aliasing',
-    '-Wcast-align',
-    '-Wdeclaration-after-statement',
-    '-Wformat=2',
-    '-Winit-self',
-    '-Winline',
-    '-Wmissing-declarations',
-    '-Wmissing-format-attribute',
-    '-Wmissing-include-dirs',
-    '-Wmissing-noreturn',
-    '-Wmissing-prototypes',
-    '-Wnested-externs',
-    '-Wno-error=unused-parameter',
-    '-Wno-error=missing-field-initializers',
-    '-Wno-missing-field-initializers',
-    '-Wno-unused-parameter',
-    '-Wold-style-definition',
-    '-Wpacked',
-    '-Wredundant-decls',
-    '-Wshadow',
-    '-Wstrict-prototypes',
-    '-Wswitch-enum',
-    '-Wundef',
-    '-Wunused-but-set-variable',
-    '-Wwrite-strings',
+    '-Wall',
+    '-Wextra',
+    '-Wno-error=unused-parameter', '-Wno-unused-parameter',
+    '-Wno-error=missing-field-initializers', '-Wno-missing-field-initializers',
   ]
 
   foreach cflag: test_cflags

@@ -164,8 +164,8 @@ subdir('src')
 subdir('data')
 subdir('po')
 
-enable_gtk_doc = get_option('gtk_doc')
-if enable_gtk_doc
+enable_documentation = get_option('documentation')
+if enable_documentation
   subdir('doc/reference')
 endif
 
@@ -182,7 +182,7 @@ output += '\n'
 output += '    Options:\n'
 output += '\n'
 output += '        Tracing.................. ' + (gnome_todo_tracing).to_string() + '\n'
-output += '        Documentation............ ' + enable_gtk_doc.to_string() + '\n'
+output += '        Documentation............ ' + enable_documentation.to_string() + '\n'
 output += '\n'
 output += '    Plugins:\n'
 output += '\n'

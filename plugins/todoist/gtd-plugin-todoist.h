@@ -25,7 +25,18 @@
 
 G_BEGIN_DECLS
 
+typedef enum
+{
+  GTD_TODOIST_NETWORK_LOCAL_CONNECTIVITY,
+  GTD_TODOIST_NETWORK_LIMITED_CONNECTIVITY,
+  GTD_TODOIST_NETWORK_PORTAL_ERROR,
+  GTD_TODOIST_NETWORK_SERVER_UNREACHABLE
+} GtdTodoistNetworkError;
+
 #define GTD_TYPE_PLUGIN_TODOIST (gtd_plugin_todoist_get_type())
+#define GTD_TODOIST_NETWORK_ERROR (gtd_todoist_network_error_quark ())
+
+GQuark               gtd_todo_txt_parser_error_quark             (void);
 
 G_DECLARE_FINAL_TYPE (GtdPluginTodoist, gtd_plugin_todoist, GTD, PLUGIN_TODOIST, PeasExtensionBase)
 

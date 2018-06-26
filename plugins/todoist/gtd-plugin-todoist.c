@@ -19,6 +19,7 @@
 
 #define G_LOG_DOMAIN "GtdPluginTodoist"
 
+#include "gtd-debug.h"
 #include "gtd-plugin-todoist.h"
 #include "gtd-provider-todoist.h"
 #include "gtd-todoist-preferences-panel.h"
@@ -38,6 +39,8 @@ struct _GtdPluginTodoist
   GtkWidget          *preferences;
 
   GoaClient          *goa_client;
+
+  gboolean            active;
 
   /* Providers */
   GList              *providers;
@@ -100,6 +103,16 @@ gtd_plugin_todoist_get_providers (GtdActivatable *activatable)
 }
 
 static void
+emit_connection_error (void)
+{
+  gtd_manager_emit_error_message (gtd_manager_get_default (),
+                                  _("GNOME To Do cannot connect to Todoist due to network issue"),
+                                  _("Not able to able to communicate with Todoist. Kindly Check your internet conectivity."),
+                                  NULL,
+                                  NULL);
+}
+
+static void
 on_account_added_cb (GoaClient        *client,
                      GoaObject        *account_object,
                      GtdPluginTodoist *self)
@@ -107,6 +120,9 @@ on_account_added_cb (GoaClient        *client,
   GtdProviderTodoist *provider;
   GoaAccount *goa_account;
   const gchar *provider_name;
+
+  if (!self->active)
+    return;
 
   goa_account = goa_object_get_account (account_object);
   provider_name = goa_account_get_provider_name (goa_account);
@@ -131,6 +147,9 @@ on_account_removed_cb (GoaClient        *client,
   GoaAccount *goa_account;
   const gchar *provider_name;
   GList *l;
+
+  if (!self->active)
+    return;
 
   goa_account = goa_object_get_account (account_object);
   provider_name = goa_account_get_provider_name (goa_account);
@@ -174,6 +193,11 @@ on_goa_client_ready_cb (GObject          *source,
       return;
     }
 
+  gtd_todoist_preferences_panel_set_client (GTD_TODOIST_PREFERENCES_PANEL (self->preferences), self->goa_client);
+
+  if (!self->active)
+    return;
+
   accounts = goa_client_get_accounts (self->goa_client);
 
   for (l = accounts; l != NULL; l = l->next)
@@ -194,9 +218,151 @@ on_goa_client_ready_cb (GObject          *source,
   g_signal_connect (self->goa_client, "account-added", G_CALLBACK (on_account_added_cb), self);
   g_signal_connect (self->goa_client, "account-removed", G_CALLBACK (on_account_removed_cb), self);
 
-  gtd_todoist_preferences_panel_set_client (GTD_TODOIST_PREFERENCES_PANEL (self->preferences), self->goa_client);
-
   g_list_free_full (accounts, g_object_unref);
+}
+
+static void
+remove_providers (GtdPluginTodoist *self)
+{
+  GList *l;
+
+  GTD_ENTRY;
+
+  self->active = FALSE;
+
+  for (l = self->providers; l != NULL; l = l->next)
+    {
+      GtdProviderTodoist *provider;
+
+      provider = GTD_PROVIDER_TODOIST (l->data);
+
+      self->providers = g_list_remove (self->providers, l->data);
+
+      g_signal_emit_by_name (self, "provider-removed", provider);
+    }
+
+  /* Disconnect handlers */
+  g_signal_handlers_disconnect_by_func (self->goa_client, on_account_added_cb, self);
+  g_signal_handlers_disconnect_by_func (self->goa_client, on_account_removed_cb, self);
+
+  GTD_RETURN ();
+}
+
+static void
+readd_providers (GtdPluginTodoist *self)
+{
+  GList *accounts;
+  GList *l;
+
+  GTD_ENTRY;
+
+  self->active = TRUE;
+  accounts = goa_client_get_accounts (self->goa_client);
+
+  for (l = accounts; l != NULL; l = l->next)
+    {
+      GoaAccount *account;
+      const gchar *provider_type;
+
+      account = goa_object_get_account (l->data);
+      provider_type = goa_account_get_provider_type (account);
+
+      if (g_strcmp0 (provider_type, "todoist") == 0)
+        on_account_added_cb (self->goa_client, l->data, self);
+
+      g_object_unref (account);
+    }
+
+  /* Connect signals */
+  g_signal_connect (self->goa_client, "account-added", G_CALLBACK (on_account_added_cb), self);
+  g_signal_connect (self->goa_client, "account-removed", G_CALLBACK (on_account_removed_cb), self);
+
+  GTD_RETURN ();
+}
+
+static void
+can_reach_todoist_cb (GNetworkMonitor  *monitor,
+                      GAsyncResult     *result,
+                      GtdPluginTodoist *self)
+{
+  g_autoptr (GError) error = NULL;
+  gboolean reachable;
+
+  reachable = g_network_monitor_can_reach_finish (monitor, result, &error);
+
+  if (!reachable && self->active)
+    {
+      remove_providers (self);
+      self->active = FALSE;
+      emit_connection_error ();
+    }
+  else if (reachable && !self->active)
+    {
+      readd_providers (self);
+      self->active = TRUE;
+    }
+}
+
+static void
+can_reach_todoist (GtdPluginTodoist  *self,
+                   GNetworkMonitor   *monitor)
+{
+  GSocketConnectable *addr;
+  gboolean status;
+  gboolean connected;
+
+  GTD_ENTRY;
+
+  addr = g_network_address_new ("www.todoist.com", 80);
+  connected = FALSE;
+
+  status = g_network_monitor_get_connectivity (monitor);
+
+  switch (status)
+    {
+      case G_NETWORK_CONNECTIVITY_LOCAL:
+        g_debug ("G_NETWORK_CONNECTIVITY_LOCAL");
+        connected = FALSE;
+        break;
+
+      case G_NETWORK_CONNECTIVITY_LIMITED:
+        g_debug ("G_NETWORK_CONNECTIVITY_LIMITED");
+        connected = FALSE;
+        break;
+
+      case G_NETWORK_CONNECTIVITY_PORTAL:
+        g_debug ("G_NETWORK_CONNECTIVITY_PORTAL");
+        connected = FALSE;
+        break;
+
+      case G_NETWORK_CONNECTIVITY_FULL:
+        connected = TRUE;
+        break;
+    }
+
+  if (connected)
+    {
+      g_network_monitor_can_reach_async (monitor, addr, NULL, (GAsyncReadyCallback) can_reach_todoist_cb, self);
+    }
+  else if (self->active)
+    {
+      remove_providers (self);
+      self->active = FALSE;
+      emit_connection_error ();
+    }
+}
+
+static void
+connectivity_changed (GNetworkMonitor  *monitor,
+                      gboolean          available,
+                      GtdPluginTodoist *self)
+{
+  /*
+   * Handles the removal and adding of providers if connectivity to Todoist changes
+   * Sends an error message before removing the providers if the plugin goes from
+   * active to inactive state
+   */
+  can_reach_todoist (self, monitor);
 }
 
 static void
@@ -262,6 +428,16 @@ gtd_plugin_todoist_init (GtdPluginTodoist *self)
   self->preferences = GTK_WIDGET (gtd_todoist_preferences_panel_new ());
 
   goa_client_new (NULL, (GAsyncReadyCallback) on_goa_client_ready_cb, self);
+
+  /*
+   * Need to check if Todoist is reachable. By Default the plugin is in inactive state
+   * i.e (self->active = FALSE) If connection to Todoist can be established the providers
+   * are added in the can_reach_todoist callback
+   */
+  can_reach_todoist (self, g_network_monitor_get_default ());
+
+  /* Connect network-changed signal */
+  g_signal_connect (g_network_monitor_get_default (), "network-changed", G_CALLBACK (connectivity_changed), self);
 }
 
 /* Empty class_finalize method */

@@ -39,6 +39,10 @@ struct _GtdPluginTodoist
 
   GoaClient          *goa_client;
 
+  GNetworkMonitor    *network_monitor;
+
+  gboolean            active;
+
   /* Providers */
   GList              *providers;
 };
@@ -49,6 +53,8 @@ enum
   PROP_PREFERENCES_PANEL,
   LAST_PROP
 };
+
+G_DEFINE_QUARK (GtdTodoistNetworkError, gtd_todoist_network_error)
 
 static void          gtd_activatable_iface_init                  (GtdActivatableInterface  *iface);
 
@@ -200,6 +206,171 @@ on_goa_client_ready_cb (GObject          *source,
 }
 
 static void
+remove_providers (GtdPluginTodoist *self)
+{
+  GList *l;
+
+  for (l = self->providers; l != NULL;)
+    {
+      GtdProviderTodoist *provider;
+      GList *curr;
+      GList *next;
+
+      curr = l;
+      next = curr->next;
+
+      provider = GTD_PROVIDER_TODOIST (l->data);
+
+      self->providers = g_list_remove (self->providers, l->data);
+
+      g_signal_emit_by_name (self, "provider-removed", provider);
+
+      l = next;
+    }
+
+  /* Disconnect handlers */
+  g_signal_handlers_disconnect_by_func (self->goa_client,
+                                        on_account_added_cb,
+                                        self);
+
+  g_signal_handlers_disconnect_by_func (self->goa_client,
+                                        on_account_removed_cb,
+                                        self);
+}
+
+static void
+readd_providers (GtdPluginTodoist *self)
+{
+  GList *accounts;
+  GList *l;
+
+  accounts = goa_client_get_accounts (self->goa_client);
+
+  for (l = accounts; l != NULL; l = l->next)
+    {
+      GoaAccount *account;
+      const gchar *provider_type;
+
+      account = goa_object_get_account (l->data);
+      provider_type = goa_account_get_provider_type (account);
+
+      if (g_strcmp0 (provider_type, "todoist") == 0)
+        on_account_added_cb (self->goa_client, l->data, self);
+
+      g_object_unref (account);
+    }
+
+  /* Connect signals */
+  g_signal_connect (self->goa_client, "account-added", G_CALLBACK (on_account_added_cb), self);
+  g_signal_connect (self->goa_client, "account-removed", G_CALLBACK (on_account_removed_cb), self);
+}
+
+static void
+can_reach_todoist_cb (GNetworkMonitor  *monitor,
+                      GAsyncResult     *result,
+                      GtdPluginTodoist *self)
+{
+  gboolean reachable;
+  GError *error;
+
+  reachable = g_network_monitor_can_reach_finish (monitor,
+                                                  result,
+                                                  &error);
+
+  if (error)
+    {
+      gtd_manager_emit_error_message (gtd_manager_get_default (),
+                                      _("Cannot establish connection with Todoist Server"),
+                                      error->message,
+                                      NULL,
+                                      NULL);
+      return;
+    }
+
+  if (!self->active && reachable)
+    {
+      self->active = TRUE;
+      readd_providers (self);
+    }
+}
+
+static void
+connectivity_changed (GNetworkMonitor   *monitor,
+                      gboolean           available,
+                      GtdPluginTodoist  *self)
+{
+  GSocketConnectable *addr;
+  gboolean status;
+  gboolean reachable;
+  g_autoptr (GError) error = NULL;
+
+  error = NULL;
+  addr = g_network_address_new ("www.todoist.com", 80);
+
+  if (!available)
+    {
+      reachable = FALSE;
+      g_warning ("Network not available");
+    }
+  else
+    {
+      status = g_network_monitor_get_connectivity (monitor);
+
+      switch (status)
+        {
+          case G_NETWORK_CONNECTIVITY_LOCAL:
+            g_warning ("G_NETWORK_CONNECTIVITY_LOCAL");
+            reachable = FALSE;
+            g_set_error (&error,
+                         GTD_TODOIST_NETWORK_ERROR,
+                         GTD_TODOIST_NETWORK_LOCAL_CONNECTIVITY,
+                         "No Internet Connectivity");
+            break;
+
+          case G_NETWORK_CONNECTIVITY_LIMITED:
+            g_warning ("G_NETWORK_CONNECTIVITY_LIMITED");
+            reachable = FALSE;
+            g_set_error (&error,
+                         GTD_TODOIST_NETWORK_ERROR,
+                         GTD_TODOIST_NETWORK_LIMITED_CONNECTIVITY,
+                         "Limited network connectivity. Cannot access Internet");
+            break;
+
+          case G_NETWORK_CONNECTIVITY_PORTAL:
+            g_warning ("G_NETWORK_CONNECTIVITY_PORTAL");
+            reachable = FALSE;
+            g_set_error (&error,
+                         GTD_TODOIST_NETWORK_ERROR,
+                         GTD_TODOIST_NETWORK_PORTAL_ERROR,
+                         "Behind a captive Portal. Todoist cannot be accessed unless logged in.");
+            break;
+
+            case G_NETWORK_CONNECTIVITY_FULL:
+            g_network_monitor_can_reach_async (self->network_monitor,
+                                               addr,
+                                               NULL,
+                                               (GAsyncReadyCallback) can_reach_todoist_cb,
+                                               self);
+            break;
+        }
+    }
+
+  if (error)
+    {
+      gtd_manager_emit_error_message (gtd_manager_get_default (),
+                                      _("GNOME To Do cannot connect to Todoist due to network issue"),
+                                      error->message,
+                                      NULL,
+                                      NULL);
+      return;
+    }
+
+  /* Remove all providers if Todoist is active and network changed to unreachable state */
+  if (self->active && !reachable)
+    remove_providers (self);
+}
+
+static void
 gtd_activatable_iface_init (GtdActivatableInterface *iface)
 {
   iface->activate = gtd_plugin_todoist_activate;
@@ -260,8 +431,13 @@ static void
 gtd_plugin_todoist_init (GtdPluginTodoist *self)
 {
   self->preferences = GTK_WIDGET (gtd_todoist_preferences_panel_new ());
+  self->network_monitor = g_network_monitor_get_default ();
+  self->active = TRUE;
 
   goa_client_new (NULL, (GAsyncReadyCallback) on_goa_client_ready_cb, self);
+
+  /* Connect network-changed signal */
+  g_signal_connect (self->network_monitor, "network-changed", G_CALLBACK (connectivity_changed), self);
 }
 
 /* Empty class_finalize method */

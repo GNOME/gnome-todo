@@ -34,9 +34,11 @@
 #include <time.h>
 #include <glib/gi18n.h>
 
-#define GTD_PROVIDER_TODOIST_ERROR (gtd_provider_todoist_error_quark ())
-#define TODOIST_URL                "https://todoist.com/API/v7/sync"
-#define MAX_COMMANDS_PER_REQUEST   100
+#define GTD_PROVIDER_TODOIST_ERROR   (gtd_provider_todoist_error_quark ())
+#define TODOIST_URL                  "https://todoist.com/API/v7/sync"
+#define MAX_COMMANDS_PER_REQUEST     100
+#define FOCUS_SYNCHRONIZE_INTERVAL   60 * 10
+#define UNFOCUS_SYNCHRONIZE_INTERVAL 30 * 1
 
 typedef enum
 {
@@ -262,19 +264,46 @@ parse_task_lists (GtdProviderTodoist *self,
       const gchar *name;
       guint32 id;
       guint color_index;
+      gboolean new_list_added;
+      gint is_deleted;
 
       object = json_node_get_object (l->data);
-
-      /* Ignore deleted tasklists */
-      if (json_object_get_boolean_member (object, "is_deleted"))
-        continue;
-
-      list = gtd_task_list_new (GTD_PROVIDER (self));
+      new_list_added = FALSE;
 
       name = json_object_get_string_member (object, "name");
       color_index = json_object_get_int_member (object, "color");
       id = json_object_get_int_member (object, "id");
+      is_deleted = json_object_get_int_member (object, "is_deleted");
       uid = g_strdup_printf ("%u", id);
+
+      if (is_deleted)
+        {
+          if (g_hash_table_contains (self->lists, GUINT_TO_POINTER (id)))
+            {
+              g_debug ("%s is marked deleted. It will be removed", name);
+
+              list = g_hash_table_lookup (self->lists, GUINT_TO_POINTER (id));
+              g_hash_table_remove (self->lists, GUINT_TO_POINTER (id));
+
+              g_signal_emit_by_name (self, "list-removed", list);
+            }
+          else
+            {
+              g_warning ("Unreachable code. List marked deleted but not found in lists hash table");
+            }
+          continue;
+        }
+
+      if (g_hash_table_contains (self->lists, GUINT_TO_POINTER (id)))
+        {
+          list = g_hash_table_lookup (self->lists, GUINT_TO_POINTER (id));
+          new_list_added = FALSE;
+        }
+      else
+        {
+          list = gtd_task_list_new (GTD_PROVIDER (self));
+          new_list_added = TRUE;
+        }
 
       gtd_task_list_set_name (list, name);
       gtd_task_list_set_color (list, convert_color_code (color_index));
@@ -282,6 +311,9 @@ parse_task_lists (GtdProviderTodoist *self,
       gtd_object_set_uid (GTD_OBJECT (list), uid);
 
       g_hash_table_insert (self->lists, GUINT_TO_POINTER (id), list);
+
+      if (new_list_added)
+        g_signal_emit_by_name (self, "list-added", list);
     }
 }
 
@@ -349,12 +381,9 @@ parse_tasks (GtdProviderTodoist *self,
       gint64 indent;
       gint64 id;
       gint priority;
+      gint is_deleted;
 
       object = json_node_get_object (l->data);
-
-      /* Ignore deleted tasklists */
-      if (json_object_get_boolean_member (object, "is_deleted"))
-        continue;
 
       title = json_object_get_string_member (object, "content");
       priority = json_object_get_int_member (object, "priority");
@@ -365,11 +394,36 @@ parse_tasks (GtdProviderTodoist *self,
       date_added = json_object_get_string_member (object, "date_added");
       indent = json_object_get_int_member (object, "indent");
       position = json_object_get_int_member (object, "item_order");
+      is_deleted = json_object_get_int_member (object, "is_deleted");
 
       uid = g_strdup_printf ("%ld", id);
 
+      if (is_deleted)
+        {
+          if (g_hash_table_contains (self->tasks, GUINT_TO_POINTER (id)))
+            {
+              GtdTaskList *list;
+
+              task = g_hash_table_lookup (self->tasks, GUINT_TO_POINTER (id));
+              list = g_hash_table_lookup (self->lists, GUINT_TO_POINTER (project));
+
+              g_hash_table_remove (self->tasks, GUINT_TO_POINTER (id));
+
+              gtd_task_list_remove_task (list, task);
+            }
+          else
+            {
+              g_warning ("Unreachable code. List marked deleted but not found in lists hash table");
+            }
+          continue;
+        }
+
       /* Setup the new task */
-      task = gtd_task_new ();
+      if (g_hash_table_contains (self->tasks, GUINT_TO_POINTER (id)))
+        task = g_hash_table_lookup (self->tasks, GUINT_TO_POINTER (id));
+      else
+        task = gtd_task_new ();
+
       gtd_object_set_uid (GTD_OBJECT (task), uid);
       gtd_task_set_title (task, title);
       gtd_task_set_priority (task, priority - 1);
@@ -461,18 +515,6 @@ parse_tasks (GtdProviderTodoist *self,
 }
 
 static void
-notify_task_lists (GtdProviderTodoist *self)
-{
-  g_autoptr (GList) lists = NULL;
-  GList *l;
-
-  lists = g_hash_table_get_values (self->lists);
-
-  for (l = lists; l; l = l->next)
-    g_signal_emit_by_name (self, "list-added", l->data);
-}
-
-static void
 load_tasks (GtdProviderTodoist *self,
             JsonObject         *object)
 {
@@ -484,7 +526,6 @@ load_tasks (GtdProviderTodoist *self,
 
   parse_task_lists (self, projects);
   parse_tasks (self, items);
-  notify_task_lists (self);
 }
 
 static void
@@ -711,7 +752,7 @@ post (GtdProviderTodoist         *self,
   g_list_free (param);
 }
 
-static void
+static gboolean
 synchronize (GtdProviderTodoist *self)
 {
   g_autoptr (JsonObject) params = NULL;
@@ -732,6 +773,8 @@ synchronize (GtdProviderTodoist *self)
   gtd_object_push_loading (GTD_OBJECT (self));
 
   post (self, params, on_synchronize_completed_cb, self);
+
+  return TRUE;
 }
 
 static gchar*
@@ -936,6 +979,31 @@ update_task_position (GtdProviderTodoist *self,
     }
 }
 
+static void
+setup_sync_timeout (GtdProviderTodoist *self,
+                    GtkWindow          *window)
+{
+  gboolean active;
+
+  active = gtk_window_has_toplevel_focus (window);
+
+  if (self->timeout_id)
+    g_source_remove (self->timeout_id);
+
+  /*
+   * If To Do window is active, synchronize immediately and set timeout
+   * to sync more frequently else set sync to occur less frequently
+   */
+  if (active)
+    {
+      synchronize (self);
+      self->timeout_id = g_timeout_add_seconds (FOCUS_SYNCHRONIZE_INTERVAL, (GSourceFunc) synchronize , self);
+    }
+  else
+    {
+      self->timeout_id = g_timeout_add_seconds (UNFOCUS_SYNCHRONIZE_INTERVAL, (GSourceFunc) synchronize , self);
+    }
+}
 
 /*
  * Callbacks
@@ -1101,6 +1169,15 @@ on_operation_completed_cb (RestProxyCall *call,
   process_request_queue (self);
 }
 
+static void
+on_window_focus_changed (GtkWindow          *window,
+                         GParamSpec         *pspec,
+                         GtdProviderTodoist *self)
+{
+  g_debug ("%s value changed", pspec->name);
+
+  setup_sync_timeout (self, window);
+}
 
 /*
  * GtdProviderInterface implementation
@@ -1577,6 +1654,14 @@ gtd_provider_todoist_init (GtdProviderTodoist *self)
 
   /* Task id → GtdTask */
   self->tasks = g_hash_table_new (g_direct_hash, g_direct_equal);
+
+  /* Timeout to sync with Todoist */
+  setup_sync_timeout (self, gtk_application_get_active_window (GTK_APPLICATION (g_application_get_default ())));
+
+  g_signal_connect (gtk_application_get_active_window (GTK_APPLICATION (g_application_get_default ())),
+                    "notify::has-toplevel-focus",
+                    G_CALLBACK (on_window_focus_changed),
+                    self);
 }
 
 GtdProviderTodoist*

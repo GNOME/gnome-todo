@@ -37,6 +37,7 @@
 #define GTD_PROVIDER_TODOIST_ERROR (gtd_provider_todoist_error_quark ())
 #define TODOIST_URL                "https://todoist.com/API/v7/sync"
 #define MAX_COMMANDS_PER_REQUEST   100
+#define SYNCHRONIZE_INTERVAL       60 * 5
 
 typedef enum
 {
@@ -262,19 +263,30 @@ parse_task_lists (GtdProviderTodoist *self,
       const gchar *name;
       guint32 id;
       guint color_index;
+      gboolean new_list_added;
 
       object = json_node_get_object (l->data);
+      new_list_added = FALSE;
 
       /* Ignore deleted tasklists */
       if (json_object_get_boolean_member (object, "is_deleted"))
         continue;
 
-      list = gtd_task_list_new (GTD_PROVIDER (self));
-
       name = json_object_get_string_member (object, "name");
       color_index = json_object_get_int_member (object, "color");
       id = json_object_get_int_member (object, "id");
       uid = g_strdup_printf ("%u", id);
+
+      if (g_hash_table_contains (self->lists, GUINT_TO_POINTER (id)))
+        {
+          list = g_hash_table_lookup (self->lists, GUINT_TO_POINTER (id));
+          new_list_added = FALSE;
+        }
+      else
+        {
+          list = gtd_task_list_new (GTD_PROVIDER (self));
+          new_list_added = TRUE;
+        }
 
       gtd_task_list_set_name (list, name);
       gtd_task_list_set_color (list, convert_color_code (color_index));
@@ -282,6 +294,9 @@ parse_task_lists (GtdProviderTodoist *self,
       gtd_object_set_uid (GTD_OBJECT (list), uid);
 
       g_hash_table_insert (self->lists, GUINT_TO_POINTER (id), list);
+
+      if (new_list_added)
+        g_signal_emit_by_name (self, "list-added", list);
     }
 }
 
@@ -369,7 +384,11 @@ parse_tasks (GtdProviderTodoist *self,
       uid = g_strdup_printf ("%ld", id);
 
       /* Setup the new task */
-      task = gtd_task_new ();
+      if (g_hash_table_contains (self->lists, GUINT_TO_POINTER (id)))
+        task = g_hash_table_lookup (self->tasks, GUINT_TO_POINTER (id));
+      else
+        task = gtd_task_new ();
+
       gtd_object_set_uid (GTD_OBJECT (task), uid);
       gtd_task_set_title (task, title);
       gtd_task_set_priority (task, priority - 1);
@@ -461,18 +480,6 @@ parse_tasks (GtdProviderTodoist *self,
 }
 
 static void
-notify_task_lists (GtdProviderTodoist *self)
-{
-  g_autoptr (GList) lists = NULL;
-  GList *l;
-
-  lists = g_hash_table_get_values (self->lists);
-
-  for (l = lists; l; l = l->next)
-    g_signal_emit_by_name (self, "list-added", l->data);
-}
-
-static void
 load_tasks (GtdProviderTodoist *self,
             JsonObject         *object)
 {
@@ -484,7 +491,6 @@ load_tasks (GtdProviderTodoist *self,
 
   parse_task_lists (self, projects);
   parse_tasks (self, items);
-  notify_task_lists (self);
 }
 
 static void
@@ -711,7 +717,7 @@ post (GtdProviderTodoist         *self,
   g_list_free (param);
 }
 
-static void
+static gboolean
 synchronize (GtdProviderTodoist *self)
 {
   g_autoptr (JsonObject) params = NULL;
@@ -732,6 +738,8 @@ synchronize (GtdProviderTodoist *self)
   gtd_object_push_loading (GTD_OBJECT (self));
 
   post (self, params, on_synchronize_completed_cb, self);
+
+  return TRUE;
 }
 
 static gchar*
@@ -1577,6 +1585,9 @@ gtd_provider_todoist_init (GtdProviderTodoist *self)
 
   /* Task id → GtdTask */
   self->tasks = g_hash_table_new (g_direct_hash, g_direct_equal);
+
+  /* Timeout to sync with Todoist */
+  g_timeout_add_seconds (SYNCHRONIZE_INTERVAL, (GSourceFunc) synchronize , self);
 }
 
 GtdProviderTodoist*

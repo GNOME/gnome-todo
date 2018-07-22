@@ -5,7 +5,8 @@ plugins_ldflags += ['-Wl,--undefined=gtd_plugin_todoist_register_types']
 sources = files(
   'gtd-plugin-' + plugin_name + '.c',
   'gtd-provider-' + plugin_name + '.c',
-  'gtd-' + plugin_name + '-preferences-panel.c'
+  'gtd-' + plugin_name + '-preferences-panel.c',
+  'gtd-' + plugin_name + '-oauth2.c'
 )
 
 todoist_deps = gnome_todo_deps + [

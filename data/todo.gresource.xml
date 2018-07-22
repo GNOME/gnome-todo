@@ -67,5 +67,6 @@
   <gresource prefix="/org/gnome/todo">
     <file alias="plugins/todoist/todoist.plugin">../plugins/todoist/todoist.plugin</file>
     <file compressed="true" alias="ui/todoist/preferences.ui">../plugins/todoist/ui/preferences.ui</file>
+    <file compressed="true" alias="ui/todoist/oauth.ui">../plugins/todoist/ui/oauth.ui</file>
   </gresource>
 </gresources>

@@ -140,6 +140,7 @@ gnome_todo_deps = [
   dependency('gmodule-export-2.0'),
   dependency('goa-1.0', version: '>= 3.2.0'),
   dependency('libpeas-1.0', version: '>= 1.17'),
+  dependency('webkit2gtk-4.0', version: '>= 2.20'),
   cc.find_library('m', required: true)
 ]
 

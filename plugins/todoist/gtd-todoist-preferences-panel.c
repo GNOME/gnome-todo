@@ -16,9 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define G_LOG_DOMAIN "GtdTodoistPreferencesPanel"
+#define G_LOG_DOMAIN  "GtdTodoistPreferencesPanel"
 
 #include "gtd-todoist-preferences-panel.h"
+#include "gtd-todoist-oauth2.h"
+#include <gtk/gtk.h>
 
 #include <glib/gi18n.h>
 
@@ -43,75 +45,15 @@ gtd_todoist_preferences_panel_new (void)
                        NULL);
 }
 
-static GVariant*
-build_dbus_parameters (const gchar *action,
-                       const gchar *arg)
-{
-  GVariantBuilder builder;
-  GVariant *array[1], *params2[3];
-
-  g_variant_builder_init (&builder, G_VARIANT_TYPE ("av"));
-
-  if (!action && !arg)
-    {
-      g_variant_builder_add (&builder, "v", g_variant_new_string (""));
-    }
-  else
-    {
-      if (action)
-        g_variant_builder_add (&builder, "v", g_variant_new_string (action));
-
-      if (arg)
-        g_variant_builder_add (&builder, "v", g_variant_new_string (arg));
-    }
-
-  array[0] = g_variant_new ("v", g_variant_new ("(sav)", "online-accounts", &builder));
-
-  params2[0] = g_variant_new_string ("launch-panel");
-  params2[1] = g_variant_new_array (G_VARIANT_TYPE ("v"), array, 1);
-  params2[2] = g_variant_new_array (G_VARIANT_TYPE ("{sv}"), NULL, 0);
-
-  return g_variant_new_tuple (params2, 3);
-}
-
-static void
-spawn_goa_with_args (const gchar *action,
-                     const gchar *arg)
-{
-  GDBusProxy *proxy;
-
-  proxy = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
-                                         G_DBUS_PROXY_FLAGS_NONE,
-                                         NULL,
-                                         "org.gnome.ControlCenter",
-                                         "/org/gnome/ControlCenter",
-                                         "org.gtk.Actions",
-                                         NULL,
-                                         NULL);
-
-  if (!proxy)
-    {
-      g_warning ("Couldn't open Online Accounts panel");
-      return;
-    }
-
-  g_dbus_proxy_call_sync (proxy,
-                          "Activate",
-                          build_dbus_parameters (action, arg),
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
-                          NULL,
-                          NULL);
-
-  g_clear_object (&proxy);
-}
-
 static void
 add_account_button_clicked (GtdTodoistPreferencesPanel *self)
 {
-  g_return_if_fail (GOA_IS_CLIENT (self->client));
+  GtkWidget *webview;
 
-  spawn_goa_with_args ("add", "todoist");
+  webview = gtd_todoist_oauth2_new ();
+
+  gtk_widget_show_all (webview);
+
 }
 
 static void
@@ -119,7 +61,7 @@ account_row_clicked_cb (GtkListBox                 *box,
                         GtkListBoxRow              *row,
                         GtdTodoistPreferencesPanel *self)
 {
-  spawn_goa_with_args (NULL, NULL);
+  //spawn_goa_with_args (NULL, NULL);
 }
 
 static void

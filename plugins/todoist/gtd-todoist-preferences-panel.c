@@ -16,9 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define G_LOG_DOMAIN "GtdTodoistPreferencesPanel"
+#define G_LOG_DOMAIN  "GtdTodoistPreferencesPanel"
+#define AUTH_ENDPOINT "https://todoist.com/oauth/authorize"
+#define CLIENT_ID     "4071c73e4c494ade8112acd307d3efa5"
 
 #include "gtd-todoist-preferences-panel.h"
+#include <webkit2/webkit2.h>
+#include <gtk/gtk.h>
 
 #include <glib/gi18n.h>
 
@@ -29,8 +33,10 @@ struct _GtdTodoistPreferencesPanel
   GoaClient          *client;
   GtkWidget          *accounts_listbox;
   GtkWidget          *add_button;
+  GtkWidget          *browser;
   GtkWidget          *accounts_page;
   GtkWidget          *empty_page;
+  GtkWidget          *login_page;
 };
 
 G_DEFINE_TYPE (GtdTodoistPreferencesPanel, gtd_todoist_preferences_panel, GTK_TYPE_STACK)
@@ -43,75 +49,35 @@ gtd_todoist_preferences_panel_new (void)
                        NULL);
 }
 
-static GVariant*
-build_dbus_parameters (const gchar *action,
-                       const gchar *arg)
+static gchar *
+build_authorization_uri ()
 {
-  GVariantBuilder builder;
-  GVariant *array[1], *params2[3];
+  gchar *state;
+  gchar *uri;
+  gchar *scope;
 
-  g_variant_builder_init (&builder, G_VARIANT_TYPE ("av"));
+  scope = "data:read_write,data:delete,task:add,project:delete";
+  state = g_uuid_string_random ();
+  uri = g_strdup_printf ("%s"
+                         "?response_type=token"
+                         "&client_id=%s"
+                         "&scope=%s"
+                         "&state=%s",
+                         AUTH_ENDPOINT,
+                         CLIENT_ID,
+                         scope,
+                         state);
 
-  if (!action && !arg)
-    {
-      g_variant_builder_add (&builder, "v", g_variant_new_string (""));
-    }
-  else
-    {
-      if (action)
-        g_variant_builder_add (&builder, "v", g_variant_new_string (action));
-
-      if (arg)
-        g_variant_builder_add (&builder, "v", g_variant_new_string (arg));
-    }
-
-  array[0] = g_variant_new ("v", g_variant_new ("(sav)", "online-accounts", &builder));
-
-  params2[0] = g_variant_new_string ("launch-panel");
-  params2[1] = g_variant_new_array (G_VARIANT_TYPE ("v"), array, 1);
-  params2[2] = g_variant_new_array (G_VARIANT_TYPE ("{sv}"), NULL, 0);
-
-  return g_variant_new_tuple (params2, 3);
-}
-
-static void
-spawn_goa_with_args (const gchar *action,
-                     const gchar *arg)
-{
-  GDBusProxy *proxy;
-
-  proxy = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
-                                         G_DBUS_PROXY_FLAGS_NONE,
-                                         NULL,
-                                         "org.gnome.ControlCenter",
-                                         "/org/gnome/ControlCenter",
-                                         "org.gtk.Actions",
-                                         NULL,
-                                         NULL);
-
-  if (!proxy)
-    {
-      g_warning ("Couldn't open Online Accounts panel");
-      return;
-    }
-
-  g_dbus_proxy_call_sync (proxy,
-                          "Activate",
-                          build_dbus_parameters (action, arg),
-                          G_DBUS_CALL_FLAGS_NONE,
-                          -1,
-                          NULL,
-                          NULL);
-
-  g_clear_object (&proxy);
+  g_free (state);
+  return uri;
 }
 
 static void
 add_account_button_clicked (GtdTodoistPreferencesPanel *self)
 {
-  g_return_if_fail (GOA_IS_CLIENT (self->client));
+  gtk_stack_set_visible_child (GTK_STACK (self), self->login_page);
 
-  spawn_goa_with_args ("add", "todoist");
+  webkit_web_view_load_uri (WEBKIT_WEB_VIEW (self->browser), build_authorization_uri ());
 }
 
 static void
@@ -119,7 +85,7 @@ account_row_clicked_cb (GtkListBox                 *box,
                         GtkListBoxRow              *row,
                         GtdTodoistPreferencesPanel *self)
 {
-  spawn_goa_with_args (NULL, NULL);
+  //spawn_goa_with_args (NULL, NULL);
 }
 
 static void
@@ -278,8 +244,10 @@ gtd_todoist_preferences_panel_class_init (GtdTodoistPreferencesPanelClass *klass
 
   gtk_widget_class_bind_template_child (widget_class, GtdTodoistPreferencesPanel, accounts_listbox);
   gtk_widget_class_bind_template_child (widget_class, GtdTodoistPreferencesPanel, add_button);
+  gtk_widget_class_bind_template_child (widget_class, GtdTodoistPreferencesPanel, browser);
   gtk_widget_class_bind_template_child (widget_class, GtdTodoistPreferencesPanel, accounts_page);
   gtk_widget_class_bind_template_child (widget_class, GtdTodoistPreferencesPanel, empty_page);
+  gtk_widget_class_bind_template_child (widget_class, GtdTodoistPreferencesPanel, login_page);
 
   gtk_widget_class_bind_template_callback (widget_class, account_row_clicked_cb);
 }
@@ -288,6 +256,8 @@ static void
 gtd_todoist_preferences_panel_init (GtdTodoistPreferencesPanel *self)
 {
   GtkWidget *label;
+
+  self->browser = webkit_web_view_new ();
 
   gtk_widget_init_template (GTK_WIDGET (self));
 

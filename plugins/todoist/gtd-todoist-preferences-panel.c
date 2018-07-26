@@ -19,11 +19,18 @@
 #define G_LOG_DOMAIN  "GtdTodoistPreferencesPanel"
 #define AUTH_ENDPOINT "https://todoist.com/oauth/authorize"
 #define CLIENT_ID     "4071c73e4c494ade8112acd307d3efa5"
+#define CLIENT_SECRET "abfa818fbba14c9195f1b6d7d534ba5b"
+#define AUTH_URL      "https://todoist.com/oauth/permission_request"
+#define REDIRECT_URL  "wiki.gnome.org/Apps/Todo"
+#define ACCESS_URL    "https://todoist.com/oauth/access_token"
 
 #include "gtd-todoist-preferences-panel.h"
-#include <webkit2/webkit2.h>
-#include <gtk/gtk.h>
 
+#include <rest/oauth2-proxy.h>
+#include <webkit2/webkit2.h>
+#include <json-glib/json-glib.h>
+#include <libsecret/secret.h>
+#include <gtk/gtk.h>
 #include <glib/gi18n.h>
 
 struct _GtdTodoistPreferencesPanel
@@ -40,6 +47,15 @@ struct _GtdTodoistPreferencesPanel
 };
 
 G_DEFINE_TYPE (GtdTodoistPreferencesPanel, gtd_todoist_preferences_panel, GTK_TYPE_STACK)
+
+enum
+{
+  ACCOUNT_ADDED,
+  ACCOUNT_REMOVED,
+  NUM_SIGNALS
+};
+
+static guint signals[NUM_SIGNALS] = { 0, };
 
 GtdTodoistPreferencesPanel*
 gtd_todoist_preferences_panel_new (void)
@@ -73,6 +89,187 @@ build_authorization_uri ()
 }
 
 static void
+parse_json_from_response (JsonParser    *parser,
+                          RestProxyCall *call)
+{
+  g_autoptr (GError) error = NULL;
+  const gchar *payload;
+  gsize payload_length;
+
+  /* Parse the JSON response */
+  payload = rest_proxy_call_get_payload (call);
+  payload_length = rest_proxy_call_get_payload_length (call);
+
+  if (!json_parser_load_from_data (parser, payload, payload_length, &error))
+    {
+      gtd_manager_emit_error_message (gtd_manager_get_default (),
+                                      _("An error occurred while updating a Todoist task"),
+                                      error->message,
+                                      NULL,
+                                      NULL);
+
+      g_warning ("Error executing request: %s", error->message);
+      return;
+    }
+
+  /* Print the response if tracing is enabled */
+#ifdef GTD_ENABLE_TRACE
+  {
+    g_autoptr (JsonGenerator) generator;
+
+    generator = g_object_new (JSON_TYPE_GENERATOR,
+                              "root", json_parser_get_root (parser),
+                              "pretty", TRUE,
+                              NULL);
+
+    g_debug ("Response: \n%s", json_generator_to_data (generator, NULL));
+  }
+#endif
+}
+
+static void
+identify_user (GtdTodoistPreferencesPanel *self,
+               const gchar                *access_token)
+{
+  g_autoptr (JsonParser) parser = NULL;
+  g_autoptr (JsonObject) object = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autofree gchar *user_name;
+  RestProxyCall *call;
+  RestProxy *proxy;
+  gint user_id;
+
+
+  proxy = rest_proxy_new (ACCESS_URL, FALSE);
+  call = rest_proxy_new_call (proxy);
+  parser = json_parser_new ();
+
+  rest_proxy_call_set_method (call, "POST");
+  rest_proxy_call_add_header (call, "content-type", "application/x-www-form-urlencoded");
+
+  rest_proxy_call_add_param (call, "token", access_token);
+  rest_proxy_call_add_param (call, "sync_token", "*");
+  rest_proxy_call_add_param (call, "resource_types", "[\"user\"]");
+
+  rest_proxy_call_sync (call, &error);
+
+  parse_json_from_response (parser, call);
+  object = json_node_get_object (json_parser_get_root (parser));
+
+  user_id = json_object_get_int_member (object, "id");
+  user_name = json_object_get_string_member (object, "full_name");
+}
+
+static void
+store_token (GtdTodoistPreferencesPanel *self,
+             const gchar                *authorization_code,
+             const gchar                *access_token)
+{
+  g_autofree gchar *format_password;
+  g_autoptr (GError) error = NULL;
+
+  static const SecretSchema todoist_schema = {
+        "org.example.Password", SECRET_SCHEMA_NONE,
+        {
+            {  "type", SECRET_SCHEMA_ATTRIBUTE_STRING },
+            {  "id", SECRET_SCHEMA_ATTRIBUTE_STRING },
+            {  "name", SECRET_SCHEMA_ATTRIBUTE_STRING },
+            {  "NULL", 0 },
+        }
+    };
+
+  format_password = g_strdup_printf ("{'authorization_code':<'%s'>, 'access_token':<'%s'>}", authorization_code, access_token);
+
+  secret_password_store_sync (&todoist_schema, SECRET_COLLECTION_DEFAULT,
+                              "The label", "the password", NULL, &error,
+                              "type", "Todoist",
+                              "id", "123",
+                              "name", "rohit",
+                              NULL);
+}
+
+static void
+get_access_token (GtdTodoistPreferencesPanel *self,
+                  const gchar                *authorization_code)
+{
+  g_autoptr (JsonParser) parser = NULL;
+  g_autoptr (JsonObject) object = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autofree gchar *access_token;
+  RestProxyCall *call;
+  RestProxy *proxy;
+
+  proxy = rest_proxy_new (ACCESS_URL, FALSE);
+  call = rest_proxy_new_call (proxy);
+  parser = json_parser_new ();
+
+  rest_proxy_call_set_method (call, "POST");
+  rest_proxy_call_add_header (call, "content-type", "application/x-www-form-urlencoded");
+
+  rest_proxy_call_add_param (call, "client_id", CLIENT_ID);
+  rest_proxy_call_add_param (call, "client_secret", CLIENT_SECRET);
+  rest_proxy_call_add_param (call, "code", authorization_code);
+
+  rest_proxy_call_sync (call, &error);
+
+  parse_json_from_response (parser, call);
+  object = json_node_get_object (json_parser_get_root (parser));
+
+  if (json_object_has_member (object, "access_token"))
+    access_token = json_object_get_string_member (object, "access_token");
+
+  store_token (self, authorization_code, access_token);
+
+  gtk_stack_set_visible_child (GTK_STACK (self), self->empty_page);
+}
+
+static void
+web_view_load_changed (WebKitWebView  *web_view,
+                       WebKitLoadEvent load_event,
+                       gpointer        user_data)
+{
+  GtdTodoistPreferencesPanel *self = user_data;
+  GHashTable *key_value_pairs;
+  SoupURI *uri;
+  const gchar *fragment;
+  const gchar *query;
+  gchar *url;
+
+  if (load_event != WEBKIT_LOAD_FINISHED)
+    return;
+
+  uri = soup_uri_new (webkit_web_view_get_uri (web_view));
+  fragment = soup_uri_get_fragment (uri);
+  query = soup_uri_get_query (uri);
+
+  /* Waiting for user to authorize To Do */
+  if (g_strcmp0 (soup_uri_to_string (uri, FALSE), AUTH_URL) == 0)
+    return;
+
+
+  url = g_strdup_printf ("%s%s", soup_uri_get_host (uri), soup_uri_get_path (uri));
+
+  /* Handle url to get authorization code and exchange for access token */
+  if (g_strcmp0 (url, REDIRECT_URL) == 0)
+    {
+      if (query != NULL)
+        {
+          gchar *code;
+          gchar *state;
+
+          key_value_pairs = soup_form_decode (query);
+
+          code = g_strdup (g_hash_table_lookup (key_value_pairs, "code"));
+          state = g_strdup (g_hash_table_lookup (key_value_pairs, "state"));
+
+          g_warning ("%s", code);
+
+          get_access_token (self, code);
+        }
+    }
+}
+
+static void
 add_account_button_clicked (GtdTodoistPreferencesPanel *self)
 {
   gtk_stack_set_visible_child (GTK_STACK (self), self->login_page);
@@ -85,120 +282,13 @@ account_row_clicked_cb (GtkListBox                 *box,
                         GtkListBoxRow              *row,
                         GtdTodoistPreferencesPanel *self)
 {
-  //spawn_goa_with_args (NULL, NULL);
-}
 
-static void
-on_goa_account_added (GoaClient                   *client,
-                      GoaObject                   *object,
-                      GtdTodoistPreferencesPanel  *self)
-{
-  GoaAccount *goa_account;
-  GtkWidget *row;
-  GtkWidget *box;
-  GtkWidget *logo;
-  GtkWidget *desc;
-  const gchar *provider_name;
-  const gchar *identity;
-
-  goa_account = goa_object_get_account (object);
-  provider_name = goa_account_get_provider_name (goa_account);
-
-  if (g_strcmp0 (provider_name, "Todoist") != 0)
-    return;
-
-  identity = goa_account_get_presentation_identity (goa_account);
-  row = gtk_list_box_row_new ();
-
-  g_object_set_data_full (G_OBJECT (row), "goa-object", g_object_ref (object), g_object_unref);
-
-  logo = gtk_image_new_from_icon_name ("org.gnome.Todo", GTK_ICON_SIZE_LARGE_TOOLBAR);
-  desc = gtk_label_new (identity);
-  box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
-
-  gtk_container_set_border_width (GTK_CONTAINER (box), 6);
-  gtk_container_add (GTK_CONTAINER (box), logo);
-  gtk_container_add (GTK_CONTAINER (box), desc);
-  gtk_container_add (GTK_CONTAINER (row), box);
-
-  gtk_widget_show_all (row);
-
-  gtk_stack_set_visible_child (GTK_STACK (self), self->accounts_page);
-
-  gtk_list_box_insert (GTK_LIST_BOX (self->accounts_listbox), GTK_WIDGET (row), -1);
-}
-
-static void
-on_goa_account_removed (GoaClient                   *client,
-                        GoaObject                   *object,
-                        GtdTodoistPreferencesPanel  *self)
-{
-  GoaAccount *goa_account;
-  GList *child;
-  GList *l;
-  const gchar *provider;
-  guint todoist_accounts;
-
-  goa_account = goa_object_get_account (object);
-  provider = goa_account_get_provider_name (goa_account);
-  child = NULL;
-  l = NULL;
-
-  if (g_strcmp0 (provider, "Todoist") != 0)
-    return;
-
-  child = gtk_container_get_children (GTK_CONTAINER (self->accounts_listbox));
-  todoist_accounts = g_list_length (child);
-
-  for (l = child; l != NULL; l = l->next)
-    {
-      GoaObject *row_account;
-
-      row_account = GOA_OBJECT (g_object_get_data (G_OBJECT (l->data), "goa-object"));
-
-      if (row_account == object)
-        {
-          gtk_container_remove (GTK_CONTAINER (self->accounts_listbox),l->data);
-          todoist_accounts--;
-          break;
-        }
-    }
-
-  /* Change to empty_page if the listbox becomes empty after this removal */
-  if (!todoist_accounts)
-    gtk_stack_set_visible_child (GTK_STACK (self), self->empty_page);
-
-  g_list_free (child);
 }
 
 void
 gtd_todoist_preferences_panel_set_client (GtdTodoistPreferencesPanel *self,
                                           GoaClient                  *client)
 {
-  GList *accounts;
-  GList *l;
-
-  accounts = NULL;
-  l = NULL;
-
-  self->client = client;
-
-  accounts = goa_client_get_accounts (self->client);
-
-  for (l = accounts; l != NULL; l = l->next)
-    on_goa_account_added (self->client, l->data, self);
-
-  g_signal_connect (self->client,
-                    "account-added",
-                    G_CALLBACK (on_goa_account_added),
-                    self);
-
-  g_signal_connect (self->client,
-                    "account-removed",
-                    G_CALLBACK (on_goa_account_removed),
-                    self);
-
-  g_list_free_full (accounts,  g_object_unref);
 }
 
 static void
@@ -239,6 +329,28 @@ gtd_todoist_preferences_panel_class_init (GtdTodoistPreferencesPanelClass *klass
   object_class->get_property = gtd_todoist_preferences_panel_get_property;
   object_class->set_property = gtd_todoist_preferences_panel_set_property;
 
+  signals[ACCOUNT_ADDED] = g_signal_new ("account-added",
+                                         GTD_TYPE_TODOIST_PREFERENCES_PANEL,
+                                         G_SIGNAL_RUN_LAST,
+                                         0,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         G_TYPE_NONE,
+                                         1,
+                                         GTD_TYPE_TASK);
+
+  signals[ACCOUNT_REMOVED] = g_signal_new ("account-removed",
+                                           GTD_TYPE_TODOIST_PREFERENCES_PANEL,
+                                           G_SIGNAL_RUN_LAST,
+                                           0,
+                                           NULL,
+                                           NULL,
+                                           NULL,
+                                           G_TYPE_NONE,
+                                           1,
+                                           GTD_TYPE_TASK);
+
     /* template class */
   gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/todo/ui/todoist/preferences.ui");
 
@@ -269,4 +381,5 @@ gtd_todoist_preferences_panel_init (GtdTodoistPreferencesPanel *self)
   gtk_list_box_set_placeholder (GTK_LIST_BOX (self->accounts_listbox), GTK_WIDGET (label));
 
   g_signal_connect_swapped (self->add_button, "clicked", G_CALLBACK (add_account_button_clicked), self);
+  g_signal_connect (self->browser, "load-changed", G_CALLBACK (web_view_load_changed), self);
 }

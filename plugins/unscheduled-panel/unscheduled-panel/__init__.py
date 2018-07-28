@@ -39,14 +39,22 @@ class UnscheduledPanel(Gtk.Box, Gtd.Panel):
     menu = GObject.Property(type=Gio.Menu, default=None)
     name = GObject.Property(type=str, default="unscheduled-panel")
     title = GObject.Property(type=str, default=_("Unscheduled"))
+    subtitle = GObject.Property(type=str, default=None)
+
+    # FIXME:
+    # 1. type should be compatible with guint.
+    # 2. set proper priority, 0 is an unset value.
+    priority = GObject.Property(type=int, default=0)
+    icon = GObject.Property(type=Gio.ThemedIcon, default=None)
+
 
     def __init__(self):
         Gtk.Box.__init__(self)
 
-        manager = Gtd.Manager.get_default()
-        manager.connect('list-added', self._count_tasks)
-        manager.connect('list-changed', self._count_tasks)
-        manager.connect('list-removed', self._count_tasks)
+        self.manager = Gtd.Manager.get_default()
+        self.manager.connect('list-added', self._count_tasks)
+        self.manager.connect('list-changed', self._count_tasks)
+        self.manager.connect('list-removed', self._count_tasks)
 
         self.task_counter = 0
 
@@ -58,20 +66,20 @@ class UnscheduledPanel(Gtk.Box, Gtd.Panel):
         self.menu.append(_("Clear completed tasks…"),
                          "list.clear-completed-tasks")
 
+        self.icon = Gio.ThemedIcon.new("appointment-missed-symbolic")
+
         self.add(self.view)
         self.show_all()
 
         self._count_tasks()
 
     def _count_tasks(self, unused_0=None, unused_1=None):
-
         previous_task_counter = self.task_counter
         self.task_counter = 0
 
-        manager = Gtd.Manager.get_default()
         current_tasks = []
 
-        for tasklist in manager.get_task_lists():
+        for tasklist in self.manager.get_task_lists():
             for task in tasklist.get_tasks():
 
                 if not task.get_due_date() is None:
@@ -93,6 +101,9 @@ class UnscheduledPanel(Gtk.Box, Gtd.Panel):
 
     def do_get_menu(self):
         return self.menu
+
+    def do_get_priority(self):
+        return self.priority
 
     def do_get_panel_name(self):
         return "unscheduled-panel"

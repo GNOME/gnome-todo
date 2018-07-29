@@ -17,10 +17,17 @@
  */
 
 #define G_LOG_DOMAIN "GtdTodoistPreferencesPanel"
+#define AUTH_ENDPOINT "https://todoist.com/oauth/authorize"
+#define AUTH_URL      "https://todoist.com/oauth/permission_request"
+#define REDIRECT_URL  "wiki.gnome.org/Apps/Todo"
+#define ACCESS_URL    "https://todoist.com/oauth/access_token"
+#define CLIENT_ID     "4071c73e4c494ade8112acd307d3efa5"
+#define CLIENT_SECRET "abfa818fbba14c9195f1b6d7d534ba5b"
 
 #include "gtd-todoist-preferences-panel.h"
 
 #include <glib/gi18n.h>
+#include <webkit2/webkit2.h>
 
 struct _GtdTodoistPreferencesPanel
 {
@@ -31,6 +38,8 @@ struct _GtdTodoistPreferencesPanel
   GtkWidget          *add_button;
   GtkWidget          *accounts_page;
   GtkWidget          *empty_page;
+  GtkWidget          *login_page;
+  GtkWidget          *web_view;
 };
 
 G_DEFINE_TYPE (GtdTodoistPreferencesPanel, gtd_todoist_preferences_panel, GTK_TYPE_STACK)
@@ -106,12 +115,34 @@ spawn_goa_with_args (const gchar *action,
   g_clear_object (&proxy);
 }
 
+static gchar *
+build_authorization_uri ()
+{
+  g_autofree gchar *state = NULL;
+  g_autofree gchar *uri = NULL;
+  gchar *scope;
+
+  scope = "data:read_write,data:delete,task:add,project:delete";
+
+  state = g_uuid_string_random ();
+  uri = g_strdup_printf ("%s"
+                         "?response_type=token"
+                         "&client_id=%s"
+                         "&scope=%s"
+                         "&state=%s",
+                         AUTH_ENDPOINT,
+                         CLIENT_ID,
+                         scope,
+                         state);
+
+  return  g_steal_pointer(&uri);
+}
+
 static void
 add_account_button_clicked (GtdTodoistPreferencesPanel *self)
 {
-  g_return_if_fail (GOA_IS_CLIENT (self->client));
-
-  spawn_goa_with_args ("add", "todoist");
+  gtk_stack_set_visible_child (GTK_STACK (self), self->login_page);
+  webkit_web_view_load_uri (WEBKIT_WEB_VIEW (self->web_view), build_authorization_uri ());
 }
 
 static void
@@ -205,6 +236,44 @@ on_goa_account_removed (GoaClient                   *client,
   g_list_free (child);
 }
 
+static void
+web_view_load_changed (WebKitWebView   *web_view,
+                       WebKitLoadEvent  load_event,
+                       gpointer         user_data)
+{
+  GtdTodoistPreferencesPanel *self = user_data;
+  GHashTable *key_value_pairs;
+  g_autoptr (SoupURI) uri = NULL;
+  g_autofree gchar *url = NULL;
+  const gchar *query;
+
+  if (load_event != WEBKIT_LOAD_FINISHED)
+    return;
+
+  uri = soup_uri_new (webkit_web_view_get_uri (web_view));
+  query = soup_uri_get_query (uri);
+
+  if (g_str_equal (soup_uri_to_string (uri, FALSE), AUTH_URL))
+    return;
+
+  url = g_strdup_printf ("%s%s", soup_uri_get_host (uri), soup_uri_get_path (uri));
+
+  if (g_strcmp0 (url, REDIRECT_URL) == 0)
+  {
+    if (query != NULL)
+      {
+        g_autofree gchar *code = NULL;
+        g_autofree gchar *state = NULL;
+
+        key_value_pairs = soup_form_decode (query);
+
+        code = g_strdup (g_hash_table_lookup (key_value_pairs, "code"));
+        state = g_strdup (g_hash_table_lookup (key_value_pairs, "state"));
+      }
+    gtk_stack_set_visible_child (GTK_STACK (self), self->accounts_page);
+  }
+}
+
 void
 gtd_todoist_preferences_panel_set_client (GtdTodoistPreferencesPanel *self,
                                           GoaClient                  *client)
@@ -280,6 +349,8 @@ gtd_todoist_preferences_panel_class_init (GtdTodoistPreferencesPanelClass *klass
   gtk_widget_class_bind_template_child (widget_class, GtdTodoistPreferencesPanel, add_button);
   gtk_widget_class_bind_template_child (widget_class, GtdTodoistPreferencesPanel, accounts_page);
   gtk_widget_class_bind_template_child (widget_class, GtdTodoistPreferencesPanel, empty_page);
+  gtk_widget_class_bind_template_child (widget_class, GtdTodoistPreferencesPanel, login_page);
+  gtk_widget_class_bind_template_child (widget_class, GtdTodoistPreferencesPanel, web_view);
 
   gtk_widget_class_bind_template_callback (widget_class, account_row_clicked_cb);
 }
@@ -288,6 +359,8 @@ static void
 gtd_todoist_preferences_panel_init (GtdTodoistPreferencesPanel *self)
 {
   GtkWidget *label;
+
+  self->web_view = webkit_web_view_new ();
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
@@ -299,4 +372,5 @@ gtd_todoist_preferences_panel_init (GtdTodoistPreferencesPanel *self)
   gtk_list_box_set_placeholder (GTK_LIST_BOX (self->accounts_listbox), GTK_WIDGET (label));
 
   g_signal_connect_swapped (self->add_button, "clicked", G_CALLBACK (add_account_button_clicked), self);
+  g_signal_connect (self->web_view, "load-changed", G_CALLBACK (web_view_load_changed), self);
 }

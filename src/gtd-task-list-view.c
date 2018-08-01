@@ -70,12 +70,10 @@
 typedef struct
 {
   GtkWidget             *dnd_row;
-  GtkWidget             *empty_box;
   GtkListBox            *listbox;
   GtkListBoxRow         *new_task_row;
   GtkWidget             *scrolled_window;
   GtkStack              *stack;
-  GtkWidget             *viewport;
 
   /* internal */
   gboolean               can_toggle;
@@ -145,7 +143,7 @@ typedef struct
   guint32               current_item;
 } GtdIdleData;
 
-#define COLOR_TEMPLATE               "viewport {background-color: %s;}"
+#define COLOR_TEMPLATE               "tasklistview {background-color: %s;}"
 #define DND_SCROLL_OFFSET            24 //px
 #define LUMINANCE(c)                 (0.299 * c->red + 0.587 * c->green + 0.114 * c->blue)
 #define TASK_REMOVED_NOTIFICATION_ID "task-removed-id"
@@ -421,20 +419,6 @@ add_task_row (GtdTaskListView *self,
   gtd_task_row_reveal (GTD_TASK_ROW (new_row), animated);
 }
 
-static void
-update_state (GtdTaskListView *self)
-{
-  GtdTaskListViewPrivate *priv;
-
-  g_assert (GTD_IS_TASK_LIST_VIEW (self));
-
-  priv = gtd_task_list_view_get_instance_private (self);
-
-  /* And the empty widgets */
-  gtk_widget_set_visible (priv->empty_box, FALSE);
-  gtd_empty_list_widget_set_is_empty (GTD_EMPTY_LIST_WIDGET (priv->empty_box), FALSE);
-}
-
 static GtdTaskRow*
 get_row_for_task (GtdTaskListView *self,
                   GtdTask         *task)
@@ -520,7 +504,6 @@ add_task (GtdTaskListView *self,
   g_hash_table_add (priv->tasks, task);
 
   add_task_row (self, task, animated);
-  update_state (self);
 
   GTD_EXIT;
 }
@@ -595,9 +578,6 @@ idle_process_items_cb (gpointer data)
   if (idle_data->current_item == n_removed_items + n_added_items)
     {
       GTD_TRACE_MSG ("Finished adding %u and removing %u items", n_added_items, n_removed_items);
-
-      /* Check if it should show the empty state */
-      update_state (idle_data->self);
 
       priv->idle_handler_id = 0;
       idle_data->state = GTD_IDLE_STATE_FINISHED;
@@ -714,8 +694,6 @@ on_clear_completed_tasks_activated_cb (GSimpleAction *simple,
       /* Remove the subtasks recursively */
       iterate_subtasks (view, task, real_remove_task_cb);
     }
-
-  update_state (view);
 }
 
 static void
@@ -834,8 +812,6 @@ on_remove_task_row_cb (GtdTaskRow      *row,
   /* Clear the active row */
   set_active_row (self, NULL);
 
-  update_state (self);
-
   g_clear_pointer (&text, g_free);
 
 out:
@@ -938,8 +914,6 @@ on_task_list_task_added_cb (GtdTaskList     *list,
 
   GTD_TRACE_MSG ("Adding task %p to list", task);
 
-  update_state (self);
-
   GTD_EXIT;
 }
 
@@ -948,8 +922,6 @@ on_task_list_task_removed_cb (GtdTaskListView *view,
                               GtdTask         *task)
 {
   remove_task_row (view, task);
-
-  update_state (view);
 }
 
 static void
@@ -1528,7 +1500,7 @@ gtd_task_list_view_constructed (GObject *object)
   /* css provider */
   self->priv->color_provider = gtk_css_provider_new ();
 
-  gtk_style_context_add_provider (gtk_widget_get_style_context (self->priv->viewport),
+  gtk_style_context_add_provider (gtk_widget_get_style_context (GTK_WIDGET (self)),
                                   GTK_STYLE_PROVIDER (self->priv->color_provider),
                                   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 2);
 
@@ -1660,13 +1632,11 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
 
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, dnd_row);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, due_date_sizegroup);
-  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, empty_box);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, listbox);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, new_task_row);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, tasklist_name_sizegroup);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, scrolled_window);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, stack);
-  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, viewport);
 
   gtk_widget_class_bind_template_callback (widget_class, listbox_drag_drop);
   gtk_widget_class_bind_template_callback (widget_class, listbox_drag_leave);

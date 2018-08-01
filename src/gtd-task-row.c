@@ -345,6 +345,14 @@ on_drag_begin_cb (GtkWidget  *event_box,
 }
 
 static void
+on_drag_data_get_cb (GtkWidget        *widget,
+                     GdkDrag          *drag,
+                     GtkSelectionData *data,
+                     GtdTaskRow       *self)
+{
+}
+
+static void
 on_drag_end_cb (GtkWidget  *event_box,
                 GdkDrag    *drag,
                 GtdTaskRow *self)
@@ -704,6 +712,7 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_button_press_event_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_complete_check_toggled_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_drag_begin_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_drag_data_get_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_drag_end_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_drag_failed_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_remove_task_cb);

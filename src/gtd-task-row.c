@@ -46,7 +46,6 @@ struct _GtdTaskRow
   GtkWidget          *edit_panel_revealer;
   GtkWidget          *header_event_box;
   GtkWidget          *title_entry;
-  GtkWidget          *toggle_button;
 
   /* task widgets */
   GtkLabel           *task_date_label;
@@ -269,13 +268,6 @@ gtd_task_row_set_task (GtdTaskRow *row,
 /*
  * Callbacks
  */
-
-static void
-on_toggle_active_cb (GtkWidget  *button,
-                     GtdTaskRow *self)
-{
-  gtd_task_row_set_active (self, !self->active);
-}
 
 static void
 on_remove_task_cb (GtdEditPane *edit_panel,
@@ -707,7 +699,6 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, task_date_label);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, task_list_label);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, title_entry);
-  gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, toggle_button);
 
   gtk_widget_class_bind_template_callback (widget_class, on_button_press_event_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_complete_check_toggled_cb);
@@ -717,7 +708,6 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_drag_failed_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_remove_task_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_task_changed_cb);
-  gtk_widget_class_bind_template_callback (widget_class, on_toggle_active_cb);
 
   gtk_widget_class_set_css_name (widget_class, "taskrow");
 }
@@ -888,22 +878,12 @@ void
 gtd_task_row_set_active (GtdTaskRow *self,
                          gboolean    active)
 {
-  GtkStyleContext *context;
-
   g_return_if_fail (GTD_IS_TASK_ROW (self));
 
   if (self->active == active)
     return;
 
   self->active = active;
-
-  /* Update the arrow icon */
-  context = gtk_widget_get_style_context (self->toggle_button);
-
-  if (active)
-    gtk_style_context_add_class (context, "active");
-  else
-    gtk_style_context_remove_class (context, "active");
 
   /* Create or destroy the edit panel */
   if (active && !self->edit_pane)

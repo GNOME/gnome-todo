@@ -4,7 +4,7 @@ project(
           version: '3.91.1',
           license: 'GPL3+',
   default_options: [ 'buildtype=debugoptimized', 'warning_level=1' ],
-    meson_version: '>= 0.41.0'
+    meson_version: '>= 0.47.0'
 )
 
 gnome_todo_version = meson.project_version()

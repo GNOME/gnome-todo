@@ -89,9 +89,6 @@ static void          on_priority_changed_cb                      (GtdTaskRow    
 
 static void          on_task_changed_cb                          (GtdTaskRow         *self);
 
-static void          on_toggle_active_cb                         (GtkWidget          *button,
-                                                                  GtdTaskRow         *self);
-
 
 G_DEFINE_TYPE (GtdTaskRow, gtd_task_row, GTK_TYPE_LIST_BOX_ROW)
 
@@ -452,42 +449,31 @@ on_depth_changed_cb (GtdTaskRow *self,
                                self->handle_subtasks ? 32 * gtd_task_get_depth (task) + 3: 3);
 }
 
+static gboolean
+on_key_pressed_cb (GtkEventControllerKey *controller,
+                   guint                  keyval,
+                   guint                  keycode,
+                   GdkModifierType        modifiers,
+                   GtdTaskRow            *self)
+{
+  GTD_ENTRY;
+
+  /* Exit when pressing Esc without modifiers */
+  if (keyval == GDK_KEY_Escape && !(modifiers & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)))
+    {
+      GTD_TRACE_MSG ("Escape pressed, closing task…");
+      gtd_task_row_set_active (self, FALSE);
+    }
+
+  GTD_RETURN (GDK_EVENT_PROPAGATE);
+}
+
 static void
 on_task_changed_cb (GtdTaskRow  *self)
 {
   g_debug ("Task changed");
 
   self->changed = TRUE;
-}
-
-
-/*
- * GtkWidget overrides
- */
-
-static gboolean
-gtd_task_row_key_press_event (GtkWidget   *row,
-                              GdkEventKey *event_key)
-{
-  GdkModifierType modifiers;
-  GtdTaskRow *self;
-  GdkEvent *event;
-  guint keyval;
-
-  self = GTD_TASK_ROW (row);
-  event = (GdkEvent*) event_key;
-
-  gdk_event_get_keyval (event, &keyval);
-  gdk_event_get_state (event, &modifiers);
-
-  /* Exit when pressing Esc without modifiers */
-  if (keyval == GDK_KEY_Escape && !(modifiers & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)))
-    {
-      self->active = FALSE;
-      g_signal_emit (row, signals[EXIT], 0);
-    }
-
-  return FALSE;
 }
 
 
@@ -706,6 +692,7 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_drag_data_get_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_drag_end_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_drag_failed_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_key_pressed_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_remove_task_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_task_changed_cb);
 

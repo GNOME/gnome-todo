@@ -310,6 +310,8 @@ on_drag_begin_cb (GtkWidget  *event_box,
   GtkWidget *widget, *new_row;
   gint x_offset;
 
+  GTD_ENTRY;
+
   widget = GTK_WIDGET (self);
 
   gtk_widget_set_cursor_from_name (widget, "grabbing");
@@ -331,6 +333,8 @@ on_drag_begin_cb (GtkWidget  *event_box,
                             self->clicked_y);
 
   gtk_widget_hide (widget);
+
+  GTD_EXIT;
 }
 
 static void
@@ -339,6 +343,7 @@ on_drag_data_get_cb (GtkWidget        *widget,
                      GtkSelectionData *data,
                      GtdTaskRow       *self)
 {
+  GTD_TRACE_MSG ("Drag data get");
 }
 
 static void
@@ -346,8 +351,12 @@ on_drag_end_cb (GtkWidget  *event_box,
                 GdkDrag    *drag,
                 GtdTaskRow *self)
 {
+  GTD_ENTRY;
+
   gtk_widget_set_cursor_from_name (GTK_WIDGET (self), NULL);
   gtk_widget_show (GTK_WIDGET (self));
+
+  GTD_EXIT;
 }
 
 static gboolean
@@ -356,10 +365,12 @@ on_drag_failed_cb (GtkWidget     *widget,
                    GtkDragResult  result,
                    GtdTaskRow    *self)
 {
+  GTD_ENTRY;
+
   gtk_widget_set_cursor_from_name (GTK_WIDGET (self), NULL);
   gtk_widget_show (GTK_WIDGET (self));
 
-  return FALSE;
+  GTD_RETURN (FALSE);
 }
 
 static void

@@ -716,37 +716,24 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
 static void
 gtd_task_row_init (GtdTaskRow *self)
 {
-  GtkEventController *controller;
-
   self->handle_subtasks = TRUE;
   self->active = FALSE;
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
   /* DnD icon */
-  controller = gtk_event_controller_motion_new ();
-  g_signal_connect (controller, "enter", G_CALLBACK (on_dnd_icon_enter_cb), self);
-  g_signal_connect (controller, "leave", G_CALLBACK (on_dnd_icon_leave_cb), self);
-
   gtk_drag_source_set (self->dnd_icon,
                        GDK_BUTTON1_MASK,
                        _gtd_get_content_formats (),
                        GDK_ACTION_MOVE);
+
   gtk_widget_set_cursor_from_name (self->dnd_icon, "grab");
 
-  gtk_widget_add_controller (self->dnd_icon, controller);
-
   /* Header box */
-  controller = gtk_event_controller_motion_new ();
-  g_signal_connect (controller, "enter", G_CALLBACK (on_header_enter_cb), self);
-  g_signal_connect (controller, "leave", G_CALLBACK (on_header_leave_cb), self);
-
   gtk_drag_source_set (self->header_event_box,
                        GDK_BUTTON1_MASK,
                        _gtd_get_content_formats (),
                        GDK_ACTION_MOVE);
-
-  gtk_widget_add_controller (self->header_event_box, controller);
 
   gtk_widget_set_cursor_from_name (self->header_event_box, "pointer");
 }

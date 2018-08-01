@@ -210,25 +210,18 @@ gtd_notification_widget_class_init (GtdNotificationWidgetClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdNotificationWidget, text_label);
 
   gtk_widget_class_bind_template_callback (widget_class, on_close_button_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_motion_controller_enter_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_motion_controller_leave_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_secondary_button_clicked_cb);
 }
 
 static void
 gtd_notification_widget_init (GtdNotificationWidget *self)
 {
-  GtkEventController *controller;
-
   self->queue = g_queue_new ();
   self->state = STATE_IDLE;
 
   gtk_widget_init_template (GTK_WIDGET (self));
-
-  /* Event controller */
-  controller = gtk_event_controller_motion_new ();
-  g_signal_connect (controller, "enter", G_CALLBACK (on_motion_controller_enter_cb), self);
-  g_signal_connect (controller, "leave", G_CALLBACK (on_motion_controller_leave_cb), self);
-
-  gtk_widget_add_controller (GTK_WIDGET (self), controller);
 }
 
 /**

@@ -929,14 +929,18 @@ on_listbox_row_activated_cb (GtkListBox      *listbox,
                              GtkListBox      *row,
                              GtdTaskListView *self)
 {
+  GTD_ENTRY;
+
   if (!GTD_IS_TASK_ROW (row))
-    return;
+    GTD_RETURN ();
 
   /* Toggle the row */
   if (gtd_task_row_get_active (GTD_TASK_ROW (row)))
     set_active_row (self, NULL);
   else
     set_active_row (self, GTK_WIDGET (row));
+
+  GTD_EXIT;
 }
 
 static gint

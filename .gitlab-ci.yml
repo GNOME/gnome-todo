@@ -10,6 +10,7 @@ variables:
 stages:
    - flatpak
    - build
+   - review
 
 variables:
     DEVELOPMENT_FLATPAK_ID: "TodoDevel"

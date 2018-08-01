@@ -507,7 +507,7 @@ gtd_window_event (GtkWidget *widget,
       self->save_geometry_timeout_id = g_timeout_add (SAVE_GEOMETRY_ID_TIMEOUT, save_geometry, self);
     }
 
-  return GTK_WIDGET_CLASS (gtd_window_parent_class)->event (widget, event);
+  return GDK_EVENT_PROPAGATE;
 }
 
 

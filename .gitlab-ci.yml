@@ -59,7 +59,7 @@ ubuntu:devel:
 ##################
 
 flatpak:master:
-    image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.28
+    image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master
     stage: flatpak
     variables:
       DEVELOPMENT_FLATPAK_ID: "TodoDevel"

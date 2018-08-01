@@ -20,6 +20,7 @@
 
 #define G_LOG_DOMAIN "GtdSidebarListRow"
 
+#include "gtd-debug.h"
 #include "gtd-manager.h"
 #include "gtd-notification.h"
 #include "gtd-provider.h"
@@ -302,6 +303,8 @@ on_rename_action_activated_cb (GSimpleAction *action,
   GtdSidebarListRow *self;
   g_autofree gchar *text;
 
+  GTD_ENTRY;
+
   self = GTD_SIDEBAR_LIST_ROW (user_data);
 
   g_assert (self->list != NULL);
@@ -313,6 +316,8 @@ on_rename_action_activated_cb (GSimpleAction *action,
 
   gtk_popover_set_relative_to (self->rename_popover, GTK_WIDGET (self));
   gtk_popover_popup (self->rename_popover);
+
+  GTD_EXIT;
 }
 
 static void
@@ -470,6 +475,8 @@ gtd_sidebar_list_row_class_init (GtdSidebarListRowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, rename_popover);
   gtk_widget_class_bind_template_child (widget_class, GtdSidebarListRow, tasks_counter_label);
 
+  gtk_widget_class_bind_template_callback (widget_class, on_gesture_long_press_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_gesture_multipress_released_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_rename_button_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_rename_entry_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_rename_entry_text_changed_cb);
@@ -479,7 +486,6 @@ gtd_sidebar_list_row_class_init (GtdSidebarListRowClass *klass)
 static void
 gtd_sidebar_list_row_init (GtdSidebarListRow *self)
 {
-  GtkGesture *gesture;
   const GActionEntry entries[] =
   {
     { "delete", on_delete_action_activated_cb },
@@ -492,22 +498,6 @@ gtd_sidebar_list_row_init (GtdSidebarListRow *self)
   self->action_group = G_ACTION_MAP (g_simple_action_group_new ());
   g_action_map_add_action_entries (self->action_group, entries, G_N_ELEMENTS (entries), self);
   gtk_widget_insert_action_group (GTK_WIDGET (self), "list-row", G_ACTION_GROUP (self->action_group));
-
-  /* Gestures */
-  gesture = gtk_gesture_long_press_new ();
-  gtk_event_controller_set_propagation_phase (GTK_EVENT_CONTROLLER (gesture), GTK_PHASE_TARGET);
-  gtk_gesture_single_set_touch_only (GTK_GESTURE_SINGLE (gesture), TRUE);
-  g_signal_connect (gesture, "pressed", G_CALLBACK (on_gesture_long_press_cb), self);
-
-  gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (gesture));
-
-  gesture = gtk_gesture_multi_press_new ();
-  gtk_event_controller_set_propagation_phase (GTK_EVENT_CONTROLLER (gesture), GTK_PHASE_BUBBLE);
-  gtk_gesture_single_set_touch_only (GTK_GESTURE_SINGLE (gesture), FALSE);
-  gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (gesture), GDK_BUTTON_SECONDARY);
-  g_signal_connect (gesture, "released", G_CALLBACK (on_gesture_multipress_released_cb), self);
-
-  gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (gesture));
 }
 
 GtkWidget*

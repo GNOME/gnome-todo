@@ -4,6 +4,15 @@
   <template class="GtdNotificationWidget" parent="GtkRevealer">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+
+    <!-- Event Controller -->
+    <child>
+      <object class="GtkEventControllerMotion">
+        <signal name="enter" handler="on_motion_controller_enter_cb" object="GtdNotificationWidget" swapped="no" />
+        <signal name="leave" handler="on_motion_controller_leave_cb" object="GtdNotificationWidget" swapped="no" />
+      </object>
+    </child>
+
     <child>
       <object class="GtkFrame" id="frame">
         <property name="visible">True</property>

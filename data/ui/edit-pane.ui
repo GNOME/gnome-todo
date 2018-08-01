@@ -38,6 +38,13 @@
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">6</property>
+
+            <child>
+              <object class="GtkGestureMultiPress">
+                <signal name="released" handler="on_trap_textview_clicks_cb" object="GtdEditPane" swapped="no" />
+              </object>
+            </child>
+
             <child>
               <object class="GtkLabel">
                 <property name="label" translatable="yes">_Notes</property>
@@ -68,10 +75,18 @@
                     <property name="pixels-above-lines">6</property>
                     <property name="wrap-mode">word-char</property>
                     <property name="buffer">text_buffer</property>
-                    <!-- <signal name="button-press-event" handler="on_trap_textview_clicks_cb" swapped="no" after="yes" />
-                    <signal name="button-release-event" handler="on_trap_textview_clicks_cb" swapped="no" after="yes" />
-                    <signal name="motion-notify-event" handler="on_hyperlink_hover_cb" swapped="no" />
-                    <signal name="event-after" handler="on_hyperlink_clicked_cb" swapped="no" /> -->
+
+                    <child>
+                      <object class="GtkGestureMultiPress">
+                        <property name="propagation-phase">capture</property>
+                        <signal name="pressed" handler="on_hyperlink_clicked_cb" object="GtdEditPane" swapped="no" />
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEventControllerMotion">
+                        <signal name="motion" handler="on_hyperlink_hover_cb" object="GtdEditPane" swapped="no" />
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>

@@ -7,6 +7,15 @@
     <property name="selectable">False</property>
     <property name="halign">center</property>
     <property name="margin">2</property>
+
+    <!-- Controllers -->
+    <child>
+      <object class="GtkEventControllerKey">
+        <property name="propagation-phase">capture</property>
+        <signal name="key-pressed" handler="on_key_pressed_cb" object="GtdTaskRow" swapped="no" />
+      </object>
+    </child>
+
     <child>
       <object class="GtkRevealer" id="revealer">
         <property name="visible">True</property>

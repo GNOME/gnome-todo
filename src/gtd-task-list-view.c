@@ -1373,6 +1373,8 @@ listbox_drag_drop (GtkWidget       *widget,
   GtdTaskListViewPrivate *priv;
   gboolean success;
 
+  GTD_ENTRY;
+
   priv = gtd_task_list_view_get_instance_private (self);
   success = gtd_dnd_row_drag_drop (GTK_WIDGET (priv->dnd_row), drop, x, y);
 
@@ -1380,7 +1382,7 @@ listbox_drag_drop (GtkWidget       *widget,
 
   gdk_drop_finish (drop, GDK_ACTION_MOVE);
 
-  return success;
+  GTD_RETURN (success);
 }
 
 

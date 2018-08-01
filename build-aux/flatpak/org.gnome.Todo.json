@@ -50,52 +50,9 @@
     ],
     "modules" : [
         {
-            "name" : "graphene",
-            "buildsystem" : "meson",
-            "builddir" : true,
-            "config-opts" : [
-                "--libdir=/app/lib"
-            ],
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://github.com/ebassi/graphene.git"
-                }
-            ]
-        },
-        {
-            "name" : "wayland",
-            "buildsystem" : "autotools",
-            "builddir" : true,
-            "config-opts" : [
-                "--disable-documentation"
-            ],
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://github.com/wayland-project/wayland.git"
-                }
-            ]
-        },
-        {
-            "name" : "gtk4",
-            "buildsystem" : "meson",
-            "builddir" : true,
-            "config-opts" : [
-                "--prefix=/app",
-                "--libdir=/app/lib",
-                "-Dbuild-tests=false"
-            ],
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://gitlab.gnome.org/GNOME/gtk.git"
-                }
-            ]
-        },
-        {
             "name" : "gnome-online-accounts",
             "config-opts" : [
+                "--disable-Werror",
                 "--disable-telepathy",
                 "--disable-documentation",
                 "--disable-backend"
@@ -181,6 +138,50 @@
                     "type" : "git",
                     "branch" : "librest-0-7",
                     "url" : "https://gitlab.gnome.org/GNOME/librest.git"
+                }
+            ]
+        },
+        {
+            "name" : "graphene",
+            "buildsystem" : "meson",
+            "builddir" : true,
+            "config-opts" : [
+                "--libdir=/app/lib"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/ebassi/graphene.git"
+                }
+            ]
+        },
+        {
+            "name" : "wayland",
+            "buildsystem" : "autotools",
+            "builddir" : true,
+            "config-opts" : [
+                "--disable-documentation"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/wayland-project/wayland.git"
+                }
+            ]
+        },
+        {
+            "name" : "gtk4",
+            "buildsystem" : "meson",
+            "builddir" : true,
+            "config-opts" : [
+                "--prefix=/app",
+                "--libdir=/app/lib",
+                "-Dbuild-tests=false"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/gtk.git"
                 }
             ]
         },

@@ -234,29 +234,24 @@ on_text_buffer_changed_cb (GtkTextBuffer *buffer,
   GTD_EXIT;
 }
 
-static gboolean
-on_trap_textview_clicks_cb (GtkWidget   *textview,
-                            GdkEvent    *event,
-                            GtdEditPane *self)
+static void
+on_hyperlink_hover_cb (GtkEventControllerMotion *controller,
+                       gdouble                   x,
+                       gdouble                   y,
+                       GtdEditPane              *self)
 {
-  return GDK_EVENT_STOP;
-}
-
-static gboolean
-on_hyperlink_hover_cb (GtkTextView    *text_view,
-                       GdkEventMotion *event)
-{
+  GtkTextView *text_view;
   GtkTextIter iter;
   gboolean hovering;
-  gdouble ex, ey;
-  gint x, y;
+  gint ex, ey;
 
-  gdk_event_get_coords ((GdkEvent *)event, &ex, &ey);
-  gtk_text_view_window_to_buffer_coords (text_view, GTK_TEXT_WINDOW_WIDGET, ex, ey, &x, &y);
+  text_view = GTK_TEXT_VIEW (gtk_event_controller_get_widget (GTK_EVENT_CONTROLLER (controller)));
+
+  gtk_text_view_window_to_buffer_coords (text_view, GTK_TEXT_WINDOW_WIDGET, x, y, &ex, &ey);
 
   hovering = FALSE;
 
-  if (gtk_text_view_get_iter_at_location (text_view, &iter, x, y))
+  if (gtk_text_view_get_iter_at_location (text_view, &iter, ex, ey))
     {
       GSList *tags = NULL;
       GSList *l = NULL;
@@ -281,43 +276,42 @@ on_hyperlink_hover_cb (GtkTextView    *text_view,
     }
 
   gtk_widget_set_cursor_from_name (GTK_WIDGET (text_view), hovering ? "pointer" : "text");
-
-  return GDK_EVENT_STOP;
 }
 
-static gboolean
-on_hyperlink_clicked_cb (GtkTextView *text_view,
-                         GdkEvent    *event)
+static void
+on_hyperlink_clicked_cb (GtkGestureMultiPress *gesture,
+                         gint                  n_press,
+                         gdouble               x,
+                         gdouble               y,
+                         GtdEditPane          *self)
 {
+  GdkEventSequence *sequence;
   GtkTextBuffer *buffer;
-  GdkEventType event_type;
+  GtkTextView *text_view;
   GtkTextIter end_iter;
   GtkTextIter iter;
   GSList *tags = NULL;
   GSList *l = NULL;
-  gdouble ex = 0.0;
-  gdouble ey = 0.0;
-  gint x;
-  gint y;
+  gint ex = 0;
+  gint ey = 0;
 
-  event_type = gdk_event_get_event_type (event);
+  GTD_ENTRY;
 
-  /* Ignore events that are not button or touch release */
-  if (event_type != GDK_BUTTON_RELEASE && event_type != GDK_TOUCH_END)
-    return GDK_EVENT_PROPAGATE;
+  /* Claim the sequence to prevent propagating to GtkListBox and closing the row */
+  sequence = gtk_gesture_single_get_current_sequence (GTK_GESTURE_SINGLE (gesture));
+  gtk_gesture_set_sequence_state (GTK_GESTURE (gesture), sequence, GTK_EVENT_SEQUENCE_CLAIMED);
 
-  gdk_event_get_coords (event, &ex, &ey);
-
+  text_view = GTK_TEXT_VIEW (gtk_event_controller_get_widget (GTK_EVENT_CONTROLLER (gesture)));
   buffer = gtk_text_view_get_buffer (text_view);
 
   /* We shouldn't follow a link if the user has selected something */
   if (gtk_text_buffer_get_has_selection (buffer))
-    return GDK_EVENT_PROPAGATE;
+    return;
 
-  gtk_text_view_window_to_buffer_coords (text_view, GTK_TEXT_WINDOW_WIDGET, ex, ey, &x, &y);
+  gtk_text_view_window_to_buffer_coords (text_view, GTK_TEXT_WINDOW_WIDGET, x, y, &ex, &ey);
 
-  if (!gtk_text_view_get_iter_at_location (text_view, &iter, x, y))
-    return GDK_EVENT_PROPAGATE;
+  if (!gtk_text_view_get_iter_at_location (text_view, &iter, ex, ey))
+    return;
 
   tags = gtk_text_iter_get_tags (&iter);
 
@@ -358,11 +352,9 @@ on_hyperlink_clicked_cb (GtkTextView *text_view,
       if (error)
         {
           g_warning ("%s", error->message);
-          return GDK_EVENT_PROPAGATE;
+          return;
         }
     }
-
-  return GDK_EVENT_STOP;
 }
 
 
@@ -501,7 +493,6 @@ gtd_edit_pane_class_init (GtdEditPaneClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_text_buffer_changed_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_today_button_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_tomorrow_button_clicked_cb);
-  gtk_widget_class_bind_template_callback (widget_class, on_trap_textview_clicks_cb);
 
   gtk_widget_class_set_css_name (widget_class, "editpane");
 }

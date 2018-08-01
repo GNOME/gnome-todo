@@ -318,16 +318,15 @@ gtd_panel_scheduled_count_tasks (GtdPanelScheduled *panel)
   /* Recount tasks */
   for (l = tasklists; l != NULL; l = l->next)
     {
-      GList *tasks;
-      GList *t;
+      guint i;
 
-      tasks = gtd_task_list_get_tasks (l->data);
-
-      for (t = tasks; t != NULL; t = t->next)
+      for (i = 0; i < g_list_model_get_n_items (l->data); i++)
         {
           g_autoptr (GDateTime) task_dt = NULL;
+          GtdTask *task;
 
-          task_dt = gtd_task_get_due_date (t->data);
+          task = g_list_model_get_item (l->data, i);
+          task_dt = gtd_task_get_due_date (task);
 
           /*
            * GtdTaskListView automagically updates the list
@@ -335,14 +334,12 @@ gtd_panel_scheduled_count_tasks (GtdPanelScheduled *panel)
            */
           if (task_dt)
             {
-              panel->task_list = g_list_prepend (panel->task_list, t->data);
+              panel->task_list = g_list_prepend (panel->task_list, task);
 
-              if (!gtd_task_get_complete (t->data))
+              if (!gtd_task_get_complete (task))
                 number_of_tasks++;
             }
         }
-
-      g_list_free (tasks);
     }
 
   /* Add the tasks to the view */

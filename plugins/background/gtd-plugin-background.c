@@ -191,21 +191,22 @@ get_tasks_for_today (guint *n_events)
 
   for (l = task_lists; l != NULL; l = l->next)
     {
-      GList *tasks, *t;
+      guint i;
 
-      tasks = gtd_task_list_get_tasks (l->data);
-
-      for (t = tasks; t != NULL; t = t->next)
+      for (i = 0; i < g_list_model_get_n_items (l->data); i++)
         {
           GDateTime *due_date;
+          GtdTask *task;
 
-          due_date = gtd_task_get_due_date (t->data);
+          task = g_list_model_get_item (l->data, i);
 
-          if (!due_date || !is_today (now, due_date) || gtd_task_get_complete (t->data))
+          due_date = gtd_task_get_due_date (task);
+
+          if (!due_date || !is_today (now, due_date) || gtd_task_get_complete (task))
             continue;
 
           n_tasks += 1;
-          result = g_list_prepend (result, t->data);
+          result = g_list_prepend (result, task);
         }
     }
 

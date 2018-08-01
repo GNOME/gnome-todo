@@ -191,18 +191,13 @@ update_source (GtdProviderTodoTxt *self)
   /* Save the tasks first */
   for (i = 0; i < self->cache->len; i++)
     {
-      g_autoptr (GList) tasks = NULL;
-      g_autoptr (GList) l = NULL;
+      guint j;
 
       list = g_ptr_array_index (self->cache, i);
-      tasks = gtd_task_list_get_tasks (list);
-
-      /* First sort the tasks */
-      tasks = g_list_sort (tasks, (GCompareFunc) gtd_task_compare);
 
       /* And now save each task */
-      for (l = tasks; l; l = l->next)
-        print_task (contents, l->data);
+      for (j = 0; j < g_list_model_get_n_items (G_LIST_MODEL (list)); j++)
+        print_task (contents, g_list_model_get_item (G_LIST_MODEL (list), j));
     }
 
   /* Initialize lists & colors custom lines */
@@ -830,7 +825,7 @@ gtd_provider_todo_txt_finalize (GObject *object)
   g_clear_pointer (&self->lists, g_hash_table_destroy);
   g_clear_pointer (&self->tasks, g_hash_table_destroy);
   g_ptr_array_free (self->cache, TRUE);
-  g_clear_pointer (&self->task_lists, g_clear_object);
+  g_clear_pointer (&self->task_lists, g_list_free);
   g_clear_object (&self->source_file);
   g_clear_object (&self->icon);
 

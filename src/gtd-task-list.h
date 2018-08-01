@@ -69,8 +69,6 @@ GtdProvider*            gtd_task_list_get_provider              (GtdTaskList    
 void                    gtd_task_list_set_provider              (GtdTaskList            *self,
                                                                  GtdProvider            *provider);
 
-GList*                  gtd_task_list_get_tasks                 (GtdTaskList            *list);
-
 void                    gtd_task_list_save_task                 (GtdTaskList            *list,
                                                                  GtdTask                *task);
 

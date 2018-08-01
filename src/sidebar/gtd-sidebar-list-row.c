@@ -150,15 +150,15 @@ update_color_icon (GtdSidebarListRow *self)
 static void
 update_counter_label (GtdSidebarListRow *self)
 {
-  g_autoptr (GList) tasks = NULL;
   g_autofree gchar *label = NULL;
-  GList *l;
+  GListModel *model;
   guint counter = 0;
+  guint i;
 
-  tasks = gtd_task_list_get_tasks (self->list);
+  model = G_LIST_MODEL (self->list);
 
-  for (l = tasks; l; l = l->next)
-    counter += !gtd_task_get_complete (l->data);
+  for (i = 0; i < g_list_model_get_n_items (model); i++)
+    counter += !gtd_task_get_complete (g_list_model_get_item (model, i));
 
   label = counter > 0 ? g_strdup_printf ("%u", counter) : g_strdup ("");
 

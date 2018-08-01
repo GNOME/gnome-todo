@@ -196,20 +196,20 @@ update_tasks (GtdNextWeekPanel *self)
   /* Recount tasks */
   for (l = tasklists; l != NULL; l = l->next)
     {
-      g_autoptr (GList) tasks = NULL;
-      GList *t;
+      guint i;
 
-      tasks = gtd_task_list_get_tasks (l->data);
-
-      for (t = tasks; t != NULL; t = t->next)
+      for (i = 0; i < g_list_model_get_n_items (l->data); i++)
         {
           g_autoptr (GDateTime) task_dt = NULL;
+          GtdTask *task;
           gint days_offset;
 
-          if (gtd_task_get_complete (t->data))
+          task = g_list_model_get_item (l->data, i);
+
+          if (gtd_task_get_complete (task))
             continue;
 
-          task_dt = gtd_task_get_due_date (t->data);
+          task_dt = gtd_task_get_due_date (task);
 
           if (!task_dt)
               continue;
@@ -219,7 +219,7 @@ update_tasks (GtdNextWeekPanel *self)
           if (days_offset >= 7)
             continue;
 
-          list = g_list_prepend (list, t->data);
+          list = g_list_prepend (list, task);
           number_of_tasks++;
         }
     }

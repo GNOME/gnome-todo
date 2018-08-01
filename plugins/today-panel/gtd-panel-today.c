@@ -121,17 +121,14 @@ update_tasks (GtdPanelToday *panel)
   /* Recount tasks */
   for (l = tasklists; l != NULL; l = l->next)
     {
-      g_autoptr (GList) tasks = NULL;
-      GList *t;
+      guint i;
 
-      tasks = gtd_task_list_get_tasks (l->data);
-
-      for (t = tasks; t != NULL; t = t->next)
+      for (i = 0; i < g_list_model_get_n_items (l->data); i++)
         {
           g_autoptr (GDateTime) task_dt = NULL;
           GtdTask *task;
 
-          task = t->data;
+          task = g_list_model_get_item (l->data, i);
           task_dt = gtd_task_get_due_date (task);
 
           /* Ignore completed tasks, and tasks in the future */

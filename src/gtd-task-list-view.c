@@ -205,6 +205,18 @@ typedef gboolean     (*IterateSubtaskFunc)                       (GtdTaskListVie
  * Auxiliary methods
  */
 
+static GList*
+get_tasks_from_list (GtdTaskList *list)
+{
+  GList *values = NULL;
+  guint i;
+
+  for (i = 0; i < g_list_model_get_n_items (G_LIST_MODEL (list)); i++)
+    values = g_list_prepend (values, g_list_model_get_item (G_LIST_MODEL (list), i));
+
+  return values;
+}
+
 static void
 idle_data_free (gpointer data)
 {
@@ -1711,7 +1723,7 @@ gtd_task_list_view_get_list (GtdTaskListView *view)
   g_return_val_if_fail (GTD_IS_TASK_LIST_VIEW (view), NULL);
 
   if (view->priv->task_list)
-    return gtd_task_list_get_tasks (view->priv->task_list);
+    return get_tasks_from_list (view->priv->task_list);
   else
     return g_hash_table_get_keys (view->priv->tasks);
 }
@@ -1892,7 +1904,7 @@ gtd_task_list_view_set_task_list (GtdTaskListView *view,
   update_font_color (view);
 
   /* Add the tasks from the list */
-  task_list = gtd_task_list_get_tasks (list);
+  task_list = get_tasks_from_list (list);
   gtd_task_list_view_set_list (view, task_list);
 
   g_signal_connect (list,

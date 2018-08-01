@@ -551,31 +551,6 @@ gtd_task_list_set_provider (GtdTaskList *self,
 }
 
 /**
- * gtd_task_list_get_tasks:
- * @list: a #GtdTaskList
- *
- * Returns the list's tasks.
- *
- * Returns: (element-type GtdTask) (transfer container): a newly-allocated list of the list's tasks.
- */
-GList*
-gtd_task_list_get_tasks (GtdTaskList *list)
-{
-  GtdTaskListPrivate *priv;
-  GList *values = NULL;
-  guint i;
-
-  g_return_val_if_fail (GTD_IS_TASK_LIST (list), NULL);
-
-  priv = gtd_task_list_get_instance_private (list);
-
-  for (i = 0; i < g_hash_table_size (priv->tasks); i++)
-    values = g_list_prepend (values, g_list_model_get_item (G_LIST_MODEL (list), i));
-
-  return g_list_reverse (values);
-}
-
-/**
  * gtd_task_list_save_task:
  * @list: a #GtdTaskList
  * @task: a #GtdTask

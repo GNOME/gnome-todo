@@ -892,26 +892,24 @@ update_task_position (GtdProviderTodoist *self,
                       GtdTask            *task,
                       gboolean            schedule_requests)
 {
-  g_autoptr (GList) tasks = NULL;
-  g_autoptr (GList) l = NULL;
   GtdTaskList *list;
   gint64 i;
 
   list = gtd_task_get_list (task);
-  tasks = gtd_task_list_get_tasks (list);
-  tasks = g_list_sort (tasks, (GCompareFunc) gtd_task_compare);
 
-  for (l = tasks, i = 0; l; l = l->next, i++)
+  for (i = 0; i < g_list_model_get_n_items (G_LIST_MODEL (list)); i++)
     {
       g_autofree gchar *command_uid = NULL;
       g_autofree gchar *command = NULL;
-      GtdTask *t = l->data;
+      GtdTask *t = NULL;
+
+      t = g_list_model_get_item (G_LIST_MODEL (list), i);
 
       if (gtd_task_get_position (t) == i)
         continue;
 
       /* Update the position */
-      gtd_task_set_position (l->data, i);
+      gtd_task_set_position (t, i);
 
       if (!schedule_requests)
         continue;
@@ -1160,7 +1158,6 @@ gtd_provider_todoist_create_task (GtdProvider *provider,
   GtdProviderTodoist *self;
   g_autoptr (GDateTime) creation_date = NULL;
   g_autoptr (GtdTask) new_task = NULL;
-  g_autoptr (GList) tasks = NULL;
   g_autofree gchar *command = NULL;
   g_autofree gchar *command_uid = NULL;
   g_autofree gchar *temp_id = NULL;
@@ -1177,8 +1174,7 @@ gtd_provider_todoist_create_task (GtdProvider *provider,
   escaped_title = escape_string_for_post (title);
   due_dt = due_date ? g_date_time_format (due_date, "\"%FT%R\"") : g_strdup ("null");
   creation_date = g_date_time_new_now_utc ();
-  tasks = gtd_task_list_get_tasks (list);
-  position = g_list_length (tasks);
+  position = g_list_model_get_n_items (G_LIST_MODEL (list));
 
   command_uid = g_uuid_string_random ();
   temp_id = g_uuid_string_random ();

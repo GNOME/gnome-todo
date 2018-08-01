@@ -143,7 +143,6 @@ gtd_task_list_get_name
 gtd_task_list_set_name
 gtd_task_list_get_provider
 gtd_task_list_set_provider
-gtd_task_list_get_tasks
 gtd_task_list_save_task
 gtd_task_list_remove_task
 gtd_task_list_contains

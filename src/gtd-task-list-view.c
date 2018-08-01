@@ -1887,7 +1887,7 @@ gtd_task_list_view_set_task_list (GtdTaskListView *view,
   color_str = gdk_rgba_to_string (color);
   parsed_css = g_strdup_printf (COLOR_TEMPLATE, color_str);
 
-  gtk_css_provider_load_from_data (priv->color_provider, parsed_css, -1);
+  //gtk_css_provider_load_from_data (priv->color_provider, parsed_css, -1);
 
   update_font_color (view);
 

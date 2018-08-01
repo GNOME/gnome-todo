@@ -35,8 +35,7 @@
                     <property name="can_focus">False</property>
                     <property name="halign">center</property>
                     <property name="vexpand">True</property>
-                    <property name="margin">24</property>
-                    <property name="margin-bottom">32</property>
+                    <property name="margin-bottom">24</property>
                     <property name="selection_mode">none</property>
                     <signal name="drag-drop" handler="listbox_drag_drop" object="GtdTaskListView" swapped="no" />
                     <signal name="drag-leave" handler="listbox_drag_leave" object="GtdTaskListView" swapped="no" />
@@ -44,7 +43,6 @@
                     <signal name="row-activated" handler="on_listbox_row_activated_cb" object="GtdTaskListView" swapped="no" />
                     <child>
                       <object class="GtdNewTaskRow" id="new_task_row">
-                        <property name="visible">True</property>
                         <signal name="enter" handler="on_task_row_entered_cb" object="GtdTaskListView" swapped="yes" />
                         <signal name="exit" handler="on_task_row_exited_cb" object="GtdTaskListView" swapped="yes" />
                       </object>

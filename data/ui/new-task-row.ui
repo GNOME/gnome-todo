@@ -8,8 +8,6 @@
     <property name="selectable">False</property>
     <property name="height-request">42</property>
     <property name="halign">center</property>
-    <property name="margin-top">12</property>
-    <property name="margin-bottom">12</property>
     <style>
       <class name="new-task-row" />
     </style>

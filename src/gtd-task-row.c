@@ -457,7 +457,7 @@ on_depth_changed_cb (GtdTaskRow *self,
                      GtdTask    *task)
 {
   gtk_widget_set_margin_start (GTK_WIDGET (self),
-                               self->handle_subtasks ? 32 * gtd_task_get_depth (task) + 3: 3);
+                               self->handle_subtasks ? 32 * gtd_task_get_depth (task) : 0);
 }
 
 static gboolean

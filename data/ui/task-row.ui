@@ -6,7 +6,6 @@
     <property name="activatable">True</property>
     <property name="selectable">False</property>
     <property name="halign">center</property>
-    <property name="margin">2</property>
 
     <!-- Controllers -->
     <child>
@@ -38,7 +37,7 @@
                 <property name="margin-top">5</property>
                 <property name="margin-bottom">5</property>
                 <property name="height-request">32</property>
-                <property name="spacing">4</property>
+                <property name="spacing">6</property>
 
                 <!-- Box with DnD margin -->
                 <child>

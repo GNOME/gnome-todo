@@ -18,7 +18,7 @@
 
 #include "gtd-rows-common-private.h"
 
-#define MAX_WIDTH                  700
+#define MAX_WIDTH                  800
 
 void
 gtd_row_measure_with_max (GtkWidget      *widget,

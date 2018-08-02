@@ -40,6 +40,8 @@ struct _GtdNextWeekPanel
 
   guint               number_of_tasks;
   GtdTaskListView    *view;
+
+  GListStore         *model;
 };
 
 static void          gtd_panel_iface_init                        (GtdPanelInterface  *iface);
@@ -179,66 +181,6 @@ compare_by_date (GDateTime *d1,
 }
 
 static void
-update_tasks (GtdNextWeekPanel *self)
-{
-  g_autoptr (GDateTime) now = NULL;
-  g_autoptr (GList) tasklists = NULL;
-  g_autoptr (GList) list = NULL;
-  GtdManager *manager;
-  GList *l;
-  guint number_of_tasks;
-
-  now = g_date_time_new_now_local ();
-  manager = gtd_manager_get_default ();
-  tasklists = gtd_manager_get_task_lists (manager);
-  number_of_tasks = 0;
-
-  /* Recount tasks */
-  for (l = tasklists; l != NULL; l = l->next)
-    {
-      guint i;
-
-      for (i = 0; i < g_list_model_get_n_items (l->data); i++)
-        {
-          g_autoptr (GDateTime) task_dt = NULL;
-          GtdTask *task;
-          gint days_offset;
-
-          task = g_list_model_get_item (l->data, i);
-
-          if (gtd_task_get_complete (task))
-            continue;
-
-          task_dt = gtd_task_get_due_date (task);
-
-          if (!task_dt)
-              continue;
-
-          get_date_offset (task_dt, &days_offset, NULL);
-
-          if (days_offset >= 7)
-            continue;
-
-          list = g_list_prepend (list, task);
-          number_of_tasks++;
-        }
-    }
-
-  /* Add the tasks to the view */
-  gtd_task_list_view_set_list (self->view, list);
-  gtd_task_list_view_set_default_date (self->view, now);
-
-  if (number_of_tasks != self->number_of_tasks)
-    {
-      self->number_of_tasks = number_of_tasks;
-
-      g_object_notify (G_OBJECT (self), "subtitle");
-    }
-
-  gtd_task_list_view_invalidate (self->view);
-}
-
-static void
 header_func (GtkListBoxRow    *row,
              GtdTask          *row_task,
              GtkListBoxRow    *before,
@@ -276,28 +218,24 @@ header_func (GtkListBoxRow    *row,
 }
 
 static gint
-sort_func (GtkListBoxRow    *row1,
-           GtdTask          *row1_task,
-           GtkListBoxRow    *row2,
-           GtdTask          *row2_task,
-           GtdNextWeekPanel *self)
+sort_func (gconstpointer a,
+           gconstpointer b,
+           gpointer      user_data)
 {
   GDateTime *dt1;
   GDateTime *dt2;
+  GtdTask *task1;
+  GtdTask *task2;
   gint retval;
   gchar *t1;
   gchar *t2;
 
-  if (!row1_task && !row2_task)
-    return  0;
-  if (!row1_task)
-    return  1;
-  if (!row2_task)
-    return -1;
+  task1 = (GtdTask*) a;
+  task2 = (GtdTask*) b;
 
   /* First, compare by ::due-date. */
-  dt1 = gtd_task_get_due_date (row1_task);
-  dt2 = gtd_task_get_due_date (row2_task);
+  dt1 = gtd_task_get_due_date (task1);
+  dt2 = gtd_task_get_due_date (task2);
 
   if (!dt1 && !dt2)
     retval = 0;
@@ -315,14 +253,14 @@ sort_func (GtkListBoxRow    *row1,
     return retval;
 
   /* Third, compare by ::priority. Inversely to the  */
-  retval = gtd_task_get_priority (row2_task) - gtd_task_get_priority (row1_task);
+  retval = gtd_task_get_priority (task1) - gtd_task_get_priority (task2);
 
   if (retval != 0)
     return retval;
 
   /* Fourth, compare by ::creation-date. */
-  dt1 = gtd_task_get_creation_date (row1_task);
-  dt2 = gtd_task_get_creation_date (row2_task);
+  dt1 = gtd_task_get_creation_date (task1);
+  dt2 = gtd_task_get_creation_date (task2);
 
   if (!dt1 && !dt2)
     retval =  0;
@@ -342,8 +280,8 @@ sort_func (GtkListBoxRow    *row1,
   /* Finally, compare by ::title. */
   t1 = t2 = NULL;
 
-  t1 = g_utf8_casefold (gtd_task_get_title (row1_task), -1);
-  t2 = g_utf8_casefold (gtd_task_get_title (row2_task), -1);
+  t1 = g_utf8_casefold (gtd_task_get_title (task1), -1);
+  t2 = g_utf8_casefold (gtd_task_get_title (task2), -1);
 
   retval = g_strcmp0 (t1, t2);
 
@@ -353,6 +291,59 @@ sort_func (GtkListBoxRow    *row1,
   return retval;
 }
 
+static void
+update_tasks (GtdNextWeekPanel *self)
+{
+  g_autoptr (GDateTime) now = NULL;
+  g_autoptr (GList) tasklists = NULL;
+  GtdManager *manager;
+  GList *l;
+
+  now = g_date_time_new_now_local ();
+  manager = gtd_manager_get_default ();
+  tasklists = gtd_manager_get_task_lists (manager);
+
+  g_list_store_remove_all (self->model);
+
+  /* Recount tasks */
+  for (l = tasklists; l != NULL; l = l->next)
+    {
+      guint i;
+
+      for (i = 0; i < g_list_model_get_n_items (l->data); i++)
+        {
+          g_autoptr (GDateTime) task_dt = NULL;
+          GtdTask *task;
+          gint days_offset;
+
+          task = g_list_model_get_item (l->data, i);
+
+          if (gtd_task_get_complete (task))
+            continue;
+
+          task_dt = gtd_task_get_due_date (task);
+
+          if (!task_dt)
+              continue;
+
+          get_date_offset (task_dt, &days_offset, NULL);
+
+          if (days_offset >= 7)
+            continue;
+
+          g_list_store_insert_sorted (self->model, task, sort_func, self);
+        }
+    }
+
+  /* Add the tasks to the view */
+  gtd_task_list_view_set_default_date (self->view, now);
+
+  if (self->number_of_tasks != g_list_model_get_n_items (G_LIST_MODEL (self->model)))
+    {
+      self->number_of_tasks = g_list_model_get_n_items (G_LIST_MODEL (self->model));
+      g_object_notify (G_OBJECT (self), "subtitle");
+    }
+}
 
 /*
  * GtdPanel iface
@@ -425,6 +416,7 @@ gtd_next_week_panel_finalize (GObject *object)
   GtdNextWeekPanel *self = (GtdNextWeekPanel *)object;
 
   g_clear_object (&self->icon);
+  g_clear_object (&self->model);
 
   G_OBJECT_CLASS (gtd_next_week_panel_parent_class)->finalize (object);
 }
@@ -500,9 +492,11 @@ gtd_next_week_panel_init (GtdNextWeekPanel *self)
   GtdManager *manager;
 
   self->icon = g_themed_icon_new ("x-office-calendar-symbolic");
+  self->model = g_list_store_new (GTD_TYPE_TASK);
 
   /* The main view */
   self->view = GTD_TASK_LIST_VIEW (gtd_task_list_view_new ());
+  gtd_task_list_view_set_model (GTD_TASK_LIST_VIEW (self->view), G_LIST_MODEL (self->model));
   gtd_task_list_view_set_handle_subtasks (GTD_TASK_LIST_VIEW (self->view), FALSE);
   gtd_task_list_view_set_show_list_name (GTD_TASK_LIST_VIEW (self->view), TRUE);
   gtd_task_list_view_set_show_due_date (GTD_TASK_LIST_VIEW (self->view), FALSE);
@@ -514,10 +508,6 @@ gtd_next_week_panel_init (GtdNextWeekPanel *self)
   gtd_task_list_view_set_header_func (GTD_TASK_LIST_VIEW (self->view),
                                       (GtdTaskListViewHeaderFunc) header_func,
                                       self);
-
-  gtd_task_list_view_set_sort_func (GTD_TASK_LIST_VIEW (self->view),
-                                    (GtdTaskListViewSortFunc) sort_func,
-                                    self);
 
   /* Connect to GtdManager::list-* signals to update the title */
   manager = gtd_manager_get_default ();

@@ -33,7 +33,7 @@ struct _GtdPanelScheduled
   GIcon              *icon;
 
   guint               number_of_tasks;
-  GList              *task_list;
+  GListStore         *model;
   GtkWidget          *view;
 };
 
@@ -216,28 +216,24 @@ gtd_panel_scheduled_header_func (GtkListBoxRow     *row,
 }
 
 static gint
-gtd_panel_scheduled_sort_func (GtkListBoxRow     *row1,
-                               GtdTask           *row1_task,
-                               GtkListBoxRow     *row2,
-                               GtdTask           *row2_task,
-                               GtdPanelScheduled *panel)
+sort_func (gconstpointer  a,
+           gconstpointer  b,
+           gpointer       user_data)
 {
   GDateTime *dt1;
   GDateTime *dt2;
+  GtdTask *task1;
+  GtdTask *task2;
   gint retval;
   gchar *t1;
   gchar *t2;
 
-  if (!row1_task && !row2_task)
-    return  0;
-  if (!row1_task)
-    return  1;
-  if (!row2_task)
-    return -1;
+  task1 = (GtdTask*) a;
+  task2 = (GtdTask*) b;
 
   /* First, compare by ::due-date. */
-  dt1 = gtd_task_get_due_date (row1_task);
-  dt2 = gtd_task_get_due_date (row2_task);
+  dt1 = gtd_task_get_due_date (task1);
+  dt2 = gtd_task_get_due_date (task2);
 
   if (!dt1 && !dt2)
     retval = 0;
@@ -255,20 +251,20 @@ gtd_panel_scheduled_sort_func (GtkListBoxRow     *row1,
     return retval;
 
   /* Second, compare by ::complete. */
-  retval = gtd_task_get_complete (row1_task) - gtd_task_get_complete (row2_task);
+  retval = gtd_task_get_complete (task1) - gtd_task_get_complete (task2);
 
   if (retval != 0)
     return retval;
 
   /* Third, compare by ::priority. Inversely to the  */
-  retval = gtd_task_get_priority (row2_task) - gtd_task_get_priority (row1_task);
+  retval = gtd_task_get_priority (task2) - gtd_task_get_priority (task1);
 
   if (retval != 0)
     return retval;
 
   /* Fourth, compare by ::creation-date. */
-  dt1 = gtd_task_get_creation_date (row1_task);
-  dt2 = gtd_task_get_creation_date (row2_task);
+  dt1 = gtd_task_get_creation_date (task1);
+  dt2 = gtd_task_get_creation_date (task2);
 
   if (!dt1 && !dt2)
     retval =  0;
@@ -288,8 +284,8 @@ gtd_panel_scheduled_sort_func (GtkListBoxRow     *row1,
   /* Finally, compare by ::title. */
   t1 = t2 = NULL;
 
-  t1 = g_utf8_casefold (gtd_task_get_title (row1_task), -1);
-  t2 = g_utf8_casefold (gtd_task_get_title (row2_task), -1);
+  t1 = g_utf8_casefold (gtd_task_get_title (task1), -1);
+  t2 = g_utf8_casefold (gtd_task_get_title (task2), -1);
 
   retval = g_strcmp0 (t1, t2);
 
@@ -313,7 +309,7 @@ gtd_panel_scheduled_count_tasks (GtdPanelScheduled *panel)
   tasklists = gtd_manager_get_task_lists (manager);
   number_of_tasks = 0;
 
-  g_clear_pointer (&panel->task_list, g_list_free);
+  g_list_store_remove_all (panel->model);
 
   /* Recount tasks */
   for (l = tasklists; l != NULL; l = l->next)
@@ -332,28 +328,24 @@ gtd_panel_scheduled_count_tasks (GtdPanelScheduled *panel)
            * GtdTaskListView automagically updates the list
            * whenever a task is added/removed/changed.
            */
-          if (task_dt)
-            {
-              panel->task_list = g_list_prepend (panel->task_list, task);
+          if (!task_dt)
+            continue;
 
-              if (!gtd_task_get_complete (task))
-                number_of_tasks++;
-            }
+          g_list_store_insert_sorted (panel->model, task, sort_func, NULL);
+
+          if (!gtd_task_get_complete (task))
+            number_of_tasks++;
         }
     }
 
   /* Add the tasks to the view */
-  gtd_task_list_view_set_list (GTD_TASK_LIST_VIEW (panel->view), panel->task_list);
   gtd_task_list_view_set_default_date (GTD_TASK_LIST_VIEW (panel->view), now);
 
   if (number_of_tasks != panel->number_of_tasks)
     {
       panel->number_of_tasks = number_of_tasks;
-
       g_object_notify (G_OBJECT (panel), "subtitle");
     }
-
-  gtd_task_list_view_invalidate (GTD_TASK_LIST_VIEW (panel->view));
 
   g_list_free (tasklists);
 }
@@ -424,7 +416,7 @@ gtd_panel_scheduled_finalize (GObject *object)
 
   g_clear_object (&self->icon);
   g_clear_object (&self->menu);
-  g_clear_pointer (&self->task_list, g_list_free);
+  g_clear_object (&self->model);
 
   G_OBJECT_CLASS (gtd_panel_scheduled_parent_class)->finalize (object);
 }
@@ -500,6 +492,7 @@ gtd_panel_scheduled_init (GtdPanelScheduled *self)
   GtdManager *manager;
 
   self->icon = g_themed_icon_new ("alarm-symbolic");
+  self->model = g_list_store_new (GTD_TYPE_TASK);
 
   /* Connect to GtdManager::list-* signals to update the title */
   manager = gtd_manager_get_default ();
@@ -532,6 +525,7 @@ gtd_panel_scheduled_init (GtdPanelScheduled *self)
 
   /* The main view */
   self->view = gtd_task_list_view_new ();
+  gtd_task_list_view_set_model (GTD_TASK_LIST_VIEW (self->view), G_LIST_MODEL (self->model));
   gtd_task_list_view_set_handle_subtasks (GTD_TASK_LIST_VIEW (self->view), FALSE);
   gtd_task_list_view_set_show_list_name (GTD_TASK_LIST_VIEW (self->view), TRUE);
   gtd_task_list_view_set_show_due_date (GTD_TASK_LIST_VIEW (self->view), FALSE);
@@ -543,10 +537,6 @@ gtd_panel_scheduled_init (GtdPanelScheduled *self)
   gtd_task_list_view_set_header_func (GTD_TASK_LIST_VIEW (self->view),
                                       (GtdTaskListViewHeaderFunc) gtd_panel_scheduled_header_func,
                                       self);
-
-  gtd_task_list_view_set_sort_func (GTD_TASK_LIST_VIEW (self->view),
-                                    (GtdTaskListViewSortFunc) gtd_panel_scheduled_sort_func,
-                                    self);
 }
 
 GtkWidget*

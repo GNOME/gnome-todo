@@ -323,9 +323,9 @@ on_drag_begin_cb (GtkWidget  *event_box,
   new_row = create_transient_row (self);
 
   if (gtk_widget_get_direction (GTK_WIDGET (self)) == GTK_TEXT_DIR_RTL)
-    x_offset = gtk_widget_get_margin_end (GTK_WIDGET (self));
+    x_offset = gtk_widget_get_margin_end (GTK_WIDGET (self->revealer));
   else
-    x_offset = gtk_widget_get_margin_start (GTK_WIDGET (self));
+    x_offset = gtk_widget_get_margin_start (GTK_WIDGET (self->revealer));
 
   gtk_drag_set_icon_widget (drag,
                             new_row,
@@ -456,8 +456,12 @@ on_depth_changed_cb (GtdTaskRow *self,
                      GParamSpec *pspec,
                      GtdTask    *task)
 {
-  gtk_widget_set_margin_start (GTK_WIDGET (self),
-                               self->handle_subtasks ? 32 * gtd_task_get_depth (task) : 0);
+  gint margin = 0;
+
+  if (self->handle_subtasks)
+    margin = 32 * gtd_task_get_depth (task);
+
+  gtk_widget_set_margin_start (GTK_WIDGET (self->revealer), margin);
 }
 
 static gboolean

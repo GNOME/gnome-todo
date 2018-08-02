@@ -25,7 +25,7 @@ G_BEGIN_DECLS
 
 #define GTD_TYPE_NEW_TASK_ROW (gtd_new_task_row_get_type())
 
-G_DECLARE_FINAL_TYPE (GtdNewTaskRow, gtd_new_task_row, GTD, NEW_TASK_ROW, GtkListBoxRow)
+G_DECLARE_FINAL_TYPE (GtdNewTaskRow, gtd_new_task_row, GTD, NEW_TASK_ROW, GtkBin)
 
 GtkWidget*           gtd_new_task_row_new                        (void);
 

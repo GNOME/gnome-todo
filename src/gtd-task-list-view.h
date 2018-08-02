@@ -75,15 +75,10 @@ typedef gint (*GtdTaskListViewSortFunc)   (GtkListBoxRow        *row1,
 
 GtkWidget*                gtd_task_list_view_new                (void);
 
-GList*                    gtd_task_list_view_get_list           (GtdTaskListView        *view);
+GListModel*               gtd_task_list_view_get_model          (GtdTaskListView        *view);
 
-void                      gtd_task_list_view_set_list           (GtdTaskListView        *view,
-                                                                 GList                  *list);
-
-GtdTaskList*              gtd_task_list_view_get_task_list      (GtdTaskListView        *view);
-
-void                      gtd_task_list_view_set_task_list      (GtdTaskListView        *view,
-                                                                 GtdTaskList            *list);
+void                      gtd_task_list_view_set_model          (GtdTaskListView        *view,
+                                                                 GListModel             *model);
 
 gboolean                  gtd_task_list_view_get_show_list_name (GtdTaskListView        *view);
 
@@ -97,14 +92,6 @@ void                      gtd_task_list_view_set_show_due_date  (GtdTaskListView
 
 void                      gtd_task_list_view_set_header_func    (GtdTaskListView           *view,
                                                                  GtdTaskListViewHeaderFunc  func,
-                                                                 gpointer                   user_data);
-
-void                      gtd_task_list_view_set_filter_func    (GtdTaskListView           *view,
-                                                                 GtdTaskListViewFilterFunc  func,
-                                                                 gpointer                   user_data);
-
-void                      gtd_task_list_view_set_sort_func      (GtdTaskListView           *view,
-                                                                 GtdTaskListViewSortFunc    func,
                                                                  gpointer                   user_data);
 
 gboolean                  gtd_task_list_view_get_show_new_task_row (GtdTaskListView        *view);
@@ -126,8 +113,6 @@ gboolean                  gtd_task_list_view_get_handle_subtasks (GtdTaskListVie
 
 void                      gtd_task_list_view_set_handle_subtasks (GtdTaskListView       *self,
                                                                   gboolean               handle_subtasks);
-
-void                      gtd_task_list_view_invalidate          (GtdTaskListView       *self);
 
 G_END_DECLS
 

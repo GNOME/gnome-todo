@@ -30,7 +30,7 @@
 
 struct _GtdNewTaskRow
 {
-  GtkListBoxRow       parent;
+  GtkBin              parent;
 
   GtkEntry           *entry;
   GtkImage           *list_color_icon;
@@ -45,7 +45,7 @@ struct _GtdNewTaskRow
   GtdManager         *manager;
 };
 
-G_DEFINE_TYPE (GtdNewTaskRow, gtd_new_task_row, GTK_TYPE_LIST_BOX_ROW)
+G_DEFINE_TYPE (GtdNewTaskRow, gtd_new_task_row, GTK_TYPE_BIN)
 
 enum
 {
@@ -141,6 +141,7 @@ entry_activated_cb (GtdNewTaskRow *self)
 {
   GtdTaskListView *view;
   GtdTaskList *list;
+  GListModel *model;
 
   /* Cannot create empty tasks */
   if (gtk_entry_get_text_length (self->entry) == 0)
@@ -149,7 +150,8 @@ entry_activated_cb (GtdNewTaskRow *self)
   view = GTD_TASK_LIST_VIEW (gtk_widget_get_ancestor (GTK_WIDGET (self), GTD_TYPE_TASK_LIST_VIEW));
 
   /* If there's a task list set, always go for it */
-  list = gtd_task_list_view_get_task_list (view);
+  model = gtd_task_list_view_get_model (view);
+  list = GTD_IS_TASK_LIST (model) ? GTD_TASK_LIST (model) : NULL;
 
   /*
    * If there is no current list set, use the default list from the

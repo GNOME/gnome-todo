@@ -63,7 +63,7 @@ update_color (GtdTaskListPanel *self)
   g_autoptr (GdkRGBA) color = NULL;
   GtdTaskList *list;
 
-  list = gtd_task_list_view_get_task_list (self->task_list_view);
+  list = GTD_TASK_LIST (gtd_task_list_view_get_model (self->task_list_view));
   color = gtd_task_list_get_color (list);
 
   g_signal_handlers_block_by_func (self->color_button, on_color_button_color_set_cb, self);
@@ -85,7 +85,7 @@ on_color_button_color_set_cb (GtkColorChooser  *color_button,
   GtdTaskList *list;
   GdkRGBA new_color;
 
-  list = gtd_task_list_view_get_task_list (self->task_list_view);
+  list = GTD_TASK_LIST (gtd_task_list_view_get_model (self->task_list_view));
 
   g_assert (list != NULL);
 
@@ -259,7 +259,7 @@ gtd_task_list_panel_get_task_list (GtdTaskListPanel *self)
 {
   g_return_val_if_fail (GTD_IS_TASK_LIST_PANEL (self), NULL);
 
-  return gtd_task_list_view_get_task_list (self->task_list_view);
+  return GTD_TASK_LIST (gtd_task_list_view_get_model (self->task_list_view));
 }
 
 void
@@ -269,7 +269,7 @@ gtd_task_list_panel_set_task_list (GtdTaskListPanel *self,
   g_return_if_fail (GTD_IS_TASK_LIST_PANEL (self));
   g_return_if_fail (GTD_IS_TASK_LIST (list));
 
-  gtd_task_list_view_set_task_list (self->task_list_view, list);
+  gtd_task_list_view_set_model (self->task_list_view, G_LIST_MODEL (list));
 
   update_color (self);
 }

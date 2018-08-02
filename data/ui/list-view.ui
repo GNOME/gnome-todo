@@ -30,32 +30,39 @@
 
                 <!-- Listbox -->
                 <child>
-                  <object class="GtkListBox" id="listbox">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="halign">center</property>
-                    <property name="vexpand">True</property>
-                    <property name="margin-bottom">24</property>
-                    <property name="selection_mode">none</property>
-                    <signal name="drag-drop" handler="listbox_drag_drop" object="GtdTaskListView" swapped="no" />
-                    <signal name="drag-leave" handler="listbox_drag_leave" object="GtdTaskListView" swapped="no" />
-                    <signal name="drag-motion" handler="listbox_drag_motion" object="GtdTaskListView" swapped="no" />
-                    <signal name="row-activated" handler="on_listbox_row_activated_cb" object="GtdTaskListView" swapped="no" />
+                  <object class="GtkBox">
+                    <property name="can_focus">false</property>
+                    <property name="orientation">vertical</property>
+
+                    <child>
+                      <object class="GtkListBox" id="listbox">
+                        <property name="can_focus">False</property>
+                        <property name="halign">center</property>
+                        <property name="selection_mode">none</property>
+                        <signal name="drag-drop" handler="listbox_drag_drop" object="GtdTaskListView" swapped="no" />
+                        <signal name="drag-leave" handler="listbox_drag_leave" object="GtdTaskListView" swapped="no" />
+                        <signal name="drag-motion" handler="listbox_drag_motion" object="GtdTaskListView" swapped="no" />
+                        <signal name="row-activated" handler="on_listbox_row_activated_cb" object="GtdTaskListView" swapped="no" />
+                        <style>
+                          <class name="transparent" />
+                        </style>
+                      </object>
+                    </child>
+
                     <child>
                       <object class="GtdNewTaskRow" id="new_task_row">
+                        <property name="margin-bottom">24</property>
                         <signal name="enter" handler="on_task_row_entered_cb" object="GtdTaskListView" swapped="yes" />
                         <signal name="exit" handler="on_task_row_exited_cb" object="GtdTaskListView" swapped="yes" />
                       </object>
                     </child>
+
                     <child>
                       <object class="GtdDndRow" id="dnd_row">
                         <property name="visible">False</property>
                         <signal name="notify::row-above" handler="gtk_list_box_invalidate_sort" object="listbox" swapped="yes" />
                       </object>
                     </child>
-                    <style>
-                      <class name="transparent" />
-                    </style>
                   </object>
                   <packing>
                     <property name="name">listbox</property>

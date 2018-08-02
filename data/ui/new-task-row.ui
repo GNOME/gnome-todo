@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="3.16"/>
-  <template class="GtdNewTaskRow" parent="GtkListBoxRow">
-    <property name="visible">True</property>
+  <template class="GtdNewTaskRow" parent="GtkBin">
     <property name="can_focus">True</property>
-    <property name="activatable">True</property>
-    <property name="selectable">False</property>
     <property name="height-request">42</property>
     <property name="halign">center</property>
     <style>

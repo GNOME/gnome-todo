@@ -43,6 +43,8 @@ struct _GtdPanelInterface
 
   GIcon*            (*get_icon)                            (GtdPanel        *self);
 
+  GtkPopover*       (*get_popover)                         (GtdPanel        *self);
+
   guint32           (*get_priority)                        (GtdPanel        *self);
 
   gchar*            (*get_subtitle)                        (GtdPanel        *self);
@@ -57,6 +59,8 @@ GList*               gtd_panel_get_header_widgets                (GtdPanel      
 const GMenu*         gtd_panel_get_menu                          (GtdPanel           *panel);
 
 GIcon*               gtd_panel_get_icon                          (GtdPanel           *self);
+
+GtkPopover*          gtd_panel_get_popover                       (GtdPanel           *self);
 
 guint32              gtd_panel_get_priority                      (GtdPanel           *self);
 

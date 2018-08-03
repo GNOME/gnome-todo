@@ -43,7 +43,9 @@
  * others panels.
  *
  * At last, a #GtdPanel implementation may provide a #GMenu that will
- * be appended to the window menu.
+ * be appended to the window menu. Alternatively, a #GtkPopover can
+ * also be set. Popovers are used when both a menu and a popover are
+ * provided.
  */
 
 G_DEFINE_INTERFACE (GtdPanel, gtd_panel, GTK_TYPE_WIDGET)
@@ -221,6 +223,26 @@ gtd_panel_get_icon (GtdPanel *self)
   g_return_val_if_fail (GTD_PANEL_GET_IFACE (self)->get_icon, NULL);
 
   return GTD_PANEL_GET_IFACE (self)->get_icon (self);
+}
+
+/**
+ * gtd_panel_get_popover:
+ * @self: a #GtdPanel
+ *
+ * Retrieves the popover of @self. It is used as the
+ * window menu when available.
+ *
+ * Returns: (nullable)(transfer none): a #GtkPopover
+ */
+GtkPopover*
+gtd_panel_get_popover (GtdPanel *self)
+{
+  g_return_val_if_fail (GTD_IS_PANEL (self), 0);
+
+  if (GTD_PANEL_GET_IFACE (self)->get_popover)
+    return GTD_PANEL_GET_IFACE (self)->get_popover (self);
+
+  return NULL;
 }
 
 /**

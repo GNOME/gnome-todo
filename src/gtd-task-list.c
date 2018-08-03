@@ -19,6 +19,7 @@
 #define G_LOG_DOMAIN "GtdTaskList"
 
 #include "interfaces/gtd-provider.h"
+#include "gtd-debug.h"
 #include "gtd-task.h"
 #include "gtd-task-list.h"
 
@@ -31,8 +32,11 @@
  * @stability:Unstable
  * @see_also:#GtdTask
  *
- * A #GtdTaskList represents a task list, and contains a list of tasks, a color,
- * a name and the provider who generated it.
+ * A #GtdTaskList represents a task list, and contains a list of tasks, a
+ * color, a name and the provider who generated it.
+ *
+ * Only a #GtdProvider can create a #GtdTaskList. Equally, a #GtdTaskList
+ * is only valid when associated with a #GtdProvider.
  *
  * It implements #GListModel, and can be used as the model for #GtkListBox.
  */
@@ -91,7 +95,7 @@ static void
 update_task_uid (GtdTaskList *self,
                  GtdTask     *task)
 {
-  GtdTaskListPrivate *priv = NULL;
+  GtdTaskListPrivate *priv;
   GHashTableIter iter;
   gpointer sequence_iter;
   gpointer uid;
@@ -132,16 +136,39 @@ task_changed_cb (GtdTask     *task,
                  GParamSpec  *pspec,
                  GtdTaskList *self)
 {
+  GtdTaskListPrivate *priv;
+  GSequenceIter *iter;
+  guint old_position;
+  guint new_position;
+
+  GTD_ENTRY;
+
+  priv = gtd_task_list_get_instance_private (self);
+
   if (g_strcmp0 (g_param_spec_get_name (pspec), "loading") == 0)
-    return;
+    GTD_RETURN ();
 
   if (g_strcmp0 (g_param_spec_get_name (pspec), "uid") == 0)
     {
       update_task_uid (self, task);
-      return;
+      GTD_RETURN ();
     }
 
-  g_signal_emit (self, signals[TASK_UPDATED], 0, task);
+  iter = g_hash_table_lookup (priv->tasks, gtd_object_get_uid (GTD_OBJECT (task)));
+
+  old_position = g_sequence_iter_get_position (iter);
+  g_sequence_sort_changed (iter, compare_tasks_cb, NULL);
+  new_position = g_sequence_iter_get_position (iter);
+
+  if (old_position != new_position)
+    {
+      GTD_TRACE_MSG ("Old position: %u, New position: %u", old_position, new_position);
+
+      g_list_model_items_changed (G_LIST_MODEL (self), old_position, 1, 0);
+      g_list_model_items_changed (G_LIST_MODEL (self), new_position, 0, 1);
+    }
+
+  GTD_EXIT;
 }
 
 
@@ -166,8 +193,15 @@ static gpointer
 gtd_list_model_get_item (GListModel *model,
                          guint       i)
 {
-  GtdTaskListPrivate *priv = gtd_task_list_get_instance_private (GTD_TASK_LIST (model));
-  return g_sequence_get (g_sequence_get_iter_at_pos (priv->sorted_tasks, i));
+  GtdTaskListPrivate *priv;
+  GSequenceIter *iter;
+  GtdTask *task;
+
+  priv = gtd_task_list_get_instance_private (GTD_TASK_LIST (model));
+  iter = g_sequence_get_iter_at_pos (priv->sorted_tasks, i);
+  task = g_sequence_get (iter);
+
+  return g_object_ref (task);
 }
 
 static void
@@ -587,6 +621,11 @@ gtd_task_list_save_task (GtdTaskList *list,
 
       g_signal_connect (task, "notify", G_CALLBACK (task_changed_cb), list);
 
+      g_list_model_items_changed (G_LIST_MODEL (list),
+                                  g_sequence_iter_get_position (iter),
+                                  0,
+                                  1);
+
       g_signal_emit (list, signals[TASK_ADDED], 0, task);
     }
 }
@@ -603,7 +642,9 @@ gtd_task_list_remove_task (GtdTaskList *list,
                            GtdTask     *task)
 {
   GtdTaskListPrivate *priv;
+  GSequenceIter *iter;
   const gchar *uid;
+  guint position;
 
   g_assert (GTD_IS_TASK_LIST (list));
   g_assert (GTD_IS_TASK (task));
@@ -616,8 +657,16 @@ gtd_task_list_remove_task (GtdTaskList *list,
   g_signal_handlers_disconnect_by_func (task, task_changed_cb, list);
 
   uid = gtd_object_get_uid (GTD_OBJECT (task));
-  g_sequence_remove (g_hash_table_lookup (priv->tasks, uid));
+  iter = g_hash_table_lookup (priv->tasks, uid);
+  position = g_sequence_iter_get_position (iter);
+
+  g_sequence_remove (iter);
   g_hash_table_remove (priv->tasks, uid);
+
+  g_list_model_items_changed (G_LIST_MODEL (list),
+                              position,
+                              1,
+                              0);
 
   g_signal_emit (list, signals[TASK_REMOVED], 0, task);
 }

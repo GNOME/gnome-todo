@@ -24,6 +24,15 @@
     <file compressed="true">theme/Adwaita.css</file>
   </gresource>
 
+
+  <!-- Icons -->
+  <gresource prefix="/org/gnome/todo/icons">
+    <file preprocess="xml-stripblanks" alias="scalable/actions/drag-handle-symbolic.svg">icons/hicolor/symbolic/actions/drag-handle-symbolic.svg</file>
+  </gresource>
+
+
+  <!--  Plugins -->
+
   <!--Background-->
   <gresource prefix="/org/gnome/todo">
     <file alias="plugins/background/background.plugin">../plugins/background/background.plugin</file>

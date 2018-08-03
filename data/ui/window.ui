@@ -81,6 +81,21 @@
                 </child>
               </object>
             </child>
+
+            <!-- App menu -->
+            <child>
+              <object class="GtkMenuButton">
+                <property name="menu-model">app-menu</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="icon-name">open-menu-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="pack-type">end</property>
+              </packing>
+            </child>
           </object>
         </child>
 
@@ -142,7 +157,7 @@
                 <child>
                   <object class="GtkImage">
                     <property name="visible">True</property>
-                    <property name="icon_name">open-menu-symbolic</property>
+                    <property name="icon_name">view-more-symbolic</property>
                   </object>
                 </child>
               </object>
@@ -190,4 +205,23 @@
       <widget name="start_headerbar" />
     </widgets>
   </object>
+
+  <menu id="app-menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Extensions</attribute>
+        <attribute name="action">app.show-extensions</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_About</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Quit</attribute>
+        <attribute name="action">app.quit</attribute>
+      </item>
+    </section>
+  </menu>
 </interface>

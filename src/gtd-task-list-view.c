@@ -83,8 +83,15 @@ typedef struct
   GListModel            *model;
   GDateTime             *default_date;
 
-  guint                  idle_handler_id;
   guint                  scroll_to_bottom_handler_id;
+
+  /*
+   * Tasks that are marked for removal, but the notification
+   * wasn't dismissed yet.
+   *
+   * GtdTask* → NULL
+   */
+  GHashTable            *removed_tasks;
 
   /* Markup renderer*/
   GtdMarkdownRenderer   *renderer;
@@ -155,6 +162,9 @@ static void          on_task_row_exited_cb                       (GtdTaskListVie
                                                                   GtdTaskRow         *row);
 
 static gboolean      scroll_to_bottom_cb                         (gpointer            data);
+
+static void          update_row_visibility_cb                    (GtkWidget          *widget,
+                                                                  gpointer            user_data);
 
 
 G_DEFINE_TYPE_WITH_PRIVATE (GtdTaskListView, gtd_task_list_view, GTK_TYPE_OVERLAY)
@@ -282,90 +292,12 @@ update_font_color (GtdTaskListView *self)
   gdk_rgba_free (color);
 }
 
-static gboolean
-ask_subtask_removal_warning (GtdTaskListView *self)
-{
-  GtkWidget *dialog, *button;
-  gint response;
-
-  dialog = gtk_message_dialog_new (GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (self))),
-                                   GTK_DIALOG_USE_HEADER_BAR | GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                                   GTK_MESSAGE_QUESTION,
-                                   GTK_BUTTONS_NONE,
-                                   _("Removing this task will also remove its subtasks. Remove anyway?"));
-
-  gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
-                                            _("Once removed, the tasks cannot be recovered."));
-
-  gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-                          _("Cancel"),
-                          GTK_RESPONSE_CANCEL,
-                          _("Remove"),
-                          GTK_RESPONSE_ACCEPT,
-                          NULL);
-
-  /* Make the Remove button visually destructive */
-  button = gtk_dialog_get_widget_for_response (GTK_DIALOG (dialog), GTK_RESPONSE_ACCEPT);
-  gtk_style_context_add_class (gtk_widget_get_style_context (button), "destructive-action");
-
-  /* Run the dialog */
-  response = gtk_dialog_run (GTK_DIALOG (dialog));
-
-  gtk_widget_destroy (dialog);
-
-  return response == GTK_RESPONSE_ACCEPT;
-}
-
-static GtdTaskRow*
-get_row_for_task (GtdTaskListView *self,
-                  GtdTask         *task)
-{
-  g_autoptr (GList) children = NULL;
-  GtdTaskListViewPrivate *priv;
-  GList *l;
-
-  priv = gtd_task_list_view_get_instance_private (self);
-  children = gtk_container_get_children (GTK_CONTAINER (priv->listbox));
-
-  for (l = children; l != NULL; l = l->next)
-    {
-      if (!GTD_IS_TASK_ROW (l->data))
-        continue;
-
-      if (gtd_task_row_get_task (l->data) == task)
-        return l->data;
-    }
-
-  return NULL;
-}
-
 static void
-destroy_task_row (GtdTaskListView *self,
-                  GtdTaskRow      *row)
+update_removed_tasks (GtdTaskListView *self)
 {
-  g_signal_handlers_disconnect_by_func (row, on_task_row_entered_cb, self);
-  g_signal_handlers_disconnect_by_func (row, on_task_row_exited_cb, self);
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
 
-  if (GTK_WIDGET (row) == self->priv->active_row)
-    set_active_row (self, NULL);
-
-  gtd_task_row_destroy (row);
-}
-
-
-static void
-remove_task_row (GtdTaskListView *view,
-                 GtdTask         *task)
-{
-  GtdTaskRow *row;
-
-  g_assert (GTD_IS_TASK_LIST_VIEW (view));
-  g_assert (GTD_IS_TASK (task));
-
-  row = get_row_for_task (view, task);
-
-  if (row)
-    destroy_task_row (view, row);
+  gtk_container_foreach (GTK_CONTAINER (priv->listbox), update_row_visibility_cb, self);
 }
 
 static void
@@ -383,6 +315,23 @@ schedule_scroll_to_bottom (GtdTaskListView *self)
 /*
  * Callbacks
  */
+
+static void
+update_row_visibility_cb (GtkWidget *widget,
+                          gpointer   user_data)
+{
+  GtdTaskListViewPrivate *priv;
+  GtdTaskRow *row;
+  GtdTask *task;
+  gboolean removed;
+
+  priv = gtd_task_list_view_get_instance_private (GTD_TASK_LIST_VIEW (user_data));
+  row = GTD_TASK_ROW (widget);
+  task = gtd_task_row_get_task (row);
+  removed = g_hash_table_contains (priv->removed_tasks, task);
+
+  gtk_widget_set_visible (widget, !removed);
+}
 
 static GtkWidget*
 create_row_for_task_cb (gpointer item,
@@ -453,18 +402,26 @@ static gboolean
 undo_remove_task_cb (GtdTaskListView *self,
                      GtdTask         *task)
 {
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+
+  g_assert (g_hash_table_contains (priv->removed_tasks, task));
+  g_hash_table_remove (priv->removed_tasks, task);
+
   /* Tasks are not loading anymore */
   gtd_object_pop_loading (GTD_OBJECT (task));
-
-  //on_task_list_task_added_cb (NULL, task, self);
 
   return TRUE;
 }
 
 static inline gboolean
-real_remove_task_cb (GtdTaskListView *self,
-                     GtdTask         *task)
+remove_task_cb (GtdTaskListView *self,
+                GtdTask         *task)
 {
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+
+  g_assert (g_hash_table_contains (priv->removed_tasks, task));
+  g_hash_table_remove (priv->removed_tasks, task);
+
   gtd_provider_remove_task (gtd_task_get_provider (task), task);
 
   GTD_TRACE_MSG ("Removing task %p from list", task);
@@ -495,7 +452,7 @@ on_clear_completed_tasks_activated_cb (GSimpleAction *simple,
         gtd_task_remove_subtask (gtd_task_get_parent (task), task);
 
       /* Remove the subtasks recursively */
-      iterate_subtasks (self, task, real_remove_task_cb);
+      iterate_subtasks (self, task, remove_task_cb);
     }
 }
 
@@ -513,7 +470,8 @@ on_remove_task_action_cb (GtdNotification *notification,
     gtd_task_remove_subtask (gtd_task_get_parent (task), task);
 
   /* Remove the subtasks recursively */
-  iterate_subtasks (data->view, data->task, real_remove_task_cb);
+  iterate_subtasks (data->view, data->task, remove_task_cb);
+  update_removed_tasks (data->view);
 
   g_clear_pointer (&data, g_free);
 }
@@ -526,6 +484,7 @@ on_undo_remove_task_action_cb (GtdNotification *notification,
 
   /* Save the subtasks recursively */
   iterate_subtasks (data->view, data->task, undo_remove_task_cb);
+  update_removed_tasks (data->view);
 
   g_free (data);
 }
@@ -534,11 +493,14 @@ static inline gboolean
 remove_task_rows_from_list_view_cb (GtdTaskListView *self,
                                     GtdTask         *task)
 {
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+
+  g_assert (!g_hash_table_contains (priv->removed_tasks, task));
+
   /* Task is in loading state until it's either readded, or effectively removed */
   gtd_object_push_loading (GTD_OBJECT (task));
 
-  /* Remove from the view, but not from the list */
-  //on_task_list_task_removed_cb (self, task);
+  g_hash_table_add (priv->removed_tasks, task);
 
   GTD_TRACE_MSG ("Removing task %p from list", task);
 
@@ -550,30 +512,13 @@ on_remove_task_row_cb (GtdTaskRow      *row,
                        GtdTaskListView *self)
 {
   GtdTaskListViewPrivate *priv;
+  g_autofree gchar *text = NULL;
   GtdNotification *notification;
   RemoveTaskData *data;
   GtdWindow *window;
   GtdTask *task;
-  GList *subtasks;
-  gchar *text;
 
   task = gtd_task_row_get_task (row);
-  subtasks = gtd_task_get_subtasks (task);
-
-  /*
-   * If the task has subtasks, ask the user if he/she really wants to
-   * remove the subtasks.
-   */
-  if (subtasks)
-    {
-      gboolean should_remove_task;
-
-      should_remove_task = ask_subtask_removal_warning (self);
-
-      /* The user canceled the operation, do nothing */
-      if (!should_remove_task)
-        goto out;
-    }
 
   priv = self->priv;
   text = g_strdup_printf (_("Task <b>%s</b> removed"), gtd_task_get_title (task));
@@ -583,8 +528,9 @@ on_remove_task_row_cb (GtdTaskRow      *row,
   data->view = self;
   data->task = task;
 
-  /* Always remove tasks and subtasks */
+  /* Remove tasks and subtasks from the list */
   iterate_subtasks (self, task, remove_task_rows_from_list_view_cb);
+  update_removed_tasks (self);
 
   /*
    * Reset the DnD row, to avoid getting into an inconsistent state where
@@ -609,11 +555,6 @@ on_remove_task_row_cb (GtdTaskRow      *row,
 
   /* Clear the active row */
   set_active_row (self, NULL);
-
-  g_clear_pointer (&text, g_free);
-
-out:
-  g_clear_pointer (&subtasks, g_list_free);
 }
 
 static void
@@ -645,35 +586,6 @@ on_task_list_color_changed_cb (GtdTaskListView *self)
   update_font_color (self);
 
   g_free (color_str);
-}
-
-static gboolean
-on_can_toggle_show_completed_cb (GtdTaskListView *view)
-{
-  view->priv->can_toggle = TRUE;
-  return G_SOURCE_REMOVE;
-}
-
-static void
-on_done_button_clicked_cb (GtkButton *button,
-                           gpointer   user_data)
-{
-  GtdTaskListView *view = GTD_TASK_LIST_VIEW (user_data);
-
-  g_return_if_fail (GTD_IS_TASK_LIST_VIEW (view));
-
-  if (!view->priv->can_toggle)
-    return;
-
-  /*
-   * The can_toggle field is needed because the user
-   * can click mindlessly the Done button, while the row
-   * animations are not finished. While the animation is
-   * running, we ignore other clicks.
-   */
-  view->priv->can_toggle = FALSE;
-
-  g_timeout_add (205, (GSourceFunc) on_can_toggle_show_completed_cb, user_data);
 }
 
 static void
@@ -1006,18 +918,8 @@ gtd_task_list_view_finalize (GObject *object)
 {
   GtdTaskListViewPrivate *priv = GTD_TASK_LIST_VIEW (object)->priv;
 
-  if (priv->idle_handler_id > 0)
-    {
-      g_source_remove (priv->idle_handler_id);
-      priv->idle_handler_id = 0;
-    }
-
-  if (priv->scroll_to_bottom_handler_id > 0)
-    {
-      g_source_remove (priv->scroll_to_bottom_handler_id);
-      priv->scroll_to_bottom_handler_id = 0;
-    }
-
+  g_clear_handle_id (&priv->scroll_to_bottom_handler_id, g_source_remove);
+  g_clear_pointer (&priv->removed_tasks, g_hash_table_destroy);
   g_clear_pointer (&priv->default_date, g_date_time_unref);
   g_clear_object (&priv->renderer);
   g_clear_object (&priv->model);
@@ -1250,7 +1152,6 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, listbox_drag_leave);
   gtk_widget_class_bind_template_callback (widget_class, listbox_drag_motion);
   gtk_widget_class_bind_template_callback (widget_class, on_listbox_row_activated_cb);
-  gtk_widget_class_bind_template_callback (widget_class, on_done_button_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_task_row_entered_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_task_row_exited_cb);
 
@@ -1263,6 +1164,8 @@ gtd_task_list_view_init (GtdTaskListView *self)
   GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
 
   self->priv = priv;
+
+  priv->removed_tasks = g_hash_table_new (g_direct_hash, g_direct_equal);
 
   priv->can_toggle = TRUE;
   priv->handle_subtasks = TRUE;

@@ -119,8 +119,10 @@ tasklistview.light emptylistwidget image {
     color: black;
 }
 
-/* Add a subtle shadow to the task list color circle */
-sidebar row image.color-circle-icon { -gtk-icon-shadow: 0 1px alpha(black, 0.18); }
+/* Add a subtle shadow to color circles */
+image.color-circle-icon {
+    -gtk-icon-shadow: 0 1px alpha(black, 0.18);
+}
 
 /*
  * Hack: Move separator by 1px so that it aligns with the sidebar
@@ -137,4 +139,13 @@ window.development-version headerbar {
                                               alpha(@theme_selected_bg_color, 0.34),
                                               alpha(@theme_selected_bg_color, 0.27) 2px,
                                               alpha(@theme_selected_bg_color, 0.20) 3px);
+}
+
+/* Color button */
+colorbutton.dark image {
+    color: white;
+}
+
+colorbutton.light image {
+    color: black;
 }

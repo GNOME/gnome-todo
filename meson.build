@@ -153,7 +153,7 @@ i18n = import('i18n')
 pkg = import('pkgconfig')
 
 top_inc = include_directories('.')
-src_inc = include_directories('src', 'src/engine', 'src/interfaces', 'src/notification')
+src_inc = include_directories('src', 'src/engine', 'src/interfaces', 'src/notification', 'src/widgets')
 
 data_dir = join_paths(meson.source_root(), 'data')
 po_dir = join_paths(meson.source_root(), 'po')
@@ -163,6 +163,7 @@ subdir('plugins')
 subdir('src')
 subdir('data')
 subdir('po')
+subdir('tests')
 
 enable_documentation = get_option('documentation')
 if enable_documentation

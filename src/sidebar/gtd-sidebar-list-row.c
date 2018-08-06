@@ -27,6 +27,7 @@
 #include "gtd-sidebar-list-row.h"
 #include "gtd-task.h"
 #include "gtd-task-list.h"
+#include "gtd-utils.h"
 
 #include <math.h>
 #include <glib/gi18n.h>
@@ -112,37 +113,14 @@ activate_row_below (GtdSidebarListRow *self)
     g_signal_emit_by_name (next_row, "activate");
 }
 
-static GdkPaintable*
-create_circular_paintable (GtdTaskList *list,
-                           gint         size)
-{
-  g_autoptr (GtkSnapshot) snapshot = NULL;
-  g_autoptr (GdkRGBA) color = NULL;
-  GskRoundedRect rect;
-
-  snapshot = gtk_snapshot_new ();
-
-  /* Draw the list's background color */
-  color = gtd_task_list_get_color (list);
-
-  gtk_snapshot_push_rounded_clip (snapshot,
-                                  gsk_rounded_rect_init_from_rect (&rect,
-                                                                   &GRAPHENE_RECT_INIT (0, 0, size, size),
-                                                                   size / 2.0));
-
-  gtk_snapshot_append_color (snapshot, color, &GRAPHENE_RECT_INIT (0, 0, size, size));
-
-  gtk_snapshot_pop (snapshot);
-
-  return gtk_snapshot_to_paintable (snapshot, &GRAPHENE_SIZE_INIT (size, size));
-}
-
 static void
 update_color_icon (GtdSidebarListRow *self)
 {
   g_autoptr (GdkPaintable) paintable = NULL;
+  g_autoptr (GdkRGBA) color = NULL;
 
-  paintable = create_circular_paintable (self->list, 12);
+  color = gtd_task_list_get_color (self->list);
+  paintable = gtd_create_circular_paintable (color, 12);
 
   gtk_image_set_from_paintable (self->color_icon, paintable);
 }

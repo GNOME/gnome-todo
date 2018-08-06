@@ -18,24 +18,34 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#define G_LOG_DOMAIN "GtdTaskListPanel"
+
+#include "gtd-color-button.h"
 #include "gtd-panel.h"
 #include "gtd-provider.h"
 #include "gtd-task-list.h"
 #include "gtd-task-list-panel.h"
 #include "gtd-task-list-view.h"
+#include "gtd-utils.h"
 
 struct _GtdTaskListPanel
 {
   GtkBox              parent;
 
-  GtkColorChooser    *color_button;
+  GtkFlowBox         *colors_flowbox;
+  GtkPopover         *popover;
   GtdTaskListView    *task_list_view;
+
+  GtkWidget          *previous_color_button;
 };
 
-static void          on_color_button_color_set_cb                (GtkColorChooser    *color_button,
+
+static void          on_colors_flowbox_child_activated_cb        (GtkFlowBox         *colors_flowbox,
+                                                                  GtkFlowBoxChild    *child,
                                                                   GtdTaskListPanel   *self);
 
 static void          gtd_panel_iface_init                        (GtdPanelInterface  *iface);
+
 
 G_DEFINE_TYPE_WITH_CODE (GtdTaskListPanel, gtd_task_list_panel, GTK_TYPE_BOX,
                          G_IMPLEMENT_INTERFACE (GTD_TYPE_PANEL, gtd_panel_iface_init))
@@ -57,20 +67,73 @@ enum
  * Auxilary methods
  */
 
+static const gchar * const colors[] =
+{
+  "#3584e4",
+  "#33d17a",
+  "#f6d32d",
+  "#ff7800",
+  "#e01b24",
+  "#9141ac",
+  "#986a44",
+  "#3d3846",
+  "#ffffff",
+};
+
 static void
-update_color (GtdTaskListPanel *self)
+populate_color_grid (GtdTaskListPanel *self)
+{
+  guint i;
+
+  for (i = 0; i < G_N_ELEMENTS (colors); i++)
+    {
+      GtkWidget *button;
+      GdkRGBA color;
+
+      gdk_rgba_parse (&color, colors[i]);
+
+      button = gtd_color_button_new (&color);
+
+      gtk_container_add (GTK_CONTAINER (self->colors_flowbox), button);
+    }
+}
+
+static void
+update_selected_color (GtdTaskListPanel *self)
 {
   g_autoptr (GdkRGBA) color = NULL;
   GtdTaskList *list;
+  GtkWidget *button;
+  guint i;
 
   list = GTD_TASK_LIST (gtd_task_list_view_get_model (self->task_list_view));
   color = gtd_task_list_get_color (list);
+  button = NULL;
 
-  g_signal_handlers_block_by_func (self->color_button, on_color_button_color_set_cb, self);
+  for (i = 0; i < G_N_ELEMENTS (colors); i++)
+    {
+      GdkRGBA c;
 
-  gtk_color_chooser_set_rgba (self->color_button, color);
+      gdk_rgba_parse (&c, colors[i]);
 
-  g_signal_handlers_unblock_by_func (self->color_button, on_color_button_color_set_cb, self);
+      if (gdk_rgba_equal (&c, color))
+        {
+          button = GTK_WIDGET (gtk_flow_box_get_child_at_index (self->colors_flowbox, i));
+          break;
+        }
+    }
+
+  if (button)
+    {
+      g_signal_handlers_block_by_func (button, on_colors_flowbox_child_activated_cb, self);
+      g_signal_emit_by_name (button, "activate");
+      g_signal_handlers_unblock_by_func (button, on_colors_flowbox_child_activated_cb, self);
+    }
+  else if (self->previous_color_button)
+    {
+      gtk_widget_unset_state_flags (self->previous_color_button, GTK_STATE_FLAG_SELECTED);
+      self->previous_color_button = NULL;
+    }
 }
 
 
@@ -79,22 +142,36 @@ update_color (GtdTaskListPanel *self)
  */
 
 static void
-on_color_button_color_set_cb (GtkColorChooser  *color_button,
-                              GtdTaskListPanel *self)
+on_colors_flowbox_child_activated_cb (GtkFlowBox       *colors_flowbox,
+                                      GtkFlowBoxChild  *child,
+                                      GtdTaskListPanel *self)
 {
+  const GdkRGBA *color;
   GtdTaskList *list;
-  GdkRGBA new_color;
+  GtkWidget *color_button;
 
   list = GTD_TASK_LIST (gtd_task_list_view_get_model (self->task_list_view));
 
   g_assert (list != NULL);
 
+  color_button = gtk_bin_get_child (GTK_BIN (child));
+
+  if (self->previous_color_button == color_button)
+    return;
+
+  gtk_widget_set_state_flags (color_button, GTK_STATE_FLAG_SELECTED, FALSE);
+
+  if (self->previous_color_button)
+    gtk_widget_unset_state_flags (self->previous_color_button, GTK_STATE_FLAG_SELECTED);
+
   g_debug ("Setting new color for task list '%s'", gtd_task_list_get_name (list));
 
-  gtk_color_chooser_get_rgba (color_button, &new_color);
-  gtd_task_list_set_color (list, &new_color);
+  color = gtd_color_button_get_color (GTD_COLOR_BUTTON (color_button));
+  gtd_task_list_set_color (list, color);
 
   gtd_provider_update_task_list (gtd_task_list_get_provider (list), list);
+
+  self->previous_color_button = color_button;
 }
 
 
@@ -117,9 +194,7 @@ gtd_task_list_panel_get_panel_title (GtdPanel *panel)
 static GList*
 gtd_task_list_panel_get_header_widgets (GtdPanel *panel)
 {
-  GtdTaskListPanel *self = GTD_TASK_LIST_PANEL (panel);
-
-  return g_list_append (NULL, self->color_button);
+  return NULL;
 }
 
 static const GMenu*
@@ -133,6 +208,14 @@ gtd_task_list_panel_get_icon (GtdPanel *panel)
 {
   return NULL;
 }
+
+static GtkPopover*
+gtd_task_list_panel_get_popover (GtdPanel *panel)
+{
+  GtdTaskListPanel *self = GTD_TASK_LIST_PANEL (panel);
+  return self->popover;
+}
+
 
 static guint32
 gtd_task_list_panel_get_priority (GtdPanel *panel)
@@ -154,6 +237,7 @@ gtd_panel_iface_init (GtdPanelInterface *iface)
   iface->get_header_widgets = gtd_task_list_panel_get_header_widgets;
   iface->get_menu = gtd_task_list_panel_get_menu;
   iface->get_icon = gtd_task_list_panel_get_icon;
+  iface->get_popover = gtd_task_list_panel_get_popover;
   iface->get_priority = gtd_task_list_panel_get_priority;
   iface->get_subtitle = gtd_task_list_panel_get_subtitle;
 }
@@ -237,15 +321,19 @@ gtd_task_list_panel_class_init (GtdTaskListPanelClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/todo/ui/task-list-panel.ui");
 
-  gtk_widget_class_bind_template_child (widget_class, GtdTaskListPanel, color_button);
+  gtk_widget_class_bind_template_child (widget_class, GtdTaskListPanel, colors_flowbox);
+  gtk_widget_class_bind_template_child (widget_class, GtdTaskListPanel, popover);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskListPanel, task_list_view);
-  gtk_widget_class_bind_template_callback (widget_class, on_color_button_color_set_cb);
+
+  gtk_widget_class_bind_template_callback (widget_class, on_colors_flowbox_child_activated_cb);
 }
 
 static void
 gtd_task_list_panel_init (GtdTaskListPanel *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  populate_color_grid (self);
 }
 
 GtkWidget*
@@ -271,6 +359,6 @@ gtd_task_list_panel_set_task_list (GtdTaskListPanel *self,
 
   gtd_task_list_view_set_model (self->task_list_view, G_LIST_MODEL (list));
 
-  update_color (self);
+  update_selected_color (self);
 }
 

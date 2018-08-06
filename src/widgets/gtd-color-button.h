@@ -1,4 +1,4 @@
-/* gtd-utils.h
+/* gtd-color-button.h
  *
  * Copyright 2018 Georges Basile Stavracas Neto <georges.stavracas@gmail.com>
  *
@@ -24,14 +24,15 @@
 
 G_BEGIN_DECLS
 
-gchar*               gtd_str_replace                             (const gchar        *source,
-                                                                  const gchar        *search,
-                                                                  const gchar        *replacement);
+#define GTD_TYPE_COLOR_BUTTON (gtd_color_button_get_type())
 
-gint                 gtd_collate_compare_strings                 (const gchar        *string_a,
-                                                                  const gchar        *string_b);
+G_DECLARE_FINAL_TYPE (GtdColorButton, gtd_color_button, GTD, COLOR_BUTTON, GtkWidget)
 
-GdkPaintable*        gtd_create_circular_paintable              (GdkRGBA             *color,
-                                                                 gint                 size);
+GtkWidget*           gtd_color_button_new                        (const GdkRGBA      *color);
+
+const GdkRGBA*       gtd_color_button_get_color                  (GtdColorButton     *self);
+
+void                 gtd_color_button_set_color                  (GtdColorButton     *self,
+                                                                  const GdkRGBA      *color);
 
 G_END_DECLS

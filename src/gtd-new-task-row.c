@@ -25,6 +25,7 @@
 #include "gtd-task.h"
 #include "gtd-task-list.h"
 #include "gtd-task-list-view.h"
+#include "gtd-utils.h"
 
 #include <math.h>
 
@@ -79,29 +80,6 @@ gtd_new_task_row_event (GtkWidget *widget,
   return GDK_EVENT_PROPAGATE;
 }
 
-
-static GdkPaintable*
-create_circular_paintable (GdkRGBA *color,
-                           gint     size)
-{
-  g_autoptr (GtkSnapshot) snapshot = NULL;
-  GskRoundedRect rect;
-
-  snapshot = gtk_snapshot_new ();
-
-  /* Draw the list's background color */
-  gtk_snapshot_push_rounded_clip (snapshot,
-                                  gsk_rounded_rect_init_from_rect (&rect,
-                                                                   &GRAPHENE_RECT_INIT (0, 0, size, size),
-                                                                   size / 2.0));
-
-  gtk_snapshot_append_color (snapshot, color, &GRAPHENE_RECT_INIT (0, 0, size, size));
-
-  gtk_snapshot_pop (snapshot);
-
-  return gtk_snapshot_to_paintable (snapshot, &GRAPHENE_SIZE_INIT (size, size));
-}
-
 static void
 set_selected_tasklist (GtdNewTaskRow *self,
                        GtdTaskList   *list)
@@ -120,7 +98,7 @@ set_selected_tasklist (GtdNewTaskRow *self,
     return;
 
   color = gtd_task_list_get_color (list);
-  paintable = create_circular_paintable (color, 12);
+  paintable = gtd_create_circular_paintable (color, 12);
 
   gtk_image_set_from_paintable (self->list_color_icon, paintable);
   gtk_label_set_label (self->list_name_label, gtd_task_list_get_name (list));
@@ -220,7 +198,7 @@ update_tasklists_cb (GtdNewTaskRow *self)
 
       /* Icon */
       color = gtd_task_list_get_color (l->data);
-      paintable = create_circular_paintable (color, 12);
+      paintable = gtd_create_circular_paintable (color, 12);
       icon = gtk_image_new_from_paintable (paintable);
       gtk_widget_set_size_request (icon, 12, 12);
       gtk_widget_set_halign (icon, GTK_ALIGN_CENTER);

@@ -56,6 +56,7 @@ sources = files(
   'sidebar/gtd-sidebar-list-row.c',
   'sidebar/gtd-sidebar-panel-row.c',
   'sidebar/gtd-sidebar-provider-row.c',
+  'widgets/gtd-color-button.c',
   'widgets/gtd-done-button.c',
   'widgets/gtd-expandable-entry.c',
   'gtd-application.c',

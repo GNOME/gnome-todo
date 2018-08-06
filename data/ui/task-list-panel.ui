@@ -7,18 +7,42 @@
     <!-- Main task list view -->
     <child>
       <object class="GtdTaskListView" id="task_list_view">
-        <property name="visible">true</property>
       </object>
     </child>
 
   </template>
 
-  <!-- Color button -->
-  <object class="GtkColorButton" id="color_button">
-    <property name="visible">true</property>
-    <property name="can_focus">True</property>
-    <property name="receives_default">True</property>
-    <property name="halign">end</property>
-    <signal name="color-set" handler="on_color_button_color_set_cb" object="GtdTaskListPanel" swapped="no" />
+  <!-- Popover -->
+  <object class="GtkPopoverMenu" id="popover">
+    <property name="visible">false</property>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">12</property>
+
+        <!-- Color grid -->
+        <child>
+          <object class="GtkFlowBox" id="colors_flowbox">
+            <property name="expand">true</property>
+            <property name="selection-mode">none</property>
+            <property name="min-children-per-line">3</property>
+            <property name="max-children-per-line">3</property>
+            <signal name="child-activated" handler="on_colors_flowbox_child_activated_cb" object="GtdTaskListPanel" swapped="no" />
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkSeparator">
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkModelButton">
+            <property name="label" translatable="yes">Clear completed tasks</property>
+            <property name="action-name">list.clear-completed-tasks</property>
+          </object>
+        </child>
+      </object>
+    </child>
   </object>
 </interface>

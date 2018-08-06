@@ -36,6 +36,28 @@ _gtd_get_content_formats (void)
   return content_formats;
 }
 
+GdkPaintable*
+gtd_create_circular_paintable (GdkRGBA *color,
+                               gint     size)
+{
+  g_autoptr (GtkSnapshot) snapshot = NULL;
+  GskRoundedRect rect;
+
+  snapshot = gtk_snapshot_new ();
+
+  gtk_snapshot_push_rounded_clip (snapshot,
+                                  gsk_rounded_rect_init_from_rect (&rect,
+                                                                   &GRAPHENE_RECT_INIT (0, 0, size, size),
+                                                                   size / 2.0));
+
+  gtk_snapshot_append_color (snapshot, color, &GRAPHENE_RECT_INIT (0, 0, size, size));
+
+  gtk_snapshot_pop (snapshot);
+
+  return gtk_snapshot_to_paintable (snapshot, &GRAPHENE_SIZE_INIT (size, size));
+}
+
+
 gchar*
 gtd_str_replace (const gchar *source,
                  const gchar *search,

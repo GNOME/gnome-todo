@@ -91,6 +91,9 @@ add_provider (GtdSidebar  *self,
 {
   GtkWidget *row;
 
+  if (!gtd_provider_get_enabled (provider))
+    return;
+
   g_debug ("Adding provider '%s'", gtd_provider_get_name (provider));
 
   row = gtd_sidebar_provider_row_new (provider);

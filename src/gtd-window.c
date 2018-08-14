@@ -74,6 +74,8 @@ struct _GtdWindow
   GtdPanel           *active_panel;
   GtdPanel           *task_list_panel;
 
+  GBinding           *headerbar_title_binding;
+
   /* mode */
   GtdWindowMode       mode;
 
@@ -428,6 +430,9 @@ on_stack_visible_child_cb (GtdWindow  *self,
                       self->panel_box_end,
                       header_widgets);
 
+      g_assert (self->headerbar_title_binding != NULL);
+      g_clear_pointer (&self->headerbar_title_binding, g_binding_unbind);
+
       g_list_free (header_widgets);
     }
 
@@ -451,6 +456,12 @@ on_stack_visible_child_cb (GtdWindow  *self,
 
   /* Setup the panel's menu */
   update_panel_menu (self);
+
+  self->headerbar_title_binding = g_object_bind_property (panel,
+                                                          "title",
+                                                          self->headerbar,
+                                                          "title",
+                                                          G_BINDING_DEFAULT | G_BINDING_SYNC_CREATE);
 }
 
 static void

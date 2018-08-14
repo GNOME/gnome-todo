@@ -188,7 +188,13 @@ gtd_task_list_panel_get_panel_name (GtdPanel *panel)
 static const gchar*
 gtd_task_list_panel_get_panel_title (GtdPanel *panel)
 {
-  return "";
+  GtdTaskListPanel *self;
+  GtdTaskList *list;
+
+  self = GTD_TASK_LIST_PANEL (panel);
+  list = (GtdTaskList *) gtd_task_list_view_get_model (self->task_list_view);
+
+  return list ? gtd_task_list_get_name (list) : "";
 }
 
 static GList*
@@ -284,7 +290,7 @@ gtd_task_list_panel_get_property (GObject    *object,
       break;
 
     case PROP_TITLE:
-      g_value_set_string (value, NULL);
+      g_value_set_string (value, gtd_panel_get_panel_title (GTD_PANEL (object)));
       break;
 
     default:
@@ -360,5 +366,7 @@ gtd_task_list_panel_set_task_list (GtdTaskListPanel *self,
   gtd_task_list_view_set_model (self->task_list_view, G_LIST_MODEL (list));
 
   update_selected_color (self);
+
+  g_object_notify (G_OBJECT (self), "title");
 }
 

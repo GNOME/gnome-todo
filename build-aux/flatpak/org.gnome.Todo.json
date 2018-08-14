@@ -176,6 +176,7 @@
             "config-opts" : [
                 "--prefix=/app",
                 "--libdir=/app/lib",
+                "-Ddemos=false",
                 "-Dbuild-tests=false"
             ],
             "sources" : [

@@ -27,6 +27,10 @@
   <!-- Icons -->
   <gresource prefix="/org/gnome/todo/icons">
     <file preprocess="xml-stripblanks" alias="scalable/actions/drag-handle-symbolic.svg">icons/hicolor/symbolic/actions/drag-handle-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="scalable/actions/view-tasks-all-symbolic.svg">icons/hicolor/symbolic/actions/view-tasks-all-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="scalable/actions/view-tasks-today-symbolic.svg">icons/hicolor/symbolic/actions/view-tasks-today-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="scalable/actions/view-tasks-unscheduled-symbolic.svg">icons/hicolor/symbolic/actions/view-tasks-unscheduled-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="scalable/actions/view-tasks-week-symbolic.svg">icons/hicolor/symbolic/actions/view-tasks-week-symbolic.svg</file>
   </gresource>
 
 

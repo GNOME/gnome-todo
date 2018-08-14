@@ -491,7 +491,7 @@ gtd_next_week_panel_init (GtdNextWeekPanel *self)
 {
   GtdManager *manager;
 
-  self->icon = g_themed_icon_new ("x-office-calendar-symbolic");
+  self->icon = g_themed_icon_new ("view-tasks-week-symbolic");
   self->model = g_list_store_new (GTD_TYPE_TASK);
 
   /* The main view */

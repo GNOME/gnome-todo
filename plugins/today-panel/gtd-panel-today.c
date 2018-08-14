@@ -401,7 +401,7 @@ gtd_panel_today_init (GtdPanelToday *self)
   g_autoptr (GDateTime) now = NULL;
   GtdManager *manager;
 
-  self->icon = g_themed_icon_new ("weather-clear-symbolic");
+  self->icon = g_themed_icon_new ("view-tasks-today-symbolic");
   self->model = g_list_store_new (GTD_TYPE_TASK);
 
   /* Connect to GtdManager::list-* signals to update the title */

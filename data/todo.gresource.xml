@@ -36,6 +36,11 @@
 
   <!--  Plugins -->
 
+  <!--All Tasks -->
+  <gresource prefix="/org/gnome/todo">
+    <file alias="plugins/all-tasks-panel/all-tasks-panel.plugin">../plugins/all-tasks-panel/all-tasks-panel.plugin</file>
+  </gresource>
+
   <!--Background-->
   <gresource prefix="/org/gnome/todo">
     <file alias="plugins/background/background.plugin">../plugins/background/background.plugin</file>

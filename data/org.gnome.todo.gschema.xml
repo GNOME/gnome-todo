@@ -27,7 +27,7 @@
             <description>The identifier of the default provider to add new lists to</description>
         </key>
         <key name="active-extensions" type="as">
-            <default>["background", "eds", "today-panel", "next-week-panel"]</default>
+            <default>["all-tasks-panel", "background", "eds", "today-panel", "next-week-panel"]</default>
             <summary>List of active extensions</summary>
             <description>The list of active extensions</description>
         </key>

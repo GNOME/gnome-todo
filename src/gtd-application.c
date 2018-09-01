@@ -27,7 +27,6 @@
 #include "gtd-manager.h"
 #include "gtd-manager-protected.h"
 #include "gtd-plugin-dialog.h"
-#include "gtd-vcs-identifier.h"
 #include "gtd-window.h"
 #include "gtd-window-private.h"
 
@@ -155,7 +154,7 @@ gtd_application_show_about (GSimpleAction *simple,
 
   gtk_show_about_dialog (GTK_WINDOW (self->window),
                          "program-name", _("To Do"),
-                         "version", VERSION GTD_VCS_IDENTIFIER,
+                         "version", VERSION,
                          "copyright", copyright,
                          "license-type", GTK_LICENSE_GPL_3_0,
                          "authors", authors,

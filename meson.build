@@ -61,8 +61,8 @@ set_defines = [
   ['PACKAGE_STRING', '@0@ @1@'.format(meson.project_name(), gnome_todo_version)],
   ['PACKAGE_TARNAME', meson.project_name()],
   ['PACKAGE_URL', 'https://wiki.gnome.org/Apps/Todo'],
-  ['PACKAGE_VERSION', gnome_todo_version],
-  ['VERSION', gnome_todo_version],
+  ['PACKAGE_VERSION', '@VCS_TAG@'],
+  ['VERSION', '@VCS_TAG@'],
   # i18n
   ['GETTEXT_PACKAGE', meson.project_name()]
 ]
@@ -142,6 +142,14 @@ gnome_todo_deps = [
   dependency('libpeas-1.0', version: '>= 1.17'),
   cc.find_library('m', required: true)
 ]
+
+vcs_identifier_h = vcs_tag(
+  input: configure_file(
+    output: 'config.h.in',
+    configuration: config_h
+  ),
+  output: 'config.h',
+)
 
 configure_file(
   output: 'config.h',

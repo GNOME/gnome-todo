@@ -265,7 +265,7 @@ gtd_panel_get_priority (GtdPanel *self)
 
 /**
  * gtd_panel_get_subtitle:
- * @panel: a #GtdPanel
+ * @self: a #GtdPanel
  *
  * Retrieves the subtitle of @panel
  *

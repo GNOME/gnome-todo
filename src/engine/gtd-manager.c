@@ -818,7 +818,7 @@ gtd_manager_set_is_first_run (GtdManager *self,
 
 /**
  * gtd_manager_emit_error_message:
- * @self: a #GtdManager
+ * @manager: a #GtdManager
  * @title: (nullable): the title of the error
  * @description: (nullable): detailed description of the error
  * @function: (nullable): function to be called when the notification is dismissed
@@ -827,15 +827,15 @@ gtd_manager_set_is_first_run (GtdManager *self,
  * Reports an error.
  */
 void
-gtd_manager_emit_error_message (GtdManager         *self,
+gtd_manager_emit_error_message (GtdManager         *manager,
                                 const gchar        *title,
                                 const gchar        *description,
                                 GtdErrorActionFunc  function,
                                 gpointer            user_data)
 {
-  g_return_if_fail (GTD_IS_MANAGER (self));
+  g_return_if_fail (GTD_IS_MANAGER (manager));
 
-  g_signal_emit (self,
+  g_signal_emit (manager,
                  signals[SHOW_ERROR_MESSAGE],
                  0,
                  title,

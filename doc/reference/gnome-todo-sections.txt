@@ -178,7 +178,6 @@ GtdTaskListView
 <TITLE>GtdWindow</TITLE>
 GTD_TYPE_WINDOW
 gtd_window_new
-gtd_window_get_manager
 gtd_window_notify
 gtd_window_cancel_notification
 gtd_window_get_mode

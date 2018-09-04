@@ -469,7 +469,7 @@ gtd_task_list_get_color (GtdTaskList *list)
 /**
  * gtd_task_list_set_color:
  * @list: a #GtdTaskList
- * #color: a #GdkRGBA
+ * @color: a #GdkRGBA
  *
  * sets the color of @list.
  */
@@ -741,7 +741,7 @@ gtd_task_list_set_is_removable (GtdTaskList *list,
 
 /**
  * gtd_task_list_get_task_by_id:
- * @list: a #GtdTaskList
+ * @self: a #GtdTaskList
  * @id: the id of the task
  *
  * Retrieves a task from @self with the given @id.

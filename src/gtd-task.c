@@ -806,6 +806,7 @@ gtd_task_get_creation_date (GtdTask *task)
 /**
  * gtd_task_set_creation_date:
  * @task: a #GtdTask
+ * @dt: (nullable): a #GDateTime
  *
  * Sets the creation date of @task.
  */
@@ -982,7 +983,7 @@ gtd_task_set_list (GtdTask     *task,
 
 /**
  * gtd_task_get_position:
- * @task: a #GtdTask
+ * @self: a #GtdTask
  *
  * Returns the position of @task inside the parent #GtdTaskList,
  * or -1 if not set.
@@ -999,7 +1000,7 @@ gtd_task_get_position (GtdTask *self)
 
 /**
  * gtd_task_set_position:
- * @task: a #GtdTask
+ * @self: a #GtdTask
  * @position: the priority of @task, or -1
  *
  * Sets the @task position inside the parent #GtdTaskList. It

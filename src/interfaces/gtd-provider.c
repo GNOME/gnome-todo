@@ -307,7 +307,9 @@ gtd_provider_get_icon (GtdProvider *provider)
 /**
  * gtd_provider_create_task:
  * @provider: a #GtdProvider
- * @task: a #GtdTask
+ * @list: a #GtdTaskList
+ * @title: (nullable): the title, or %NULL
+ * @due_date: (nullable): a #GDateTime
  *
  * Creates the given task in @provider.
  */

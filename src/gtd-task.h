@@ -101,9 +101,9 @@ GtdTaskList*        gtd_task_get_list                 (GtdTask              *tas
 void                gtd_task_set_list                 (GtdTask              *task,
                                                        GtdTaskList          *list);
 
-gint64              gtd_task_get_position             (GtdTask              *self);
+gint64              gtd_task_get_position             (GtdTask              *task);
 
-void                gtd_task_set_position             (GtdTask              *self,
+void                gtd_task_set_position             (GtdTask              *task,
                                                        gint64                position);
 
 const gchar*        gtd_task_get_title                (GtdTask              *task);

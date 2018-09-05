@@ -117,10 +117,7 @@ gtd_application_show_about (GSimpleAction *simple,
                             GVariant      *parameter,
                             gpointer       user_data)
 {
-  g_autofree gchar *copyright = NULL;
-  g_autoptr (GDateTime) date = NULL;
   GtdApplication *self;
-  gint created_year = 2015;
 
   static const gchar *authors[] = {
     "Emmanuele Bassi <ebassi@gnome.org>",
@@ -139,23 +136,11 @@ gtd_application_show_about (GSimpleAction *simple,
   };
 
   self = GTD_APPLICATION (user_data);
-  date = g_date_time_new_now_local ();
-
-  if (g_date_time_get_year (date) <= created_year)
-    {
-      copyright = g_strdup_printf (_("Copyright \xC2\xA9 %1$d "
-                                     "The To Do authors"), created_year);
-    }
-  else
-    {
-      copyright = g_strdup_printf (_("Copyright \xC2\xA9 %1$d\xE2\x80\x93%2$d "
-                                     "The To Do authors"), created_year, g_date_time_get_year (date));
-    }
 
   gtk_show_about_dialog (GTK_WINDOW (self->window),
                          "program-name", _("To Do"),
                          "version", VERSION,
-                         "copyright", copyright,
+                         "copyright", _("Copyright \xC2\xA9 2015–2018 The To Do authors"),
                          "license-type", GTK_LICENSE_GPL_3_0,
                          "authors", authors,
                          "artists", artists,

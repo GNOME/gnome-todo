@@ -78,8 +78,6 @@ struct _GtdWindow
 
   /* mode */
   GtdWindowMode       mode;
-
-  guint               save_geometry_timeout_id;
 };
 
 typedef struct
@@ -88,9 +86,6 @@ typedef struct
   gchar              *primary_text;
   gchar              *secondary_text;
 } ErrorData;
-
-
-#define              SAVE_GEOMETRY_ID_TIMEOUT                    100 /* ms */
 
 
 G_DEFINE_TYPE (GtdWindow, gtd_window, GTK_TYPE_APPLICATION_WINDOW)

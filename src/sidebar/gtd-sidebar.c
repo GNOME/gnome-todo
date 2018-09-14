@@ -20,6 +20,7 @@
 
 #define G_LOG_DOMAIN "GtdSidebar"
 
+#include "gtd-application.h"
 #include "gtd-debug.h"
 #include "gtd-manager.h"
 #include "gtd-panel.h"
@@ -28,6 +29,7 @@
 #include "gtd-sidebar-list-row.h"
 #include "gtd-sidebar-panel-row.h"
 #include "gtd-sidebar-provider-row.h"
+#include "gtd-task.h"
 #include "gtd-task-list.h"
 #include "gtd-task-list-panel.h"
 #include "gtd-utils.h"
@@ -68,6 +70,32 @@ add_task_list (GtdSidebar  *self,
   row = gtd_sidebar_list_row_new (list);
 
   gtk_list_box_prepend (self->listbox, row);
+
+  GApplication *application;
+  GtdApplication *app;
+  const gchar *uuid;
+
+  application = g_application_get_default ();
+  app = GTD_APPLICATION (application);
+  uuid = gtd_application_get_uuid (app);
+
+  /* Check if a uuid has been provided via command line */
+  if (uuid)
+  {
+    GtdTask *task;
+
+    /* Check if task is found in this task list */
+    task = gtd_task_list_get_task_by_id (list, uuid);
+
+    if (task)
+    {
+      /* Activate this task list in the sidebar */
+      gtd_task_list_panel_set_task_list (GTD_TASK_LIST_PANEL (self->task_list_panel), list);
+      gtk_stack_set_visible_child (self->stack, GTK_WIDGET (self->task_list_panel));
+    }
+
+    uuid = NULL;
+  }
 }
 
 static void
@@ -252,6 +280,13 @@ on_listbox_row_activated_cb (GtkListBox    *panels_listbox,
     {
       g_assert_not_reached ();
     }
+  /* Remove uuid from application only after user clicks on another rows
+   * If uuid deleted too early, row with uuid is not activated.
+   */
+  GApplication *application;
+
+  application = g_application_get_default ();
+  gtd_application_free_uuid (application);
 }
 
 static void

@@ -18,6 +18,7 @@
 
 #define G_LOG_DOMAIN "GtdTaskListView"
 
+#include "gtd-application.h"
 #include "gtd-debug.h"
 #include "gtd-dnd-row.h"
 #include "gtd-edit-pane.h"
@@ -348,6 +349,46 @@ scroll_to_bottom_cb (gpointer data)
 
       gtk_widget_grab_focus (GTK_WIDGET (priv->new_task_row));
       g_signal_emit_by_name (priv->scrolled_window, "scroll-child", GTK_SCROLL_END, FALSE, &ignored);
+
+      /* Check for command line provided uuid */
+      GApplication *application;
+      GtdApplication *app;
+      const gchar *uuid;
+
+      application = g_application_get_default ();
+      app = GTD_APPLICATION (application);
+      uuid = gtd_application_get_uuid (app);
+
+      if (uuid)
+      {
+        GListModel *model;
+        guint i;
+
+        model = priv->model;
+
+        for (i = 0; i < g_list_model_get_n_items (model); i++)
+          {
+            GtkListBoxRow *listbox_row;
+            GtdTaskRow *task_row;
+            GtdTask *task;
+
+            // g_autoptr (GtdTask) task = g_list_model_get_item (model, i);
+            listbox_row = gtk_list_box_get_row_at_index (priv->listbox, i);
+            task_row = task_row_from_row (listbox_row);
+            task = gtd_task_row_get_task (task_row);
+
+            if (!g_strcmp0 (gtd_object_get_uid (GTD_OBJECT (task)), uuid))
+            {
+              GtdTaskListView *view;
+
+              view = GTD_TASK_LIST_VIEW (gtk_widget_get_ancestor (GTK_WIDGET (task_row), GTD_TYPE_TASK_LIST_VIEW));
+
+              set_active_row (view, task_row);
+
+              break;
+            }
+          }
+      }
     }
 
   return G_SOURCE_REMOVE;

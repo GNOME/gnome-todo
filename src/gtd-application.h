@@ -31,6 +31,13 @@ G_DECLARE_FINAL_TYPE (GtdApplication, gtd_application, GTD, APPLICATION, GtkAppl
 
 GtdApplication*                 gtd_application_new                     (void);
 
+void                            gtd_application_set_uuid                (GtdApplication *self,
+                                                                         const gchar    *app_uuid);
+
+const gchar*                    gtd_application_get_uuid                (GtdApplication *self);
+
+void                            gtd_application_free_uuid               (GApplication *application);
+
 G_END_DECLS
 
 #endif /* GTD_APPLICATION_H */

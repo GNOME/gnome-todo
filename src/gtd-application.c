@@ -44,6 +44,8 @@ struct _GtdApplication
   GtkWidget             *window;
   GtkWidget             *plugin_dialog;
   GtkWidget             *initial_setup;
+
+  gchar                 *uuid;
 };
 
 static void           gtd_application_activate_action             (GSimpleAction        *simple,
@@ -69,6 +71,7 @@ static void           gtd_application_quit                        (GSimpleAction
 G_DEFINE_TYPE (GtdApplication, gtd_application, GTK_TYPE_APPLICATION)
 
 static GOptionEntry cmd_options[] = {
+  { "uuid", 'u', 0, G_OPTION_ARG_STRING, NULL, N_("Open a task with task uuid"), NULL },
   { "quit", 'q', 0, G_OPTION_ARG_NONE, NULL, N_("Quit GNOME To Do"), NULL },
   { "debug", 'd', 0, G_OPTION_ARG_NONE, NULL, N_("Enable debug messages"), NULL },
   { NULL }
@@ -293,12 +296,25 @@ gtd_application_command_line (GApplication            *app,
 {
   GVariantDict *options;
 
+  GVariant *option;
+  const gchar* uuid = NULL;
+  gsize length;
+
   options = g_application_command_line_get_options_dict (command_line);
 
   if (g_variant_dict_contains (options, "quit"))
     {
       g_application_quit (app);
       return 0;
+    }
+
+  if (g_variant_dict_contains (options, "uuid"))
+    {
+      option = g_variant_dict_lookup_value (options, "uuid", G_VARIANT_TYPE_STRING);
+      uuid = g_variant_get_string (option, &length);
+
+      gtd_application_set_uuid (GTD_APPLICATION (app), uuid);
+      g_variant_unref (option);
     }
 
   g_application_activate (app);
@@ -344,4 +360,30 @@ static void
 gtd_application_init (GtdApplication *self)
 {
   g_application_add_main_option_entries (G_APPLICATION (self), cmd_options);
+}
+
+void
+gtd_application_set_uuid (GtdApplication *self,
+                           const gchar   *app_uuid)
+{
+  g_return_if_fail (GTD_IS_APPLICATION (self));
+
+  g_free (self->uuid);
+  self->uuid = g_strdup (app_uuid);
+}
+
+const gchar*
+gtd_application_get_uuid (GtdApplication *self)
+{
+  return self->uuid;
+}
+
+void
+gtd_application_free_uuid (GApplication *application)
+{
+  GtdApplication *self;
+
+  self = GTD_APPLICATION (application);
+
+  g_clear_pointer (&self->uuid, g_free);
 }

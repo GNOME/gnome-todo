@@ -70,7 +70,7 @@ struct _GtdManager
 G_DEFINE_TYPE (GtdManager, gtd_manager, GTD_TYPE_OBJECT)
 
 /* Singleton instance */
-GtdManager *gtd_manager_instance = NULL;
+static GtdManager *gtd_manager_instance = NULL;
 
 enum
 {

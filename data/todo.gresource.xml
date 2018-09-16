@@ -64,6 +64,11 @@
     <file compressed="true" alias="theme/next-week-panel/Adwaita.css">../plugins/next-week-panel/theme/Adwaita.css</file>
   </gresource>
 
+  <!--Night Light-->
+  <gresource prefix="/org/gnome/todo">
+    <file alias="plugins/night-light/night-light.plugin">../plugins/night-light/night-light.plugin</file>
+  </gresource>
+
   <!--Scheduled panel-->
   <gresource prefix="/org/gnome/todo">
     <file alias="plugins/scheduled-panel/scheduled-panel.plugin">../plugins/scheduled-panel/scheduled-panel.plugin</file>

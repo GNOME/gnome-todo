@@ -12,6 +12,7 @@ subdir('background')
 subdir('dark-theme')
 subdir('eds')
 subdir('next-week-panel')
+subdir('night-light')
 subdir('scheduled-panel')
 subdir('today-panel')
 

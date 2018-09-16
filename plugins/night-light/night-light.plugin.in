@@ -1,0 +1,14 @@
+[Plugin]
+Name = Night Light
+Module = night-light
+Description = Night Light integration for GNOME To Do
+Version = @VERSION@
+Authors = Georges Basile Stavracas Neto <gbsneto@gnome.org>
+Copyright = Copyleft © The To Do maintainers
+Website = https://wiki.gnome.org/Apps/Todo
+Builtin = true
+Hidden = true
+License = GPL
+Loader = C
+Embedded = gtd_night_light_plugin_register_types
+Depends =

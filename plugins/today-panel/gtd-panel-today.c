@@ -34,8 +34,8 @@ struct _GtdPanelToday
   guint               number_of_tasks;
   GtdTaskListView    *view;
 
-  GtdListModelFilter *filter_model;
-  GtdListModelSort   *sort_model;
+  GtkFilterListModel *filter_model;
+  GtkSortListModel   *sort_model;
 };
 
 static void          gtd_panel_iface_init                        (GtdPanelInterface  *iface);
@@ -105,44 +105,6 @@ should_be_added (GDateTime *today,
   return is_today (today, dt) || is_overdue (today, dt);
 }
 
-static gint
-sort_func (GObject  *a,
-           GObject  *b,
-           gpointer  user_data)
-{
-  g_autoptr (GDateTime) dt1 = NULL;
-  g_autoptr (GDateTime) dt2 = NULL;
-  GtdTask *task1;
-  GtdTask *task2;
-  GDate dates[2];
-  gint result;
-
-  task1 = (GtdTask*) a;
-  task2 = (GtdTask*) b;
-
-  dt1 = gtd_task_get_due_date (task1);
-  dt2 = gtd_task_get_due_date (task2);
-
-  g_date_clear (dates, 2);
-
-  g_date_set_dmy (&dates[0],
-                  g_date_time_get_day_of_month (dt1),
-                  g_date_time_get_month (dt1),
-                  g_date_time_get_year (dt1));
-
-  g_date_set_dmy (&dates[1],
-                  g_date_time_get_day_of_month (dt2),
-                  g_date_time_get_month (dt2),
-                  g_date_time_get_year (dt2));
-
-  result = g_date_days_between (&dates[1], &dates[0]);
-
-  if (result != 0)
-    return result;
-
-  return gtd_task_compare (task1, task2);
-}
-
 static GtkWidget*
 create_label (const gchar *text,
               gboolean     overdue)
@@ -201,18 +163,56 @@ header_func (GtdTask  *task,
  */
 
 static gboolean
-filter_func (GObject  *object,
+filter_func (gpointer  item,
              gpointer  user_data)
 {
   g_autoptr (GDateTime) task_dt = NULL;
   g_autoptr (GDateTime) now = NULL;
   GtdTask *task;
 
-  task = (GtdTask*) object;
+  task = (GtdTask*) item;
   now = g_date_time_new_now_local ();
   task_dt = gtd_task_get_due_date (task);
 
   return !gtd_task_get_complete (task) && should_be_added (now, task_dt);
+}
+
+static gint
+sort_func (gconstpointer a,
+           gconstpointer b,
+           gpointer      user_data)
+{
+  g_autoptr (GDateTime) dt1 = NULL;
+  g_autoptr (GDateTime) dt2 = NULL;
+  GtdTask *task1;
+  GtdTask *task2;
+  GDate dates[2];
+  gint result;
+
+  task1 = (GtdTask*) a;
+  task2 = (GtdTask*) b;
+
+  dt1 = gtd_task_get_due_date (task1);
+  dt2 = gtd_task_get_due_date (task2);
+
+  g_date_clear (dates, 2);
+
+  g_date_set_dmy (&dates[0],
+                  g_date_time_get_day_of_month (dt1),
+                  g_date_time_get_month (dt1),
+                  g_date_time_get_year (dt1));
+
+  g_date_set_dmy (&dates[1],
+                  g_date_time_get_day_of_month (dt2),
+                  g_date_time_get_month (dt2),
+                  g_date_time_get_year (dt2));
+
+  result = g_date_days_between (&dates[1], &dates[0]);
+
+  if (result != 0)
+    return result;
+
+  return gtd_task_compare (task1, task2);
 }
 
 static void
@@ -238,7 +238,7 @@ on_timer_updated_cb (GtdTimer      *timer,
   now = g_date_time_new_now_local ();
   gtd_task_list_view_set_default_date (self->view, now);
 
-  gtd_list_model_filter_invalidate (self->filter_model);
+  gtk_filter_list_model_refilter (self->filter_model);
 }
 
 
@@ -389,11 +389,8 @@ gtd_panel_today_init (GtdPanelToday *self)
 
   self->icon = g_themed_icon_new ("view-tasks-today-symbolic");
 
-  self->filter_model = gtd_list_model_filter_new (gtd_manager_get_tasks_model (manager));
-  gtd_list_model_filter_set_filter_func (self->filter_model, filter_func, self, NULL);
-
-  self->sort_model = gtd_list_model_sort_new (G_LIST_MODEL (self->filter_model));
-  gtd_list_model_sort_set_sort_func (self->sort_model, sort_func, self, NULL);
+  self->filter_model = gtk_filter_list_model_new (gtd_manager_get_tasks_model (manager), filter_func, self, NULL);
+  self->sort_model = gtk_sort_list_model_new (G_LIST_MODEL (self->filter_model), sort_func, self, NULL);
 
   /* Connect to GtdManager::list-* signals to update the title */
   manager = gtd_manager_get_default ();
@@ -405,7 +402,7 @@ gtd_panel_today_init (GtdPanelToday *self)
   gtd_task_list_view_set_handle_subtasks (self->view, FALSE);
   gtd_task_list_view_set_show_list_name (self->view, TRUE);
   gtd_task_list_view_set_show_due_date (self->view, FALSE);
-  gtd_task_list_view_set_default_date (self->view, FALSE);
+  gtd_task_list_view_set_default_date (self->view, now);
 
   gtk_widget_set_hexpand (GTK_WIDGET (self->view), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (self->view), TRUE);

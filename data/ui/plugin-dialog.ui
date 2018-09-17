@@ -63,12 +63,12 @@
     </child>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="headerbar">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="title" translatable="yes">Extensions</property>
         <property name="show-title-buttons">True</property>
         <child>
           <object class="GtkButton" id="back_button">
+            <property name="visible">False</property>
             <property name="can_focus">True</property>
             <signal name="clicked" handler="back_button_clicked" object="GtdPluginDialog" swapped="no" />
             <child>

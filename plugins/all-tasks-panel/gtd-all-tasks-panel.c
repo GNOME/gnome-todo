@@ -25,6 +25,8 @@
 
 #include "gnome-todo.h"
 
+#include "gtd-debug.h"
+
 #include <glib/gi18n.h>
 #include <math.h>
 
@@ -41,8 +43,8 @@ struct _GtdAllTasksPanel
   guint               number_of_tasks;
   GtdTaskListView    *view;
 
-  GtdListModelFilter *filter_model;
-  GtdListModelSort   *sort_model;
+  GtkFilterListModel *filter_model;
+  GtkSortListModel   *sort_model;
 };
 
 static void          gtd_panel_iface_init                        (GtdPanelInterface  *iface);
@@ -233,9 +235,9 @@ header_func (GtdTask          *task,
 }
 
 static gint
-sort_func (GObject  *a,
-           GObject  *b,
-           gpointer  user_data)
+sort_func (gconstpointer a,
+           gconstpointer b,
+           gpointer      user_data)
 {
   GtdTask *task_a = (GtdTask*) a;
   GtdTask *task_b = (GtdTask*) b;
@@ -244,10 +246,10 @@ sort_func (GObject  *a,
 }
 
 static gboolean
-filter_func (GObject  *object,
+filter_func (gpointer  item,
              gpointer  user_data)
 {
-  GtdTask *task = (GtdTask*) object;
+  GtdTask *task = (GtdTask*) item;
   return !gtd_task_get_complete (task);
 }
 
@@ -260,6 +262,8 @@ on_model_items_changed_cb (GListModel       *model,
 {
   if (self->number_of_tasks == g_list_model_get_n_items (model))
     return;
+
+  GTD_TRACE_MSG ("Received items-changed(%u, %u, %u)", position, n_removed, n_added);
 
   self->number_of_tasks = g_list_model_get_n_items (model);
   g_object_notify (G_OBJECT (self), "subtitle");
@@ -274,7 +278,7 @@ on_timer_updated_cb (GtdTimer         *timer,
   now = g_date_time_new_now_local ();
   gtd_task_list_view_set_default_date (self->view, now);
 
-  gtd_list_model_filter_invalidate (self->filter_model);
+  gtk_filter_list_model_refilter (self->filter_model);
 }
 
 /*
@@ -426,11 +430,8 @@ gtd_all_tasks_panel_init (GtdAllTasksPanel *self)
 
   self->icon = g_themed_icon_new ("view-tasks-all-symbolic");
 
-  self->filter_model = gtd_list_model_filter_new (gtd_manager_get_tasks_model (manager));
-  gtd_list_model_filter_set_filter_func (self->filter_model, filter_func, self, NULL);
-
-  self->sort_model = gtd_list_model_sort_new (G_LIST_MODEL (self->filter_model));
-  gtd_list_model_sort_set_sort_func (self->sort_model, sort_func, self, NULL);
+  self->filter_model = gtk_filter_list_model_new (gtd_manager_get_tasks_model (manager), filter_func, self, NULL);
+  self->sort_model = gtk_sort_list_model_new (G_LIST_MODEL (self->filter_model), sort_func, self, NULL);
 
   /* The main view */
   self->view = GTD_TASK_LIST_VIEW (gtd_task_list_view_new ());

@@ -32,7 +32,7 @@ struct _GtdTaskListPopover
 {
   GtkPopover          parent;
 
-  GtdListModelFilter *filter_model;
+  GtkFilterListModel *filter_model;
 
   GtkSizeGroup       *sizegroup;
   GtkListBox         *listbox;
@@ -79,7 +79,7 @@ set_selected_tasklist (GtdTaskListPopover *self,
  */
 
 static gboolean
-filter_listbox_cb (GObject  *object,
+filter_listbox_cb (gpointer  item,
                    gpointer  user_data)
 {
   GtdTaskListPopover *self;
@@ -88,7 +88,7 @@ filter_listbox_cb (GObject  *object,
   GtdTaskList *list;
 
   self = (GtdTaskListPopover*) user_data;
-  list = (GtdTaskList*) object;
+  list = (GtdTaskList*) item;
 
   normalized_search_query = gtd_normalize_casefold_and_unaccent (gtk_entry_get_text (self->search_entry));
   normalized_list_name = gtd_normalize_casefold_and_unaccent (gtd_task_list_get_name (list));
@@ -193,7 +193,7 @@ static void
 on_search_entry_search_changed_cb (GtkEntry           *search_entry,
                                    GtdTaskListPopover *self)
 {
-  gtd_list_model_filter_invalidate (self->filter_model);
+  gtk_filter_list_model_refilter (self->filter_model);
 }
 
 
@@ -242,11 +242,10 @@ gtd_task_list_popover_init (GtdTaskListPopover *self)
 {
   GtdManager *manager = gtd_manager_get_default ();
 
-  self->filter_model = gtd_list_model_filter_new (gtd_manager_get_task_lists_model (manager));
-  gtd_list_model_filter_set_filter_func (self->filter_model,
-                                         filter_listbox_cb,
-                                         self,
-                                         NULL);
+  self->filter_model = gtk_filter_list_model_new (gtd_manager_get_task_lists_model (manager),
+                                                  filter_listbox_cb,
+                                                  self,
+                                                  NULL);
 
   gtk_widget_init_template (GTK_WIDGET (self));
 

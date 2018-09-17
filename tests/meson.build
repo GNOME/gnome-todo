@@ -14,8 +14,6 @@ tests_incs = [
 libgtd_tests = static_library(
            'gtd_tests',
               sources : sources,
-              version : libversion,
-            soversion : soversion,
   include_directories : tests_incs,
          dependencies : gnome_todo_deps,
                c_args : cflags,

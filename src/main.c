@@ -41,4 +41,3 @@ main (gint  argc,
 
   return g_application_run (G_APPLICATION (app), argc, argv);
 }
-

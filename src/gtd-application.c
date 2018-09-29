@@ -27,6 +27,7 @@
 #include "gtd-manager.h"
 #include "gtd-manager-protected.h"
 #include "gtd-plugin-dialog.h"
+#include "gtd-search-provider.h"
 #include "gtd-window.h"
 #include "gtd-window-private.h"
 
@@ -44,6 +45,8 @@ struct _GtdApplication
   GtkWidget             *window;
   GtkWidget             *plugin_dialog;
   GtkWidget             *initial_setup;
+
+  GtdSearchProvider     *search_provider;
 };
 
 static void           gtd_application_activate_action             (GSimpleAction        *simple,
@@ -113,6 +116,15 @@ gtd_application_show_extensions (GSimpleAction *simple,
 }
 
 static void
+gtd_application_display_task (GSimpleAction *simple,
+                              GVariant      *paramenter,
+                              gpointer       user_data)
+{
+  GtdApplication *self = GTD_APPLICATION (user_data);
+
+}
+
+static void
 gtd_application_show_about (GSimpleAction *simple,
                             GVariant      *parameter,
                             gpointer       user_data)
@@ -157,6 +169,64 @@ gtd_application_quit (GSimpleAction *simple,
   GtdApplication *self = GTD_APPLICATION (user_data);
 
   gtk_widget_destroy (self->window);
+}
+
+static gboolean
+gtd_application_dbus_register (GApplication *application,
+                               GDBusConnection *connection,
+                               const gchar *object_path,
+                               GError **error)
+{
+  g_debug ("Hello, Registering");
+  GtdApplication *self = GTD_APPLICATION (application);
+  gboolean ret_val = FALSE;
+  gchar *search_provider_path = NULL;
+
+  self->search_provider = gtd_search_provider_new ();
+
+  if (!G_APPLICATION_CLASS (gtd_application_parent_class)
+         ->dbus_register (application,
+                          connection,
+                          object_path,
+                          error))
+    goto out;
+
+  search_provider_path = g_strconcat (object_path, "/SearchProvider", NULL);
+  if (!gtd_search_provider_dbus_export (self->search_provider,
+                                              connection,
+                                              search_provider_path,
+                                              error))
+    {
+      g_error ("%s", (*error)->message);
+      goto out;
+    }
+
+  ret_val = TRUE;
+
+ out:
+  g_free (search_provider_path);
+  return ret_val;
+}
+
+static void
+gtd_application_dbus_unregister (GApplication *application,
+                                 GDBusConnection *connection,
+                                 const gchar *object_path)
+{
+  GtdApplication *self = GTD_APPLICATION (application);
+  gchar *search_provider_path = NULL;
+
+  search_provider_path = g_strconcat (object_path, "/SearchProvider", NULL);
+  gtd_search_provider_dbus_unexport (self->search_provider,
+                                     connection,
+                                     search_provider_path);
+
+  G_APPLICATION_CLASS (gtd_application_parent_class)
+    ->dbus_unregister (application,
+                       connection,
+                       object_path);
+
+  g_free (search_provider_path);
 }
 
 GtdApplication *
@@ -220,19 +290,6 @@ run_initial_setup (GtdApplication *application)
 static void
 gtd_application_activate (GApplication *application)
 {
-  GTD_ENTRY;
-
-  /* FIXME: the initial setup is disabled for the 3.18 release because
-   * we can't create tasklists on GOA accounts.
-   */
-  run_window (GTD_APPLICATION (application));
-
-  GTD_EXIT;
-}
-
-static void
-gtd_application_startup (GApplication *application)
-{
   GtdApplication *self;
   g_autoptr (GtkCssProvider) css_provider;
   g_autoptr (GFile) css_file;
@@ -241,15 +298,6 @@ gtd_application_startup (GApplication *application)
   GTD_ENTRY;
 
   self = GTD_APPLICATION (application);
-
-  /* add actions */
-  g_action_map_add_action_entries (G_ACTION_MAP (self),
-                                   gtd_application_entries,
-                                   G_N_ELEMENTS (gtd_application_entries),
-                                   self);
-
-  G_APPLICATION_CLASS (gtd_application_parent_class)->startup (application);
-
   /* window */
   gtk_window_set_default_icon_name ("org.gnome.Todo");
   self->window = gtd_window_new (self);
@@ -274,6 +322,7 @@ gtd_application_startup (GApplication *application)
 
   gtk_window_set_transient_for (GTK_WINDOW (self->plugin_dialog), GTK_WINDOW (self->window));
 
+
   /* Load the plugins */
   gtd_manager_load_plugins (gtd_manager_get_default ());
 
@@ -283,6 +332,31 @@ gtd_application_startup (GApplication *application)
    * all the rows set up.
    */
   _gtd_window_finish_startup (GTD_WINDOW (self->window));
+
+  /* FIXME: the initial setup is disabled for the 3.18 release because
+   * we can't create tasklists on GOA accounts.
+   */
+  run_window (GTD_APPLICATION (application));
+
+  GTD_EXIT;
+}
+
+static void
+gtd_application_startup (GApplication *application)
+{
+  GtdApplication *self;
+
+  GTD_ENTRY;
+
+  self = GTD_APPLICATION (application);
+
+  /* add actions */
+  g_action_map_add_action_entries (G_ACTION_MAP (self),
+                                   gtd_application_entries,
+                                   G_N_ELEMENTS (gtd_application_entries),
+                                   self);
+
+  G_APPLICATION_CLASS (gtd_application_parent_class)->startup (application);
 
   GTD_EXIT;
 }
@@ -338,6 +412,9 @@ gtd_application_class_init (GtdApplicationClass *klass)
   application_class->command_line = gtd_application_command_line;
   application_class->local_command_line = gtd_application_local_command_line;
   application_class->handle_local_options = gtd_application_handle_local_options;
+
+  application_class->dbus_register = gtd_application_dbus_register;
+  application_class->dbus_unregister = gtd_application_dbus_unregister;
 }
 
 static void

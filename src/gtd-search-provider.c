@@ -43,11 +43,6 @@ struct _GtdSearchProvider
 
 G_DEFINE_TYPE (GtdSearchProvider, gtd_search_provider, G_TYPE_OBJECT)
 
-enum {
-  PROP_0,
-  N_PROPS
-};
-
 typedef struct
 {
   GDBusMethodInvocation  *invocation;
@@ -55,11 +50,10 @@ typedef struct
   GtdSearchProvider      *provider;
 } ResultMetaData;
 
-static GParamSpec *properties [N_PROPS];
-
 static void
 result_metadata_free (ResultMetaData *data)
 {
+  g_clear_object (&data->provider);
   g_clear_object (&data->invocation);
   g_strfreev (data->results);
 
@@ -77,7 +71,7 @@ filter_func (GObject *object,
 
   task_title = gtd_task_get_title (task);
 
-  for (i = 0; i < g_strv_length (terms); i++)
+  for (i = 0; terms[i] != NULL; i++)
     {
       if (strstr (task_title, terms[i]))
         {
@@ -97,7 +91,7 @@ task_id_filter_func (GObject *object,
 
   id = gtd_object_get_uid (GTD_OBJECT (object));
 
-  for (i = 0; i < g_strv_length (results); i++)
+  for (i = 0; results[i] != NULL; i++)
     {
       if (g_strcmp0 (results[i], id) == 0)
         {
@@ -117,7 +111,6 @@ create_result_metas_async (GTask        *g_task,
   GListModel *model = gtd_manager_get_tasks_model (gtd_manager_get_default ());
   GtdListModelFilter *filter = gtd_list_model_filter_new (model);
   ResultMetaData *data = task_data;
-  const gchar *title, *description;
   GVariantBuilder meta;
   GVariant *meta_variant;
   GtdTask *task;
@@ -137,6 +130,11 @@ create_result_metas_async (GTask        *g_task,
 
   for (i = 0; i < n_tasks; i++)
     {
+      if (g_hash_table_lookup (self->cache, data->results[i]))
+        {
+          continue;
+        }
+
       g_variant_builder_init (&meta, G_VARIANT_TYPE ("a{sv}"));
 
       task = GTD_TASK (g_list_model_get_object (G_LIST_MODEL (filter), i));
@@ -154,6 +152,26 @@ create_result_metas_async (GTask        *g_task,
     }
 
   g_task_return_pointer (g_task, NULL, NULL);
+}
+
+static void
+result_meta_return_from_cache (ResultMetaData *data)
+{
+  GVariantBuilder builder;
+  GVariant *meta;
+  gint idx;
+
+  g_variant_builder_init (&builder, G_VARIANT_TYPE ("aa{sv}"));
+
+  for (idx = 0; data->results[idx] != NULL; idx++)
+    {
+      meta = g_hash_table_lookup (data->provider->cache,
+                                  data->results[idx]);
+      g_variant_builder_add_value (&builder, meta);
+    }
+
+  g_dbus_method_invocation_return_value (data->invocation,
+                                         g_variant_new ("(aa{sv})", &builder));
 }
 
 static void
@@ -191,11 +209,31 @@ create_result_metas_from_id (GtdSearchProvider     *self,
 {
   GTask *task;
   ResultMetaData *data;
+  gint idx;
+  gboolean cache_miss = FALSE;
+  gchar *result;
+
+  for (idx = 0; results[idx] != NULL; idx++)
+    {
+      result = results[idx];
+
+      if (!g_hash_table_lookup (self->cache, result))
+        {
+          cache_miss = TRUE;
+        }
+    }
 
   data = g_slice_new (ResultMetaData);
   data->invocation = g_object_ref (invocation);
   data->results =  g_strdupv (results);
-  data->provider = self;
+  data->provider = g_object_ref (self);
+
+  if (cache_miss == FALSE)
+    {
+      result_meta_return_from_cache (data);
+      result_metadata_free (data);
+      return;
+    }
 
   task = g_task_new (self, NULL, result_meta_callback, data);
   g_task_set_task_data (task, data, NULL);
@@ -315,14 +353,6 @@ handle_launch_search (GtdShellSearchProvider2  *skeleton,
 }
 
 static void
-gtd_search_provider_finalize (GObject *object)
-{
-  GtdSearchProvider *self = (GtdSearchProvider *)object;
-
-  G_OBJECT_CLASS (gtd_search_provider_parent_class)->finalize (object);
-}
-
-static void
 gtd_search_provider_dispose (GObject *object)
 {
   GtdSearchProvider *self = GTD_SEARCH_PROVIDER (object);
@@ -334,44 +364,11 @@ gtd_search_provider_dispose (GObject *object)
 }
 
 static void
-gtd_search_provider_get_property (GObject    *object,
-                                  guint       prop_id,
-                                  GValue     *value,
-                                  GParamSpec *pspec)
-{
-  GtdSearchProvider *self = GTD_SEARCH_PROVIDER (object);
-
-  switch (prop_id)
-    {
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-    }
-}
-
-static void
-gtd_search_provider_set_property (GObject      *object,
-                                  guint         prop_id,
-                                  const GValue *value,
-                                  GParamSpec   *pspec)
-{
-  GtdSearchProvider *self = GTD_SEARCH_PROVIDER (object);
-
-  switch (prop_id)
-    {
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-    }
-}
-
-static void
 gtd_search_provider_class_init (GtdSearchProviderClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->finalize = gtd_search_provider_finalize;
   object_class->dispose = gtd_search_provider_dispose;
-  object_class->get_property = gtd_search_provider_get_property;
-  object_class->set_property = gtd_search_provider_set_property;
 }
 
 static void

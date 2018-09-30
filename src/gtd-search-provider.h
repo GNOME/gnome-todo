@@ -29,24 +29,21 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (GtdSearchProvider, gtd_search_provider, GTD, SEARCH_PROVIDER, GObject)
 
-GtdSearchProvider *gtd_search_provider_new (void);
+GtdSearchProvider*   gtd_search_provider_new                     (void);
 
-gboolean
-gtd_search_provider_register (GtdSearchProvider *self,
-                                    GDBusConnection   *connection,
-                                    GError            *error);
+gboolean             gtd_search_provider_register                (GtdSearchProvider *self,
+                                                                  GDBusConnection   *connection,
+                                                                  GError            *error);
 
-void
-gtd_search_provider_unregister (GtdSearchProvider *self);
+void                 gtd_search_provider_unregister              (GtdSearchProvider *self);
 
-gboolean
-gtd_search_provider_dbus_export (GtdSearchProvider *self,
-                                 GDBusConnection *connection,
-                                 const gchar *object_path,
-                                 GError **error);
+gboolean             gtd_search_provider_dbus_export             (GtdSearchProvider  *self,
+                                                                  GDBusConnection    *connection,
+                                                                  const gchar        *object_path,
+                                                                  GError            **error);
 
-void
-gtd_search_provider_dbus_unexport (GtdSearchProvider *self,
-                                   GDBusConnection *connection,
-                                   const gchar *object_path);
+void                 gtd_search_provider_dbus_unexport           (GtdSearchProvider *self,
+                                                                  GDBusConnection   *connection,
+                                                                  const gchar       *object_path);
+
 G_END_DECLS

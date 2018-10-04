@@ -109,7 +109,7 @@ setup_development_build (GtdWindow *self)
 
   context = gtk_widget_get_style_context (GTK_WIDGET (self));
 
-  gtk_style_context_add_class (context, "development-version");
+  gtk_style_context_add_class (context, "devel");
 }
 
 static gboolean

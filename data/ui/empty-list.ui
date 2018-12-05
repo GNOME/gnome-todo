@@ -2,13 +2,11 @@
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <template class="GtdEmptyListWidget" parent="GtkBox">
-    <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="orientation">vertical</property>
     <property name="spacing">12</property>
     <child>
       <object class="GtkImage" id="icon">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin_bottom">18</property>
         <property name="vexpand">True</property>
@@ -20,7 +18,6 @@
     </child>
     <child>
       <object class="GtkLabel" id="title_label">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <attributes>
           <attribute name="weight" value="bold"/>
@@ -30,7 +27,6 @@
     </child>
     <child>
       <object class="GtkLabel" id="subtitle_label">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <style>
           <class name="dim-label"/>

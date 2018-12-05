@@ -2,18 +2,15 @@
 <interface>
   <requires lib="gtk+" version="3.16"/>
   <template class="GtdProviderSelector" parent="GtkBox">
-    <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="orientation">vertical</property>
     <property name="spacing">12</property>
     <child>
       <object class="GtkFrame" id="frame">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label_xalign">0</property>
         <child>
           <object class="GtkListBox" id="listbox">
-            <property name="visible">True</property>
             <property name="sensitive" bind-source="local_check" bind-property="active" bind-flags="default|sync-create|invert-boolean" />
             <property name="can_focus">False</property>
             <property name="hexpand">True</property>
@@ -22,18 +19,15 @@
             <signal name="row-activated" handler="gtd_provider_selector__listbox_row_activated" object="GtdProviderSelector" swapped="yes" />
             <child>
               <object class="GtkListBoxRow" id="google_stub_row">
-                <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="tooltip_text" translatable="yes">Click to add a new Google account</property>
                 <child>
                   <object class="GtkBox" id="google_stub_row_box">
-                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin">12</property>
                     <property name="spacing">12</property>
                     <child>
                       <object class="GtkImage" id="google_stub_row_icon_image">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">32</property>
                         <property name="icon_name">goa-account-google</property>
@@ -41,7 +35,6 @@
                     </child>
                     <child>
                       <object class="GtkLabel" id="google_stub_row_label">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Google</property>
                       </object>
@@ -52,18 +45,15 @@
             </child>
             <child>
               <object class="GtkListBoxRow" id="owncloud_stub_row">
-                <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="tooltip_text" translatable="yes">Click to add a new ownCloud account</property>
                 <child>
                   <object class="GtkBox" id="box3">
-                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin">12</property>
                     <property name="spacing">12</property>
                     <child>
                       <object class="GtkImage" id="image2">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">32</property>
                         <property name="icon_name">goa-account-owncloud</property>
@@ -71,7 +61,6 @@
                     </child>
                     <child>
                       <object class="GtkLabel" id="label2">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ownCloud</property>
                       </object>
@@ -82,18 +71,15 @@
             </child>
             <child>
               <object class="GtkListBoxRow" id="exchange_stub_row">
-                <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="tooltip_text" translatable="yes">Click to add a new Microsoft Exchange account</property>
                 <child>
                   <object class="GtkBox" id="box4">
-                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin">12</property>
                     <property name="spacing">12</property>
                     <child>
                       <object class="GtkImage" id="image3">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">32</property>
                         <property name="icon_name">goa-account</property>
@@ -101,7 +87,6 @@
                     </child>
                     <child>
                       <object class="GtkLabel" id="label3">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Microsoft Exchange</property>
                       </object>
@@ -117,7 +102,6 @@
     <child>
       <object class="GtkCheckButton" id="local_check">
         <property name="label" translatable="yes">Or you can just store your tasks on this computer</property>
-        <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">False</property>
         <property name="draw_indicator">True</property>

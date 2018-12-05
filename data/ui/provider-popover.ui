@@ -6,7 +6,6 @@
     <signal name="closed" handler="gtd_provider_popover__closed" swapped="no" />
     <child>
       <object class="GtkStack" id="stack">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin">18</property>
         <property name="vhomogeneous">False</property>
@@ -15,7 +14,6 @@
         <property name="transition_type">slide-left-right</property>
         <child>
           <object class="GtkGrid" id="new_list_popover_grid">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="hexpand">True</property>
             <property name="row_spacing">12</property>
@@ -24,7 +22,6 @@
               <object class="GtkButton" id="new_list_create_button">
                 <property name="label" translatable="yes">Create _List</property>
                 <property name="use_underline">True</property>
-                <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -42,7 +39,6 @@
               <object class="GtkButton" id="new_list_cancel_button">
                 <property name="label" translatable="yes">_Cancel</property>
                 <property name="use_underline">True</property>
-                <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="gtd_provider_popover__action_button_clicked" object="GtdProviderPopover" swapped="yes" />
@@ -54,7 +50,6 @@
             </child>
             <child>
               <object class="GtkLabel" id="new_list_popover_dim_label">
-                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">List Name</property>
                 <property name="xalign">0</property>
@@ -70,11 +65,9 @@
             </child>
             <child>
               <object class="GtkBox" id="location_box">
-                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
                   <object class="GtkEntry" id="new_list_name_entry">
-                    <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="hexpand">True</property>
                     <property name="width_chars">35</property>
@@ -84,14 +77,12 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="change_location_button">
-                    <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="sensitive">True</property>
                     <signal name="clicked" handler="gtd_provider_popover__change_location_clicked" object="GtdProviderPopover" swapped="yes" />
                     <child>
                       <object class="GtkImage" id="location_provider_image">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">16</property>
                         <property name="icon_name">goa-account</property>
@@ -116,17 +107,14 @@
         </child>
         <child>
           <object class="GtkGrid" id="selector_grid">
-            <property name="visible">True</property>
             <property name="column_spacing">12</property>
             <property name="row_spacing">12</property>
             <child>
               <object class="GtkButton" id="back_button">
-                <property name="visible">True</property>
                 <property name="halign">start</property>
                 <signal name="clicked" handler="gtd_provider_popover__change_location_clicked" object="GtdProviderPopover" swapped="yes" />
                 <child>
                   <object class="GtkImage" id="back_image">
-                    <property name="visible">True</property>
                     <property name="icon-name">go-previous-symbolic</property>
                     <property name="pixel-size">16</property>
                   </object>
@@ -140,7 +128,6 @@
             </child>
             <child>
               <object class="GtkLabel" id="title_label">
-                <property name="visible">True</property>
                 <property name="hexpand">True</property>
                 <property name="label" translatable="yes">Select a storage location</property>
               </object>
@@ -152,7 +139,6 @@
             </child>
             <child>
               <object class="GtdProviderSelector" id="provider_selector">
-                <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="show_local">True</property>
                 <property name="select_default">True</property>

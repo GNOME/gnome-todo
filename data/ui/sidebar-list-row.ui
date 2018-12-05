@@ -2,7 +2,6 @@
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <template class="GtdSidebarListRow" parent="GtkListBoxRow">
-    <property name="visible">True</property>
     <property name="can_focus">True</property>
 
     <!-- Gestures -->
@@ -24,7 +23,6 @@
 
     <child>
       <object class="GtkBox">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin_start">12</property>
         <property name="margin_end">12</property>
@@ -33,7 +31,6 @@
         <property name="spacing">6</property>
         <child>
           <object class="GtkImage" id="color_icon">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="width-request">12</property>
             <property name="height-request">12</property>
@@ -46,7 +43,6 @@
         </child>
         <child>
           <object class="GtkLabel" id="name_label">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="hexpand">True</property>
             <property name="xalign">0</property>
@@ -54,7 +50,6 @@
         </child>
         <child>
           <object class="GtkLabel" id="tasks_counter_label">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <attributes>
               <attribute name="scale" value="0.88"/>
@@ -77,7 +72,6 @@
 
     <child>
       <object class="GtkBox">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">12</property>
@@ -85,7 +79,6 @@
 
         <child>
           <object class="GtkLabel" id="rename_label">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="hexpand">True</property>
             <property name="xalign">0.0</property>
@@ -97,14 +90,12 @@
 
         <child>
           <object class="GtkBox">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="spacing">12</property>
 
             <!-- Entry -->
             <child>
               <object class="GtkEntry" id="rename_entry">
-                <property name="visible">True</property>
                 <signal name="activate" handler="on_rename_entry_activated_cb" object="GtdSidebarListRow" swapped="no" />
                 <signal name="notify::text" handler="on_rename_entry_text_changed_cb" object="GtdSidebarListRow" swapped="no" />
               </object>
@@ -113,7 +104,6 @@
             <!-- Button -->
             <child>
               <object class="GtkButton" id="rename_button">
-                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Rename</property>
                 <signal name="clicked" handler="on_rename_button_clicked_cb" object="GtdSidebarListRow" swapped="no" />

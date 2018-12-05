@@ -3,17 +3,14 @@
 <interface>
   <requires lib="gtk+" version="3.18"/>
   <template class="GtdPluginDialogRow" parent="GtkListBoxRow">
-    <property name="visible">True</property>
     <property name="can_focus">True</property>
     <child>
       <object class="GtkGrid">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin">12</property>
         <property name="column_spacing">12</property>
         <child>
           <object class="GtkImage" id="icon_image">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="pixel_size">32</property>
             <property name="icon_name">application-system-symbolic</property>
@@ -26,7 +23,6 @@
         </child>
         <child>
           <object class="GtkLabel" id="name_label">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="hexpand">True</property>
             <property name="xalign">0</property>
@@ -38,7 +34,6 @@
         </child>
         <child>
           <object class="GtkLabel" id="description_label">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="hexpand">True</property>
             <property name="xalign">0</property>
@@ -68,7 +63,6 @@
         </child>
         <child>
           <object class="GtkSwitch" id="loaded_switch">
-            <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="valign">center</property>
             <signal name="notify::active" handler="loaded_switch_changed" object="GtdPluginDialogRow" swapped="yes" />
@@ -81,7 +75,6 @@
         </child>
         <child>
           <object class="GtkButton" id="preferences_button">
-            <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="sensitive">False</property>
             <property name="halign">center</property>
@@ -92,7 +85,6 @@
             </style>
             <child>
               <object class="GtkImage">
-                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="icon_name">preferences-system-symbolic</property>
                 <property name="pixel_size">16</property>

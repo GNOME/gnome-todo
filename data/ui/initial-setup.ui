@@ -11,7 +11,6 @@
     <property name="default_height">600</property>
     <child>
       <object class="GtkBox" id="box">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="valign">center</property>
         <property name="margin_bottom">48</property>
@@ -20,7 +19,6 @@
         <property name="spacing">18</property>
         <child>
           <object class="GtkLabel" id="welcome_label">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Welcome</property>
             <style>
@@ -35,7 +33,6 @@
         </child>
         <child>
           <object class="GtkLabel" id="subtitle_label">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Log in to online accounts to access your tasks</property>
             <style>
@@ -50,7 +47,6 @@
         </child>
         <child>
           <object class="GtdStorageSelector" id="storage_selector">
-            <property name="visible">True</property>
             <property name="receives_default">True</property>
             <property name="width_request">400</property>
             <property name="valign">center</property>
@@ -62,14 +58,12 @@
     </child>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="headerbar">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="title" translatable="yes">To Do Setup</property>
         <child>
           <object class="GtkButton" id="cancel_button">
             <property name="label" translatable="yes">_Cancel</property>
             <property name="use_underline">True</property>
-            <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <signal name="clicked" handler="gtd_initial_setup_window__button_clicked" object="GtdInitialSetupWindow" swapped="yes"/>
@@ -79,7 +73,6 @@
           <object class="GtkButton" id="done_button">
             <property name="label" translatable="yes">_Done</property>
             <property name="use_underline">True</property>
-            <property name="visible">True</property>
             <property name="sensitive">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>

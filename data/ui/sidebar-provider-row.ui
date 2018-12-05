@@ -8,7 +8,6 @@
     <property name="margin_top">6</property>
     <child>
       <object class="GtkBox">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin_start">6</property>
         <property name="margin_end">6</property>
@@ -17,7 +16,6 @@
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkBox">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_start">6</property>
             <property name="margin_end">6</property>
@@ -26,7 +24,6 @@
             <!-- Main label -->
             <child>
               <object class="GtkLabel" id="provider_label">
-                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="xalign">0.0</property>
@@ -43,7 +40,6 @@
             <!-- Stack with the loading spinner & pan-down arrow -->
             <child>
               <object class="GtkStack" id="stack">
-                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="homogeneous">True</property>
                 <property name="transition-type">crossfade</property>
@@ -51,7 +47,6 @@
                 <!-- Loading spinner -->
                 <child>
                   <object class="GtkSpinner">
-                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="active">True</property>
                   </object>
@@ -63,7 +58,6 @@
                 <!-- Drop down icon -->
                 <child>
                   <object class="GtkBox">
-                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                   </object>
                   <packing>
@@ -78,7 +72,6 @@
 
         <child>
           <object class="GtkSeparator">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
         </child>
@@ -86,7 +79,6 @@
         <!-- Loading label -->
         <child>
           <object class="GtkLabel" id="loading_label">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin-start">6</property>
             <property name="margin-end">6</property>

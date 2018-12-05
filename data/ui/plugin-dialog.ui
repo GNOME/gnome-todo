@@ -15,24 +15,20 @@
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkStack" id="stack">
-            <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="hexpand">True</property>
             <property name="vexpand">True</property>
             <property name="interpolate_size">True</property>
             <child>
               <object class="GtkScrolledWindow">
-                <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="propagate_natural_width">True</property>
                 <child>
                   <object class="GtkViewport">
-                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="shadow_type">none</property>
                     <child>
                       <object class="GtkListBox" id="listbox">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="selection_mode">none</property>
                         <style>
@@ -49,7 +45,6 @@
             </child>
             <child>
               <object class="GtkFrame" id="frame">
-                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="shadow_type">none</property>
               </object>
@@ -78,7 +73,6 @@
     </child>
   </template>
   <object class="GtkBox" id="extension_list_placeholder">
-    <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="halign">center</property>
     <property name="valign">center</property>
@@ -88,7 +82,6 @@
     <property name="spacing">18</property>
     <child>
       <object class="GtkImage">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="pixel_size">64</property>
         <property name="icon_name">preferences-system-symbolic</property>
@@ -99,7 +92,6 @@
     </child>
     <child>
       <object class="GtkLabel">
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">No extensions found</property>
         <style>

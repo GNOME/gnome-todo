@@ -70,14 +70,8 @@
           <object class="GtkButton" id="back_button">
             <property name="visible">False</property>
             <property name="can_focus">True</property>
+            <property name="icon-name">go-previous-symbolic</property>
             <signal name="clicked" handler="back_button_clicked" object="GtdPluginDialog" swapped="no" />
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">go-previous-symbolic</property>
-              </object>
-            </child>
           </object>
         </child>
       </object>

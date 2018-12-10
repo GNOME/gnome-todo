@@ -1,4 +1,0 @@
-[Desktop Entry]
-Type=Application
-Exec=gapplication action org.gnome.Todo start-client
-NoDisplay=True

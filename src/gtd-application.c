@@ -137,14 +137,15 @@ gtd_application_show_about (GSimpleAction *simple,
 
   self = GTD_APPLICATION (user_data);
 
+  g_autofree gchar *program_name = g_strconcat (_("To Do"), NAME_SUFFIX, NULL);
   gtk_show_about_dialog (GTK_WINDOW (self->window),
-                         "program-name", _("To Do"),
+                         "program-name", program_name,
                          "version", VERSION,
                          "copyright", _("Copyright \xC2\xA9 2015–2018 The To Do authors"),
                          "license-type", GTK_LICENSE_GPL_3_0,
                          "authors", authors,
                          "artists", artists,
-                         "logo-icon-name", "org.gnome.Todo",
+                         "logo-icon-name", APPLICATION_ID,
                          "translator-credits", _("translator-credits"),
                          NULL);
 }
@@ -163,7 +164,7 @@ GtdApplication *
 gtd_application_new (void)
 {
   return g_object_new (GTD_TYPE_APPLICATION,
-                       "application-id", "org.gnome.Todo",
+                       "application-id", APPLICATION_ID,
                        "flags", G_APPLICATION_HANDLES_COMMAND_LINE,
                        "resource-base-path", "/org/gnome/todo",
                        NULL);
@@ -251,7 +252,7 @@ gtd_application_startup (GApplication *application)
   G_APPLICATION_CLASS (gtd_application_parent_class)->startup (application);
 
   /* window */
-  gtk_window_set_default_icon_name ("org.gnome.Todo");
+  gtk_window_set_default_icon_name (APPLICATION_ID);
   self->window = gtd_window_new (self);
 
   /* CSS provider */

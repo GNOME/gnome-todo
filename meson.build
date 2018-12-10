@@ -41,12 +41,22 @@ gnome_todo_tracing = get_option('tracing')
 
 cc = meson.get_compiler('c')
 
+if get_option('profile') == 'development'
+  profile = 'Devel'
+  name_suffix = ' (Development)'
+else
+  profile = ''
+  name_suffix = ''
+endif
+
 config_h = configuration_data()
 
 config_h.set_quoted('GETTEXT_PACKAGE', meson.project_name())
 
+application_id = 'org.gnome.Todo@0@'.format(profile)
+
 # development build
-config_h.set('DEVELOPMENT_BUILD', gnome_todo_minor_version.is_odd())
+config_h.set('DEVELOPMENT_BUILD', gnome_todo_minor_version.is_odd() or profile == 'Devel')
 
 # debug options
 config_h.set('GNOME_TODO_ENABLE_DEBUG', gnome_todo_debug)
@@ -55,6 +65,9 @@ config_h.set('NDEBUG', not gnome_todo_debug)
 
 # package
 set_defines = [
+  ['APPLICATION_ID', application_id],
+  ['AUTOSTART_FILE', application_id + '.Autostart.desktop'],
+  ['NAME_SUFFIX', name_suffix],
   ['PACKAGE', meson.project_name()],
   ['PACKAGE_BUGREPORT', 'https://gitlab.gnome.org/GNOME/' + meson.project_name() + '/issues/new'],
   ['PACKAGE_NAME', meson.project_name()],
@@ -143,17 +156,15 @@ gnome_todo_deps = [
   cc.find_library('m', required: true)
 ]
 
-vcs_identifier_h = vcs_tag(
-  input: configure_file(
-    output: 'config.h.in',
-    configuration: config_h
-  ),
-  output: 'config.h',
-)
-
-configure_file(
-  output: 'config.h',
-  configuration: config_h
+config = declare_dependency(
+  sources: vcs_tag(
+    fallback: get_option('profile') != 'default'? 'devel' : 'stable',
+    input: configure_file(
+      output: 'config.h.in',
+      configuration: config_h
+    ),
+    output: 'config.h'
+  )
 )
 
 gnome = import('gnome')

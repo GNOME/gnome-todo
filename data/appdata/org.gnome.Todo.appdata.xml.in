@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyleft 2015 Georges Basile Stavracas Neto <georges.stavracas@gmail.com> -->
 <component type="desktop">
-  <id>org.gnome.Todo.desktop</id>
+  <id>org.gnome.Todo</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+</project_license>
   <name>To Do</name>
@@ -246,6 +246,8 @@
     <content_attribute id="money-purchasing">none</content_attribute>
     <content_attribute id="money-gambling">none</content_attribute>
   </content_rating>
+  <launchable type="desktop-id">org.gnome.Todo.desktop</launchable>
+  <developer_name>Georges Basile Stavracas Neto</developer_name>
   <update_contact>georges.stavracas@gmail.com</update_contact>
   <translation type="gettext">gnome-todo</translation>
 </component>

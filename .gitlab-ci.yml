@@ -12,9 +12,6 @@ stages:
    - build
    - review
 
-variables:
-    DEVELOPMENT_FLATPAK_ID: "TodoDevel"
-
 
 ##################
 # Fedora Rawhide #
@@ -65,21 +62,32 @@ ubuntu:devel:
 flatpak:master:
     image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master
     stage: flatpak
+    
+    variables:
+        MANIFEST_PATH: "build-aux/flatpak/org.gnome.Todo.json"
+        RUNTIME_REPO: "https://sdk.gnome.org/gnome-nightly.flatpakrepo"
+        # Replace with your application name, as written in the manifest
+        FLATPAK_MODULE: "gnome-todo"
+        # Make sure to keep this in sync with the Flatpak manifest, all arguments
+        # are passed except the config-args because we build it ourselves
+        MESON_ARGS: "-Dtracing=true -Dprofile=development"
+        DBUS_ID: "org.gnome.TodoDevel"
+        BUNDLE: "org.gnome.TodoDevel.flatpak"
 
     script:
-    # Print debug information
-    - build-aux/ci/debug.sh environment
-    - build-aux/ci/debug.sh git
+        - flatpak-builder --stop-at=${FLATPAK_MODULE} app ${MANIFEST_PATH}
+        - flatpak build app meson --prefix=/app ${MESON_ARGS} _build
+        - flatpak build app ninja -C _build install
+        - flatpak-builder --finish-only --repo=repo app ${MANIFEST_PATH}
+        # Generate a Flatpak bundle
+        - flatpak build-bundle repo ${BUNDLE} --runtime-repo=${RUNTIME_REPO} ${DBUS_ID}
+        # Run automatic tests inside the Flatpak env
+        - xvfb-run -a -s "-screen 0 1024x768x24" flatpak build app ninja -C _build test
 
-    # Setup the current directory
-    - build-aux/ci/setup.sh $DEVELOPMENT_FLATPAK_ID $CI_COMMIT_SHA
-
-    # Build and generate the bundle
-    - build-aux/ci/build-flatpak-bundle.sh $DEVELOPMENT_FLATPAK_ID
 
     artifacts:
         paths:
-        - org.gnome.$DEVELOPMENT_FLATPAK_ID.flatpak
+        - ${BUNDLE}
         expire_in: 3 days
     cache:
         paths:

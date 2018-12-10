@@ -1,6 +1,8 @@
 option('documentation', type: 'boolean', value: false, description: 'Use gtk-doc to build documentation')
 option('introspection', type: 'boolean', value: true, description: 'Enable GObject Introspection (depends on GObject)')
 option('tracing', type: 'boolean', value: false, description: 'Enable application tracing')
+option('profile', type: 'combo', choices: ['default', 'development'], value: 'default', description: 'Build profiles')
+
 
 # Plugins
 option('score_plugin', type: 'boolean', value: true, description: 'Enable Score plugin')

@@ -3,7 +3,7 @@ Name=To Do
 Comment=Manage your personal tasks
 Exec=gnome-todo
 # Translators: Do NOT translate or transliterate this text (this is an icon file name)!
-Icon=org.gnome.Todo
+Icon=@icon@
 Terminal=false
 Type=Application
 StartupNotify=true

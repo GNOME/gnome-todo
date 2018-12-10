@@ -1,22 +1,26 @@
-desktop = 'org.gnome.Todo.desktop'
-
-i18n.merge_file(
-  desktop,
+desktop_conf = configuration_data()
+desktop_conf.set('icon', application_id)
+desktop = i18n.merge_file(
   type: 'desktop',
-  input: desktop + '.in',
-  output: desktop,
+  input: configure_file(
+    input: 'org.gnome.Todo.desktop.in.in',
+    output: 'org.gnome.Todo.desktop.in',
+    configuration: desktop_conf
+  ),
+  output: '@0@.desktop'.format(application_id),
   po_dir: po_dir,
   install: true,
   install_dir: join_paths(gnome_todo_datadir, 'applications')
 )
 
-autostart = 'org.gnome.Todo.Autostart.desktop'
-
-i18n.merge_file(
-  autostart,
+autostart = i18n.merge_file(
   type: 'desktop',
-  input: autostart + '.in',
-  output: autostart,
+  input: configure_file(
+    input: 'org.gnome.Todo.Autostart.desktop.in.in',
+    output: 'org.gnome.Todo.Autostart.desktop.in',
+    configuration: desktop_conf
+  ),
+  output: '@0@.Autostart.desktop'.format(application_id),
   po_dir: po_dir,
   install: true,
   install_dir: gnome_todo_pkgdatadir
@@ -24,12 +28,11 @@ i18n.merge_file(
 
 service_conf = configuration_data()
 service_conf.set('bindir', gnome_todo_bindir)
+service_conf.set('application_id', application_id)
 
-service = 'org.gnome.Todo.service'
-
-configure_file(
-  input: service + '.in',
-  output: service,
+service = configure_file(
+  input: 'org.gnome.Todo.service.in',
+  output: '@0@.service'.format(application_id),
   install: true,
   install_dir: join_paths(gnome_todo_datadir, 'dbus-1', 'services'),
   configuration: service_conf

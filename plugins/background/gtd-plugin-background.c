@@ -25,7 +25,6 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
-#define AUTOSTART_FILE                 "org.gnome.Todo.Autostart.desktop"
 #define AUTOSTART_NOTIFICATION_ID      "Gtd::BackgroundPlugin::autostart_notification"
 #define AUTOSTART_NOTIFICATION_TIMEOUT 3  /* seconds */
 #define MAX_BODY_LENGTH                50 /* chars */

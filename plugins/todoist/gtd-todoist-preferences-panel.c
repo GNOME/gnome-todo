@@ -20,6 +20,7 @@
 
 #include "gtd-todoist-preferences-panel.h"
 
+#include "config.h"
 #include <glib/gi18n.h>
 
 struct _GtdTodoistPreferencesPanel
@@ -146,7 +147,7 @@ on_goa_account_added (GoaClient                   *client,
 
   g_object_set_data_full (G_OBJECT (row), "goa-object", g_object_ref (object), g_object_unref);
 
-  logo = gtk_image_new_from_icon_name ("org.gnome.Todo");
+  logo = gtk_image_new_from_icon_name (APPLICATION_ID);
   desc = gtk_label_new (identity);
   box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
 

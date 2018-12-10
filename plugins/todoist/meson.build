@@ -17,7 +17,7 @@ plugins_libs += static_library(
           plugin_name,
               sources: sources,
   include_directories: plugins_incs,
-         dependencies: todoist_deps
+         dependencies: [ vcs_identifier_h, todoist_deps ]
 )
 
 plugin_data = plugin_name + '.plugin'

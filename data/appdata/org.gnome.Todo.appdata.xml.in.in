@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyleft 2015 Georges Basile Stavracas Neto <georges.stavracas@gmail.com> -->
 <component type="desktop">
-  <id>org.gnome.Todo.desktop</id>
+  <id>@appid@</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+</project_license>
   <name>To Do</name>
@@ -9,8 +9,8 @@
 
   <description>
     <p>
-      GNOME To Do is a task management application designed to integrate with GNOME. Save and order your todos. 
-      Manage multiple todo lists. Keep your todos on your computer or sync them with cloud providers. 
+      GNOME To Do is a task management application designed to integrate with GNOME. Save and order your todos.
+      Manage multiple todo lists. Keep your todos on your computer or sync them with cloud providers.
       Customize your experience with plugins.
     </p>
   </description>

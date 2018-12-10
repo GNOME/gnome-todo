@@ -175,7 +175,7 @@ gnome_todo = executable(
   meson.project_name(),
                sources,
   include_directories: incs,
-         dependencies: gtd_deps,
+         dependencies: [ vcs_identifier_h, gtd_deps ],
                c_args: cflags,
             link_args: ldflags,
               install: true,

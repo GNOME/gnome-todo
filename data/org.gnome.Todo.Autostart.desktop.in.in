@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Exec=gapplication action @application_id@ start-client
+NoDisplay=True

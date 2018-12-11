@@ -247,7 +247,7 @@
     <content_attribute id="money-gambling">none</content_attribute>
   </content_rating>
   <launchable type="desktop-id">org.gnome.Todo.desktop</launchable>
-  <developer_name>The GNOME Project</developer_name>
+  <developer_name>Georges Basile Stavracas Neto</developer_name>
   <update_contact>georges.stavracas@gmail.com</update_contact>
   <translation type="gettext">gnome-todo</translation>
 </component>

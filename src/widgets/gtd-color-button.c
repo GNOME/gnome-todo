@@ -88,13 +88,19 @@ gtd_color_button_measure (GtkWidget      *widget,
 }
 
 static void
-gtd_color_button_size_allocate (GtkWidget           *widget,
-                                const GtkAllocation *allocation,
-                                gint                 baseline)
+gtd_color_button_size_allocate (GtkWidget *widget,
+                                gint       width,
+                                gint       height,
+                                gint       baseline)
 {
   GtdColorButton *self = GTD_COLOR_BUTTON (widget);
+  GtkAllocation allocation;
 
-  gtk_widget_size_allocate (self->selected_icon, allocation, baseline);
+  allocation.x = allocation.y = 0;
+  allocation.width = width;
+  allocation.height = height;
+
+  gtk_widget_size_allocate (self->selected_icon, &allocation, baseline);
 }
 
 static void

@@ -89,7 +89,6 @@ gtd_application_activate_action (GSimpleAction *simple,
 {
   GtdApplication *self = GTD_APPLICATION (user_data);
 
-  gtk_widget_show (self->window);
   gtk_window_present (GTK_WINDOW (self->window));
 }
 
@@ -172,7 +171,6 @@ gtd_application_new (void)
 static void
 run_window (GtdApplication *self)
 {
-  gtk_widget_show (self->window);
   gtk_window_present (GTK_WINDOW (self->window));
 }
 

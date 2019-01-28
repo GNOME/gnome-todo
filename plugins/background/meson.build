@@ -4,7 +4,7 @@ plugins_ldflags += ['-Wl,--undefined=gtd_plugin_background_register_types']
 
 plugins_libs += static_library(
           plugin_name,
-              sources: 'gtd-plugin-' + plugin_name + '.c',
+              sources: ['gtd-plugin-' + plugin_name + '.c', vcs_identifier_h],
   include_directories: plugins_incs,
          dependencies: gnome_todo_deps,
                c_args: '-DPACKAGE_DATA_DIR="@0@"'.format(gnome_todo_pkgdatadir),

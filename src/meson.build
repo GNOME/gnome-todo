@@ -189,7 +189,7 @@ gnome_todo = executable(
 
 libgtd = shared_library(
                 'gtd',
-              sources: sources,
+              sources: sources + [vcs_identifier_h],
               version: libversion,
             soversion: soversion,
   include_directories: incs,

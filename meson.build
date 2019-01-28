@@ -161,11 +161,6 @@ vcs_identifier_h = vcs_tag(
   output: 'config.h',
 )
 
-configure_file(
-  output: 'config.h',
-  configuration: config_h
-)
-
 gnome = import('gnome')
 i18n = import('i18n')
 pkg = import('pkgconfig')

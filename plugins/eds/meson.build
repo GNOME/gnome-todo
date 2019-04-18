@@ -8,10 +8,9 @@ plugins_ldflags += ['-Wl,--undefined=gtd_plugin_eds_register_types']
 ################
 
 eds_plugin_deps = [
-  dependency('libecal-1.2', version: '>= 3.13.90'),
+  dependency('libecal-2.0', version: '>= 3.33.1'),
   dependency('libedataserver-1.2', version: '>= 3.17.1'),
   dependency('libedataserverui-1.2', version: '>= 3.17.1'),
-  dependency('libical', version: '>= 0.43'),
 ]
 
 eds_plugin_deps += gnome_todo_deps

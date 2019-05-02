@@ -163,7 +163,7 @@ on_view_objects_added_cb (ECalClientView *view,
       GtdTask *task;
       const gchar *uid;
 
-      component = e_cal_component_new_from_icalcomponent (i_cal_component_new_clone (l->data));
+      component = e_cal_component_new_from_icalcomponent (i_cal_component_clone (l->data));
       uid = e_cal_component_get_uid (component);
 
       task = gtd_task_list_get_task_by_id (self, uid);
@@ -213,7 +213,7 @@ on_view_objects_modified_cb (ECalClientView *view,
       GtdTask *task;
       const gchar *uid;
 
-      component = e_cal_component_new_from_icalcomponent (i_cal_component_new_clone (l->data));
+      component = e_cal_component_new_from_icalcomponent (i_cal_component_clone (l->data));
       uid = e_cal_component_get_uid (component);
 
       task = gtd_task_list_get_task_by_id (self, uid);

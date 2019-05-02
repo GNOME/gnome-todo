@@ -210,7 +210,7 @@ gtd_task_eds_set_complete (GtdTask  *task,
       percent = 100;
       status = ICAL_STATUS_COMPLETED;
 
-      dt = i_cal_time_null_time ();
+      dt = i_cal_time_new_null_time ();
       i_cal_time_set_date (dt,
                            g_date_time_get_year (now),
                            g_date_time_get_month (now),
@@ -226,7 +226,7 @@ gtd_task_eds_set_complete (GtdTask  *task,
        * FIXME: This does not do anything until we have an ical
        * timezone associated with the task
        */
-      i_cal_timezone_convert_time (dt, NULL, i_cal_timezone_get_utc_timezone ());
+      i_cal_time_convert_timezone (dt, NULL, i_cal_timezone_get_utc_timezone ());
     }
   else
     {
@@ -331,7 +331,7 @@ gtd_task_eds_set_due_date (GtdTask   *task,
            dt &&
            g_date_time_compare (current_dt, dt) != 0))
         {
-          idt = i_cal_time_null_time ();
+          idt = i_cal_time_new_null_time ();
 
           g_date_time_ref (dt);
 

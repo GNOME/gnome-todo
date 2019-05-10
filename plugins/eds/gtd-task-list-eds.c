@@ -113,7 +113,7 @@ update_changed_tasks (GtdTaskListEds *self,
   g_hash_table_iter_init (&iter, changed_tasks);
   while (g_hash_table_iter_next (&iter, (gpointer *) &task, NULL))
     {
-      icalcomponent *ical_comp;
+      ICalComponent *ical_comp;
       ECalComponent *comp;
 
       comp = gtd_task_eds_get_component (GTD_TASK_EDS (task));
@@ -125,6 +125,7 @@ update_changed_tasks (GtdTaskListEds *self,
   e_cal_client_modify_objects (self->client,
                                components,
                                E_CAL_OBJ_MOD_THIS,
+                               E_CAL_OPERATION_FLAG_NONE,
                                self->cancellable,
                                on_client_objects_modified_for_migration_cb,
                                self);
@@ -235,19 +236,19 @@ setup_parent_task (GtdTaskListEds *self,
                    GtdTask        *task)
 {
   ECalComponent *component;
-  icalcomponent *ical_comp;
-  icalproperty *property;
+  ICalComponent *ical_comp;
+  ICalProperty *property;
   GtdTask *parent_task;
   const gchar *parent_uid;
 
   component = gtd_task_eds_get_component (GTD_TASK_EDS (task));
   ical_comp = e_cal_component_get_icalcomponent (component);
-  property = icalcomponent_get_first_property (ical_comp, ICAL_RELATEDTO_PROPERTY);
+  property = i_cal_component_get_first_property (ical_comp, I_CAL_RELATEDTO_PROPERTY);
 
   if (!property)
     return;
 
-  parent_uid = icalproperty_get_relatedto (property);
+  parent_uid = i_cal_property_get_relatedto (property);
   parent_task = gtd_task_list_get_task_by_id (GTD_TASK_LIST (self), parent_uid);
 
   /* Nothing to do, parent task is already set */
@@ -266,6 +267,8 @@ setup_parent_task (GtdTaskListEds *self,
 
       g_ptr_array_add (self->pending_subtasks, data);
     }
+
+  g_object_unref (property);
 }
 
 static void
@@ -340,8 +343,8 @@ on_view_objects_added_cb (ECalClientView *view,
       GtdTask *task;
       const gchar *uid;
 
-      component = e_cal_component_new_from_string (icalcomponent_as_ical_string (l->data));
-      e_cal_component_get_uid (component, &uid);
+      component = e_cal_component_new_from_icalcomponent (i_cal_component_clone (l->data));
+      uid = e_cal_component_get_uid (component);
 
       task = gtd_task_list_get_task_by_id (self, uid);
 
@@ -392,8 +395,8 @@ on_view_objects_modified_cb (ECalClientView *view,
       GtdTask *task;
       const gchar *uid;
 
-      component = e_cal_component_new_from_string (icalcomponent_as_ical_string (l->data));
-      e_cal_component_get_uid (component, &uid);
+      component = e_cal_component_new_from_icalcomponent (i_cal_component_clone (l->data));
+      uid = e_cal_component_get_uid (component);
 
       task = gtd_task_list_get_task_by_id (self, uid);
 
@@ -425,7 +428,7 @@ on_view_objects_removed_cb (ECalClientView *view,
       GtdTask *task;
 
       id = l->data;
-      task = gtd_task_list_get_task_by_id (self, id->uid);
+      task = gtd_task_list_get_task_by_id (self, e_cal_component_id_get_uid (id));
 
       if (!task)
         continue;

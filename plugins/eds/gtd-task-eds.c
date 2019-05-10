@@ -50,19 +50,19 @@ static GParamSpec *properties [N_PROPS];
  */
 
 static GDateTime*
-convert_icaltime (const icaltimetype *date)
+convert_icaltime (const ICalTime *date)
 {
   GDateTime *dt;
 
   if (!date)
     return NULL;
 
-  dt = g_date_time_new_utc (date->year,
-                            date->month,
-                            date->day,
-                            date->is_date ? 0 : date->hour,
-                            date->is_date ? 0 : date->minute,
-                            date->is_date ? 0 : date->second);
+  dt = g_date_time_new_utc (i_cal_time_get_year (date),
+                            i_cal_time_get_month (date),
+                            i_cal_time_get_day (date),
+                            i_cal_time_is_date (date) ? 0 : i_cal_time_get_hour (date),
+                            i_cal_time_is_date (date) ? 0 : i_cal_time_get_minute (date),
+                            i_cal_time_is_date (date) ? 0 : i_cal_time_get_second (date));
 
   return dt;
 }
@@ -71,19 +71,20 @@ static void
 set_description (GtdTaskEds  *self,
                  const gchar *description)
 {
-  ECalComponentText text;
+  ECalComponentText *text;
   GSList note;
 
-  text.value = description && *description ? description : "";
-  text.altrep = NULL;
+  text = e_cal_component_text_new (description ? description : "", NULL);
 
-  note.data = &text;
+  note.data = text;
   note.next = NULL;
 
   g_clear_pointer (&self->description, g_free);
   self->description = g_strdup (description);
 
-  e_cal_component_set_description_list (self->new_component, &note);
+  e_cal_component_set_descriptions (self->new_component, (description && *description) ? &note : NULL);
+
+  e_cal_component_text_free (text);
 }
 
 static void
@@ -94,7 +95,7 @@ setup_description (GtdTaskEds *self)
   GSList *l;
 
   /* concatenates the multiple descriptions a task may have */
-  e_cal_component_get_description_list (self->new_component, &text_list);
+  text_list = e_cal_component_get_descriptions (self->new_component);
 
   for (l = text_list; l != NULL; l = l->next)
     {
@@ -109,21 +110,21 @@ setup_description (GtdTaskEds *self)
             {
               carrier = g_strconcat (desc,
                                      "\n",
-                                     text->value,
+                                     e_cal_component_text_get_value (text),
                                      NULL);
               g_free (desc);
               desc = carrier;
             }
           else
             {
-              desc = g_strdup (text->value);
+              desc = g_strdup (e_cal_component_text_get_value (text));
             }
         }
     }
 
   set_description (self, desc);
 
-  e_cal_component_free_text_list (text_list);
+  g_slist_free_full (text_list, e_cal_component_text_free);
 }
 
 
@@ -142,7 +143,7 @@ gtd_task_eds_get_uid (GtdObject *object)
   self = GTD_TASK_EDS (object);
 
   if (self->new_component)
-    e_cal_component_get_uid (self->new_component, &uid);
+    uid = e_cal_component_get_uid (self->new_component);
   else
     uid = NULL;
 
@@ -163,7 +164,7 @@ gtd_task_eds_set_uid (GtdObject   *object,
   if (!self->new_component)
     return;
 
-  e_cal_component_get_uid (self->new_component, &current_uid);
+  current_uid = e_cal_component_get_uid (self->new_component);
 
   if (g_strcmp0 (current_uid, uid) != 0)
     {
@@ -181,20 +182,19 @@ gtd_task_eds_set_uid (GtdObject   *object,
 static GDateTime*
 gtd_task_eds_get_completion_date (GtdTask *task)
 {
-  icaltimetype *idt;
+  ICalTime *idt;
   GtdTaskEds *self;
   GDateTime *dt;
 
   self = GTD_TASK_EDS (task);
-  idt = NULL;
   dt = NULL;
 
-  e_cal_component_get_completed (self->new_component, &idt);
+  idt = e_cal_component_get_completed (self->new_component);
 
   if (idt)
     dt = convert_icaltime (idt);
 
-  g_clear_pointer (&idt, e_cal_component_free_icaltimetype);
+  g_clear_object (&idt);
 
   return dt;
 }
@@ -204,36 +204,37 @@ gtd_task_eds_set_completion_date (GtdTask   *task,
                                   GDateTime *dt)
 {
   GtdTaskEds *self;
-  icaltimetype *idt;
+  ICalTime *idt;
 
   self = GTD_TASK_EDS (task);
 
-  idt = g_new0 (icaltimetype, 1);
-  idt->year = g_date_time_get_year (dt);
-  idt->month = g_date_time_get_month (dt);
-  idt->day = g_date_time_get_day_of_month (dt);
-  idt->hour = g_date_time_get_hour (dt);
-  idt->minute = g_date_time_get_minute (dt);
-  idt->second = g_date_time_get_seconds (dt);
-  idt->zone = icaltimezone_get_utc_timezone ();
+  idt = i_cal_time_new_null_time ();
+  i_cal_time_set_date (idt,
+                       g_date_time_get_year (dt),
+                       g_date_time_get_month (dt),
+                       g_date_time_get_day_of_month (dt));
+  i_cal_time_set_time (idt,
+                       g_date_time_get_hour (dt),
+                       g_date_time_get_minute (dt),
+                       g_date_time_get_seconds (dt));
+  i_cal_time_set_timezone (idt, i_cal_timezone_get_utc_timezone ());
 
   /* convert timezone
    *
    * FIXME: This does not do anything until we have an ical
    * timezone associated with the task
    */
-  icaltimezone_convert_time (idt, NULL, icaltimezone_get_utc_timezone ());
+  i_cal_time_convert_timezone (idt, NULL, i_cal_timezone_get_utc_timezone ());
 
   e_cal_component_set_completed (self->new_component, idt);
 
-  if (idt)
-    e_cal_component_free_icaltimetype (idt);
+  g_object_unref (idt);
 }
 
 static gboolean
 gtd_task_eds_get_complete (GtdTask *task)
 {
-  icalproperty_status status;
+  ICalPropertyStatus status;
   GtdTaskEds *self;
   gboolean completed;
 
@@ -241,8 +242,8 @@ gtd_task_eds_get_complete (GtdTask *task)
 
   self = GTD_TASK_EDS (task);
 
-  e_cal_component_get_status (self->new_component, &status);
-  completed = status == ICAL_STATUS_COMPLETED;
+  status = e_cal_component_get_status (self->new_component);
+  completed = status == I_CAL_STATUS_COMPLETED;
 
   return completed;
 }
@@ -251,7 +252,7 @@ static void
 gtd_task_eds_set_complete (GtdTask  *task,
                            gboolean  complete)
 {
-  icalproperty_status status;
+  ICalPropertyStatus status;
   GtdTaskEds *self;
   gint percent;
   g_autoptr (GDateTime) now = NULL;
@@ -262,15 +263,15 @@ gtd_task_eds_set_complete (GtdTask  *task,
   if (complete)
     {
       percent = 100;
-      status = ICAL_STATUS_COMPLETED;
+      status = I_CAL_STATUS_COMPLETED;
     }
   else
     {
       percent = 0;
-      status = ICAL_STATUS_NEEDSACTION;
+      status = I_CAL_STATUS_NEEDSACTION;
     }
 
-  e_cal_component_set_percent_as_int (self->new_component, percent);
+  e_cal_component_set_percent_complete (self->new_component, percent);
   e_cal_component_set_status (self->new_component, status);
   gtd_task_eds_set_completion_date (task, now);
 }
@@ -278,20 +279,19 @@ gtd_task_eds_set_complete (GtdTask  *task,
 static GDateTime*
 gtd_task_eds_get_creation_date (GtdTask *task)
 {
-  icaltimetype *idt;
+  ICalTime *idt;
   GtdTaskEds *self;
   GDateTime *dt;
 
   self = GTD_TASK_EDS (task);
-  idt = NULL;
   dt = NULL;
 
-  e_cal_component_get_created (self->new_component, &idt);
+  idt = e_cal_component_get_created (self->new_component);
 
   if (idt)
     dt = convert_icaltime (idt);
 
-  g_clear_pointer (&idt, e_cal_component_free_icaltimetype);
+  g_clear_object (&idt);
 
   return dt;
 }
@@ -321,7 +321,7 @@ gtd_task_eds_set_description (GtdTask     *task,
 static GDateTime*
 gtd_task_eds_get_due_date (GtdTask *task)
 {
-  ECalComponentDateTime comp_dt;
+  ECalComponentDateTime *comp_dt;
   GtdTaskEds *self;
   GDateTime *date;
 
@@ -329,10 +329,12 @@ gtd_task_eds_get_due_date (GtdTask *task)
 
   self = GTD_TASK_EDS (task);
 
-  e_cal_component_get_due (self->new_component, &comp_dt);
+  comp_dt = e_cal_component_get_due (self->new_component);
+  if (!comp_dt)
+    return NULL;
 
-  date = convert_icaltime (comp_dt.value);
-  e_cal_component_free_datetime (&comp_dt);
+  date = convert_icaltime (e_cal_component_datetime_get_value (comp_dt));
+  e_cal_component_datetime_free (comp_dt);
 
   return date;
 }
@@ -352,11 +354,10 @@ gtd_task_eds_set_due_date (GtdTask   *task,
 
   if (dt != current_dt)
     {
-      ECalComponentDateTime comp_dt;
-      icaltimetype *idt;
+      ECalComponentDateTime *comp_dt;
+      ICalTime *idt;
 
-      comp_dt.value = NULL;
-      comp_dt.tzid = NULL;
+      comp_dt = NULL;
       idt = NULL;
 
       if (!current_dt ||
@@ -364,36 +365,34 @@ gtd_task_eds_set_due_date (GtdTask   *task,
            dt &&
            g_date_time_compare (current_dt, dt) != 0))
         {
-          idt = g_new0 (icaltimetype, 1);
+          idt = i_cal_time_new_null_time ();
 
           g_date_time_ref (dt);
 
           /* Copy the given dt */
-          idt->year = g_date_time_get_year (dt);
-          idt->month = g_date_time_get_month (dt);
-          idt->day = g_date_time_get_day_of_month (dt);
-          idt->hour = g_date_time_get_hour (dt);
-          idt->minute = g_date_time_get_minute (dt);
-          idt->second = g_date_time_get_seconds (dt);
-          idt->is_date = (idt->hour == 0 &&
-                          idt->minute == 0 &&
-                          idt->second == 0);
+          i_cal_time_set_date (idt,
+                               g_date_time_get_year (dt),
+                               g_date_time_get_month (dt),
+                               g_date_time_get_day_of_month (dt));
+          i_cal_time_set_time (idt,
+                               g_date_time_get_hour (dt),
+                               g_date_time_get_minute (dt),
+                               g_date_time_get_seconds (dt));
+          i_cal_time_set_is_date (idt,
+                          i_cal_time_get_hour (idt) == 0 &&
+                          i_cal_time_get_minute (idt) == 0 &&
+                          i_cal_time_get_second (idt) == 0);
 
-          comp_dt.tzid = g_strdup ("UTC");
+          comp_dt = e_cal_component_datetime_new_take (idt, g_strdup ("UTC"));
 
-          comp_dt.value = idt;
+          e_cal_component_set_due (self->new_component, comp_dt);
 
-          e_cal_component_set_due (self->new_component, &comp_dt);
-
-          e_cal_component_free_datetime (&comp_dt);
+          e_cal_component_datetime_free (comp_dt);
 
           g_date_time_unref (dt);
         }
       else if (!dt)
         {
-          idt = NULL;
-          comp_dt.tzid = NULL;
-
           e_cal_component_set_due (self->new_component, NULL);
         }
     }
@@ -404,24 +403,21 @@ gtd_task_eds_set_due_date (GtdTask   *task,
 static gint64
 gtd_task_eds_get_position (GtdTask *task)
 {
-  icalcomponent *ical_comp;
-  icalproperty *property;
+  g_autofree gchar *value = NULL;
+  ICalComponent *ical_comp;
+  gint64 position = -1;
   GtdTaskEds *self;
 
   self = GTD_TASK_EDS (task);
   ical_comp = e_cal_component_get_icalcomponent (self->new_component);
 
-  for (property = icalcomponent_get_first_property (ical_comp, ICAL_X_PROPERTY);
-       property;
-       property = icalcomponent_get_next_property (ical_comp, ICAL_X_PROPERTY))
+  value = e_cal_util_component_dup_x_property (ical_comp, ICAL_X_GNOME_TODO_POSITION);
+  if (value)
     {
-      const gchar *name = icalproperty_get_x_name (property);
-
-      if (g_strcmp0 (name, ICAL_X_GNOME_TODO_POSITION) == 0)
-        return g_ascii_strtoll (icalproperty_get_x (property), NULL, 10);
+        position = g_ascii_strtoll (value, NULL, 10);
     }
 
-  return -1;
+  return position;
 }
 
 void
@@ -429,57 +425,34 @@ gtd_task_eds_set_position (GtdTask *task,
                            gint64   position)
 {
   g_autofree gchar *value = NULL;
-  icalcomponent *ical_comp;
-  icalproperty *property;
+  ICalComponent *ical_comp;
   GtdTaskEds *self;
 
   self = GTD_TASK_EDS (task);
-  value = g_strdup_printf ("%ld", position);
+  if (position != -1)
+    value = g_strdup_printf ("%" G_GINT64_FORMAT, position);
   ical_comp = e_cal_component_get_icalcomponent (self->new_component);
 
-  for (property = icalcomponent_get_first_property (ical_comp, ICAL_X_PROPERTY);
-       property;
-       property = icalcomponent_get_next_property (ical_comp, ICAL_X_PROPERTY))
-    {
-      const gchar *name = icalproperty_get_x_name (property);
-
-      if (g_strcmp0 (name, ICAL_X_GNOME_TODO_POSITION) == 0)
-        break;
-    }
-
-  if (!property)
-    {
-      property = icalproperty_new_x (value);
-      icalproperty_set_x_name (property, ICAL_X_GNOME_TODO_POSITION);
-
-      icalcomponent_add_property (ical_comp, property);
-    }
-  else
-    {
-      icalproperty_set_x (property, value);
-    }
+  e_cal_util_component_set_x_property (ical_comp, ICAL_X_GNOME_TODO_POSITION, value);
 }
 
 static const gchar*
 gtd_task_eds_get_title (GtdTask *task)
 {
-  ECalComponentText summary;
   GtdTaskEds *self;
 
   g_return_val_if_fail (GTD_IS_TASK_EDS (task), NULL);
 
   self = GTD_TASK_EDS (task);
 
-  e_cal_component_get_summary (self->new_component, &summary);
-
-  return summary.value;
+  return i_cal_component_get_summary (e_cal_component_get_icalcomponent (self->new_component));
 }
 
 static void
 gtd_task_eds_set_title (GtdTask     *task,
                         const gchar *title)
 {
-  ECalComponentText new_summary;
+  ECalComponentText *new_summary;
   GtdTaskEds *self;
 
   g_return_if_fail (GTD_IS_TASK_EDS (task));
@@ -487,20 +460,21 @@ gtd_task_eds_set_title (GtdTask     *task,
 
   self = GTD_TASK_EDS (task);
 
-  new_summary.value = title;
-  new_summary.altrep = NULL;
+  new_summary = e_cal_component_text_new (title, NULL);
 
-  e_cal_component_set_summary (self->new_component, &new_summary);
+  e_cal_component_set_summary (self->new_component, new_summary);
+
+  e_cal_component_text_free (new_summary);
 }
 
 static void
 gtd_task_eds_subtask_added (GtdTask *task,
                             GtdTask *subtask)
 {
-  ECalComponentId *id;
+  const gchar *uid;
   ECalComponent *comp;
-  icalcomponent *ical_comp;
-  icalproperty *property;
+  ICalComponent *ical_comp;
+  ICalProperty *property;
   GtdTaskEds *subtask_self;
   GtdTaskEds *self;
 
@@ -510,25 +484,25 @@ gtd_task_eds_subtask_added (GtdTask *task,
   /* Hook with parent's :subtask_added */
   GTD_TASK_CLASS (gtd_task_eds_parent_class)->subtask_added (task, subtask);
 
-  id = e_cal_component_get_id (self->new_component);
+  uid = e_cal_component_get_uid (self->new_component);
   comp = subtask_self->new_component;
   ical_comp = e_cal_component_get_icalcomponent (comp);
-  property = icalcomponent_get_first_property (ical_comp, ICAL_RELATEDTO_PROPERTY);
+  property = i_cal_component_get_first_property (ical_comp, I_CAL_RELATEDTO_PROPERTY);
 
   if (property)
-    icalproperty_set_relatedto (property, id->uid);
+    i_cal_property_set_relatedto (property, uid);
   else
-    icalcomponent_add_property (ical_comp, icalproperty_new_relatedto (id->uid));
+    i_cal_component_take_property (ical_comp, i_cal_property_new_relatedto (uid));
 
-  e_cal_component_free_id (id);
+  g_clear_object (&property);
 }
 
 static void
 gtd_task_eds_subtask_removed (GtdTask *task,
                               GtdTask *subtask)
 {
-  icalcomponent *ical_comp;
-  icalproperty *property;
+  ICalComponent *ical_comp;
+  ICalProperty *property;
   GtdTaskEds *subtask_self;
 
   subtask_self = GTD_TASK_EDS (subtask);
@@ -538,12 +512,13 @@ gtd_task_eds_subtask_removed (GtdTask *task,
 
   /* Remove the parent link from the subtask's component */
   ical_comp = e_cal_component_get_icalcomponent (subtask_self->new_component);
-  property = icalcomponent_get_first_property (ical_comp, ICAL_RELATEDTO_PROPERTY);
+  property = i_cal_component_get_first_property (ical_comp, I_CAL_RELATEDTO_PROPERTY);
 
   if (!property)
     return;
 
-  icalcomponent_remove_property (ical_comp, property);
+  i_cal_component_remove_property (ical_comp, property);
+  g_object_unref (property);
 }
 
 

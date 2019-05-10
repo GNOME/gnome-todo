@@ -23,5 +23,5 @@
 #include <libecal/libecal.h>
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (ECalComponent, g_object_unref);
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (ECalComponentId, e_cal_component_free_id);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (ECalComponentId, e_cal_component_id_free);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (ECalClient, g_object_unref);

@@ -583,6 +583,7 @@ gtd_provider_eds_create_task (GtdProvider *provider,
 
   e_cal_client_create_object (client,
                               e_cal_component_get_icalcomponent (updated_component),
+                              E_CAL_OPERATION_FLAG_NONE,
                               NULL,
                               (GAsyncReadyCallback) on_task_created_cb,
                               new_task);
@@ -616,6 +617,7 @@ gtd_provider_eds_update_task (GtdProvider *provider,
   e_cal_client_modify_object (client,
                               e_cal_component_get_icalcomponent (component),
                               E_CAL_OBJ_MOD_THIS,
+                              E_CAL_OPERATION_FLAG_NONE,
                               NULL,
                               (GAsyncReadyCallback) on_task_modified_cb,
                               task);
@@ -645,9 +647,10 @@ gtd_provider_eds_remove_task (GtdProvider *provider,
   gtd_object_push_loading (GTD_OBJECT (provider));
 
   e_cal_client_remove_object (client,
-                              id->uid,
-                              id->rid,
+                              e_cal_component_id_get_uid (id),
+                              e_cal_component_id_get_rid (id),
                               E_CAL_OBJ_MOD_THIS,
+                              E_CAL_OPERATION_FLAG_NONE,
                               NULL,
                               (GAsyncReadyCallback) on_task_removed_cb,
                               provider);

@@ -84,3 +84,8 @@ review:
 stop_review:
     extends: .stop_review
     stage: review
+
+flatpak:nightly:
+    extends: '.publish_nightly'
+    dependencies:
+        - flatpak:master

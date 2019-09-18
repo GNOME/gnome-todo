@@ -146,24 +146,6 @@
             ]
         },
         {
-            "name" : "gtk4",
-            "buildsystem": "meson",
-            "builddir": true,
-            "config-opts": [
-                "-Dbuild-examples=false",
-                "-Dbuild-tests=false",
-                "-Ddemos=false",
-                "--prefix=/app",
-                "--libdir=/app/lib"
-            ],
-            "sources": [
-                {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/gtk.git"
-                }
-            ]
-        },
-        {
             "name" : "gnome-todo",
             "buildsystem" : "meson",
             "config-opts" : [

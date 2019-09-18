@@ -1,5 +1,8 @@
+include: 'https://gitlab.gnome.org/GNOME/citemplates/raw/master/flatpak/flatpak_ci_initiative.yml'
+
 variables:
   GIT_SUBMODULE_STRATEGY: normal
+  BUNDLE: "org.gnome.TodoDevel.flatpak"
 
 
 .build_template: &distro_build
@@ -11,6 +14,7 @@ stages:
    - flatpak
    - build
    - review
+   - deploy
 
 
 ##################
@@ -60,65 +64,30 @@ ubuntu:devel:
 ##################
 
 flatpak:master:
+    extends: .flatpak
     image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master
     stage: flatpak
-    
     variables:
         MANIFEST_PATH: "build-aux/flatpak/org.gnome.Todo.json"
-        RUNTIME_REPO: "https://sdk.gnome.org/gnome-nightly.flatpakrepo"
+        RUNTIME_REPO: "https://nightly.gnome.org/gnome-nightly.flatpakrepo"
         # Replace with your application name, as written in the manifest
         FLATPAK_MODULE: "gnome-todo"
         # Make sure to keep this in sync with the Flatpak manifest, all arguments
         # are passed except the config-args because we build it ourselves
         MESON_ARGS: "-Dtracing=true -Dprofile=development"
-        DBUS_ID: "org.gnome.TodoDevel"
-        BUNDLE: "org.gnome.TodoDevel.flatpak"
-
-    script:
-        - flatpak-builder --stop-at=${FLATPAK_MODULE} app ${MANIFEST_PATH}
-        - flatpak build app meson --prefix=/app ${MESON_ARGS} _build
-        - flatpak build app ninja -C _build install
-        - flatpak-builder --finish-only --repo=repo app ${MANIFEST_PATH}
-        # Generate a Flatpak bundle
-        - flatpak build-bundle repo ${BUNDLE} --runtime-repo=${RUNTIME_REPO} ${DBUS_ID}
-        # Run automatic tests inside the Flatpak env
-        - xvfb-run -a -s "-screen 0 1024x768x24" flatpak build app ninja -C _build test
-
-
-    artifacts:
-        paths:
-        - ${BUNDLE}
-        expire_in: 3 days
-    cache:
-        paths:
-        - .flatpak-builder/cache
+        APP_ID: "org.gnome.TodoDevel"
 
 review:
+    extends: .review
     stage: review
     dependencies:
         - flatpak:master
-    script:
-        - echo "Generating flatpak deployment"
-    artifacts:
-        paths:
-            - org.gnome.$DEVELOPMENT_FLATPAK_ID.flatpak
-        expire_in: 30 days
-    environment:
-        name: review/$CI_COMMIT_REF_NAME
-        url: https://gitlab.gnome.org/$CI_PROJECT_PATH/-/jobs/$CI_JOB_ID/artifacts/raw/${BUNDLE}
-        on_stop: stop_review
-    except:
-        - master@GNOME/gnome-todo
-        - tags
 
 stop_review:
+    extends: .stop_review
     stage: review
-    script:
-        - echo "Stopping flatpak deployment"
-    when: manual
-    environment:
-        name: review/$CI_COMMIT_REF_NAME
-        action: stop
-    except:
-        - master@GNOME/gnome-todo
-        - tags
+
+flatpak:nightly:
+    extends: .publish_nightly
+    dependencies:
+        - flatpak:master

@@ -857,18 +857,18 @@ gtd_task_new (void)
 
 /**
  * gtd_task_get_complete:
- * @self: a #GtdTask
+ * @task: a #GtdTask
  *
  * Retrieves whether the task is complete or not.
  *
  * Returns: %TRUE if the task is complete, %FALSE otherwise
  */
 gboolean
-gtd_task_get_complete (GtdTask *self)
+gtd_task_get_complete (GtdTask *task)
 {
-  g_return_val_if_fail (GTD_IS_TASK (self), FALSE);
+  g_return_val_if_fail (GTD_IS_TASK (task), FALSE);
 
-  return GTD_TASK_CLASS (G_OBJECT_GET_CLASS (self))->get_complete (self);
+  return GTD_TASK_CLASS (G_OBJECT_GET_CLASS (task))->get_complete (task);
 }
 
 /**
@@ -914,6 +914,7 @@ gtd_task_get_creation_date (GtdTask *task)
 /**
  * gtd_task_set_creation_date:
  * @task: a #GtdTask
+ * @dt: (nullable): a #GDateTime
  *
  * Sets the creation date of @task.
  */
@@ -1098,11 +1099,11 @@ gtd_task_set_list (GtdTask     *task,
  * Returns: the position of the task, or -1
  */
 gint64
-gtd_task_get_position (GtdTask *self)
+gtd_task_get_position (GtdTask *task)
 {
-  g_return_val_if_fail (GTD_IS_TASK (self), -1);
+  g_return_val_if_fail (GTD_IS_TASK (task), -1);
 
-  return GTD_TASK_CLASS (G_OBJECT_GET_CLASS (self))->get_position (self);
+  return GTD_TASK_CLASS (G_OBJECT_GET_CLASS (task))->get_position (task);
 }
 
 /**
@@ -1115,17 +1116,17 @@ gtd_task_get_position (GtdTask *self)
  * the same position value.
  */
 void
-gtd_task_set_position (GtdTask *self,
+gtd_task_set_position (GtdTask *task,
                        gint64   position)
 {
-  g_return_if_fail (GTD_IS_TASK (self));
+  g_return_if_fail (GTD_IS_TASK (task));
 
-  if (gtd_task_get_position (self) == position)
+  if (gtd_task_get_position (task) == position)
     return;
 
-  GTD_TASK_CLASS (G_OBJECT_GET_CLASS (self))->set_position (self, position);
+  GTD_TASK_CLASS (G_OBJECT_GET_CLASS (task))->set_position (task, position);
 
-  g_object_notify (G_OBJECT (self), "position");
+  g_object_notify (G_OBJECT (task), "position");
 }
 
 /**

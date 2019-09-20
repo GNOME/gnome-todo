@@ -32,8 +32,6 @@ G_DECLARE_FINAL_TYPE (GtdWindow, gtd_window, GTD, WINDOW, GtkApplicationWindow)
 
 GtkWidget*                gtd_window_new                  (GtdApplication       *application);
 
-GtdManager*               gtd_window_get_manager          (GtdWindow            *window);
-
 void                      gtd_window_notify               (GtdWindow            *window,
                                                            GtdNotification      *notification);
 

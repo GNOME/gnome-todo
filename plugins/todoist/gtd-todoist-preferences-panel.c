@@ -19,6 +19,9 @@
 #define G_LOG_DOMAIN "GtdTodoistPreferencesPanel"
 
 #include "gtd-todoist-preferences-panel.h"
+#include <libsecret/secret.h>
+#include <rest/oauth2-proxy.h>
+#include <json-glib/json-glib.h>
 
 #include "config.h"
 #include <glib/gi18n.h>
@@ -43,6 +46,93 @@ gtd_todoist_preferences_panel_new (void)
 
   return g_object_new (GTD_TYPE_TODOIST_PREFERENCES_PANEL,
                        NULL);
+}
+
+static gboolean
+identify_todoist_user (GtdTodoistPreferencesPanel *self,
+                       const gchar                *access_token,
+                       gchar                     **email,
+                       gchar                     **user_name,
+                       gint                       *user_id)
+{
+  g_autoptr (GError) error = NULL;
+  RestProxy *proxy = NULL;
+  RestProxyCall *call = NULL;
+  g_autoptr (JsonObject) json_object = NULL;
+  g_autoptr (JsonObject) json_object_user = NULL;
+  g_autoptr (JsonParser) parser = NULL;
+
+  proxy = rest_proxy_new ("https://todoist.com/API/v7/sync", FALSE);
+  call = rest_proxy_new_call (proxy);
+  rest_proxy_call_set_method (call, "GET");
+  rest_proxy_call_add_param (call, "token", access_token);
+  rest_proxy_call_add_param (call, "sync_token", "*");
+  rest_proxy_call_add_param (call, "resource_types", "[\"user\"]");
+
+  if (!rest_proxy_call_sync (call, &error))
+    return FALSE;
+
+  if (rest_proxy_call_get_status_code (call) != 200)
+    return FALSE;
+
+  parser = json_parser_new ();
+
+  json_object = json_node_get_object (json_parser_get_root (parser));
+
+  json_object_user = json_object_get_object_member (json_object, "user");
+
+  *email = g_strdup (json_object_get_string_member (json_object_user, "email"));
+  *user_name = g_strdup (json_object_get_string_member (json_object_user, "user_name"));
+  *user_id = json_object_get_int_member (json_object_user, "id");
+
+  g_object_unref (proxy);
+  g_object_unref (call);
+
+  return TRUE;
+}
+
+static void
+store_access_token_cb (GObject      *source,
+                       GAsyncResult *result,
+                       gpointer      user_data)
+{
+  GtdTodoistPreferencesPanel *self = user_data;
+  g_autoptr (GError) error = NULL;
+
+  secret_password_store_finish (result, &error);
+}
+
+static void
+store_access_token (GtdTodoistPreferencesPanel *self,
+                    const gchar                *authorization_code,
+                    const gchar                *access_token)
+{
+  g_autofree gchar *format_password = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autofree gchar *email = NULL;
+  g_autofree gchar *user_name = NULL;
+  gint user_id;
+
+  static const SecretSchema todoist_schema = {
+        "org.example.Password", SECRET_SCHEMA_NONE,
+        {
+            {  "email", SECRET_SCHEMA_ATTRIBUTE_STRING },
+            {  "id", SECRET_SCHEMA_ATTRIBUTE_STRING },
+            {  "name", SECRET_SCHEMA_ATTRIBUTE_STRING },
+            {  "NULL", 0 },
+        }
+    };
+
+  format_password = g_strdup_printf ("{'authorization_code':<'%s'>, 'access_token':<'%s'>}", authorization_code, access_token);
+
+  identify_todoist_user (self, access_token, &email, &user_name, &user_id);
+
+  secret_password_store (&todoist_schema, SECRET_COLLECTION_DEFAULT,
+                        "Todoist account for GNOME To Do", format_password, NULL, store_access_token_cb, NULL,
+                        "email", email,
+                        "id", user_id,
+                        "name", user_name,
+                        NULL);
 }
 
 static GVariant*

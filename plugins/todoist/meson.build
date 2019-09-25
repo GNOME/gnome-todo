@@ -10,7 +10,8 @@ sources = files(
 
 todoist_deps = gnome_todo_deps + [
   dependency('rest-0.7'),
-  dependency('json-glib-1.0')
+  dependency('json-glib-1.0'),
+  dependency('libsecret-1')
 ]
 
 plugins_libs += static_library(

@@ -77,6 +77,7 @@ sources = files(
   'gtd-plugin-dialog.c',
   'gtd-plugin-dialog-row.c',
   'gtd-rows-common.c',
+  'gtd-search-provider.c',
   'gtd-task.c',
   'gtd-task-list.c',
   'gtd-task-list-panel.c',
@@ -121,6 +122,15 @@ sources += gnome.mkenums(
      sources: enum_headers,
   c_template: enum + '.c.template',
   h_template: enum + '.h.template'
+)
+
+sources += gnome.gdbus_codegen(
+  'gtd-search-provider-generated',
+  join_paths(
+    meson.source_root(), 'data', 'gtd-search-provider-dbus-interfaces.xml'
+  ),
+  interface_prefix: 'org.gnome',
+  namespace: 'Gtd'
 )
 
 incs = [

@@ -39,6 +39,16 @@ service = configure_file(
   configuration: service_conf
 )
 
+search_provider_conf = configuration_data()
+search_provider_conf.set('bindir', gnome_todo_bindir)
+
+configure_file(
+  input: files('org.gnome.Todo.search-provider.in'),
+  output: 'todo.search-provider.ini',
+  install_dir: join_paths(gnome_todo_datadir, 'gnome-shell', 'search-providers'),
+  configuration: search_provider_conf
+)
+
 gnome.mkenums(
   'org.gnome.todo.enums.xml',
   sources: enum_headers,

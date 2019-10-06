@@ -1,0 +1,5 @@
+[Shell Search Provider]
+DesktopId=org.gnome.Todo.desktop
+BusName=org.gnome.Todo
+ObjectPath=/org/gnome/Todo/SearchProvider
+Version=1

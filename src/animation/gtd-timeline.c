@@ -90,18 +90,17 @@ typedef struct
 
   guint delay_id;
 
-  /* The total length in milliseconds of this timeline */
-  guint duration;
-  guint delay;
+  gint64 duration_ms;
+  gint64 delay_ms;
 
   /* The current amount of elapsed time */
-  gint64 elapsed_time;
+  gint64 elapsed_time_ms;
 
   /* The elapsed time since the last frame was fired */
-  gint64 msecs_delta;
+  gint64 delta_ms;
 
   /* Time we last advanced the elapsed time and showed a frame */
-  gint64 last_frame_time;
+  gint64 last_frame_time_ms;
 
   /* How many times the timeline should repeat */
   gint repeat_count;
@@ -171,7 +170,7 @@ emit_frame_signal (GtdTimeline *self)
 
   GTD_TRACE_MSG ("Emitting ::new-frame signal on timeline[%p]", self);
 
-  g_signal_emit (self, timeline_signals[NEW_FRAME], 0, priv->elapsed_time);
+  g_signal_emit (self, timeline_signals[NEW_FRAME], 0, priv->elapsed_time_ms);
 }
 
 static gboolean
@@ -180,8 +179,8 @@ is_complete (GtdTimeline *self)
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
 
   return (priv->direction == GTD_TIMELINE_FORWARD
-          ? priv->elapsed_time >= priv->duration
-          : priv->elapsed_time <= 0);
+          ? priv->elapsed_time_ms >= priv->duration_ms
+          : priv->elapsed_time_ms <= 0);
 }
 
 static gboolean
@@ -192,17 +191,17 @@ gtd_timeline_do_frame (GtdTimeline *self)
   g_object_ref (self);
 
   GTD_TRACE_MSG ("Timeline [%p] activated (elapsed time: %ld, "
-                 "duration: %ld, msecs_delta: %ld)",
+                 "duration: %ldms, delta_ms: %ld)",
                  self,
-                 (long) priv->elapsed_time,
-                 (long) priv->duration,
-                 (long) priv->msecs_delta);
+                 (long) priv->elapsed_time_ms,
+                 (long) priv->duration_ms,
+                 (long) priv->delta_ms);
 
   /* Advance time */
   if (priv->direction == GTD_TIMELINE_FORWARD)
-    priv->elapsed_time += priv->msecs_delta;
+    priv->elapsed_time_ms += priv->delta_ms;
   else
-    priv->elapsed_time -= priv->msecs_delta;
+    priv->elapsed_time_ms -= priv->delta_ms;
 
   /* If we have not reached the end of the timeline: */
   if (!is_complete (self))
@@ -217,9 +216,9 @@ gtd_timeline_do_frame (GtdTimeline *self)
     {
       /* Handle loop or stop */
       GtdTimelineDirection saved_direction = priv->direction;
-      gint elapsed_time_delta = priv->msecs_delta;
-      guint overflow_msecs = priv->elapsed_time;
-      gint end_msecs;
+      gint elapsed_time_delta_ms = priv->delta_ms;
+      guint overflow_ms = priv->elapsed_time_ms;
+      gint end_ms;
 
       /* Update the current elapsed time in case the signal handlers
        * want to take a peek. If we clamp elapsed time, then we need
@@ -227,22 +226,22 @@ gtd_timeline_do_frame (GtdTimeline *self)
        * range of times */
       if (priv->direction == GTD_TIMELINE_FORWARD)
         {
-          elapsed_time_delta -= (priv->elapsed_time - priv->duration);
-          priv->elapsed_time = priv->duration;
+          elapsed_time_delta_ms -= (priv->elapsed_time_ms - priv->duration_ms);
+          priv->elapsed_time_ms = priv->duration_ms;
         }
       else if (priv->direction == GTD_TIMELINE_BACKWARD)
         {
-          elapsed_time_delta -= - priv->elapsed_time;
-          priv->elapsed_time = 0;
+          elapsed_time_delta_ms -= - priv->elapsed_time_ms;
+          priv->elapsed_time_ms = 0;
         }
 
-      end_msecs = priv->elapsed_time;
+      end_ms = priv->elapsed_time_ms;
 
       /* Emit the signal */
       emit_frame_signal (self);
 
       /* Did the signal handler modify the elapsed time? */
-      if (priv->elapsed_time != end_msecs)
+      if (priv->elapsed_time_ms != end_ms)
         {
           g_object_unref (self);
           return TRUE;
@@ -251,10 +250,10 @@ gtd_timeline_do_frame (GtdTimeline *self)
       /* Note: If the new-frame signal handler paused the timeline
        * on the last frame we will still go ahead and send the
        * completed signal */
-      GTD_TRACE_MSG ("Timeline [%p] completed (cur: %ld, tot: %ld)",
+      GTD_TRACE_MSG ("Timeline [%p] completed (cur: %ldms, tot: %ld)",
                     self,
-                    (long) priv->elapsed_time,
-                    (long) priv->msecs_delta);
+                    (long) priv->elapsed_time_ms,
+                    (long) priv->delta_ms);
 
       if (priv->is_playing &&
           (priv->repeat_count == 0 ||
@@ -292,11 +291,11 @@ gtd_timeline_do_frame (GtdTimeline *self)
       /* Again check to see if the user has manually played with
        * the elapsed time, before we finally stop or loop the timeline */
 
-      if (priv->elapsed_time != end_msecs &&
+      if (priv->elapsed_time_ms != end_ms &&
           !(/* Except allow changing time from 0 -> duration (or vice-versa)
                since these are considered equivalent */
-            (priv->elapsed_time == 0 && end_msecs == (gint) priv->duration) ||
-            (priv->elapsed_time == priv->duration && end_msecs == 0)
+            (priv->elapsed_time_ms == 0 && end_ms == (gint) priv->duration_ms) ||
+            (priv->elapsed_time_ms == priv->duration_ms && end_ms == 0)
           ))
         {
           g_object_unref (self);
@@ -307,13 +306,13 @@ gtd_timeline_do_frame (GtdTimeline *self)
         {
           /* We try and interpolate smoothly around a loop */
           if (saved_direction == GTD_TIMELINE_FORWARD)
-            priv->elapsed_time = overflow_msecs - priv->duration;
+            priv->elapsed_time_ms = overflow_ms - priv->duration_ms;
           else
-            priv->elapsed_time = priv->duration + overflow_msecs;
+            priv->elapsed_time_ms = priv->duration_ms + overflow_ms;
 
           /* Or if the direction changed, we try and bounce */
           if (priv->direction != saved_direction)
-            priv->elapsed_time = priv->duration - priv->elapsed_time;
+            priv->elapsed_time_ms = priv->duration_ms - priv->elapsed_time_ms;
 
           g_object_unref (self);
           return TRUE;
@@ -330,19 +329,19 @@ gtd_timeline_do_frame (GtdTimeline *self)
 
 static gboolean
 tick_timeline (GtdTimeline *self,
-               gint64       tick_time)
+               gint64       tick_time_ms)
 {
   GtdTimelinePrivate *priv;
 
   priv = gtd_timeline_get_instance_private (self);
 
-  GTD_TRACE_MSG ("Timeline [%p] ticked (elapsed_time: %ld, msecs_delta: %ld, "
-                 "last_frame_time: %ld, tick_time: %ld)",
+  GTD_TRACE_MSG ("Timeline [%p] ticked (elapsed_time: %ldms, delta_ms: %ldms, "
+                 "last_frame_time: %ldms, tick_time: %ldms)",
                  self,
-                 (long) priv->elapsed_time,
-                 (long) priv->msecs_delta,
-                 (long) priv->last_frame_time,
-                 (long) tick_time);
+                 priv->elapsed_time_ms,
+                 priv->delta_ms,
+                 priv->last_frame_time_ms,
+                 tick_time_ms);
 
   /* Check the is_playing variable before performing the timeline tick.
    * This is necessary, as if a timeline is stopped in response to a
@@ -354,33 +353,33 @@ tick_timeline (GtdTimeline *self,
 
   if (priv->waiting_first_tick)
     {
-      priv->last_frame_time = tick_time;
-      priv->msecs_delta = 0;
+      priv->last_frame_time_ms = tick_time_ms;
+      priv->delta_ms = 0;
       priv->waiting_first_tick = FALSE;
       return gtd_timeline_do_frame (self);
     }
   else
     {
-      gint64 msecs;
+      gint64 elapsed_ms;
 
-      msecs = tick_time - priv->last_frame_time;
+      elapsed_ms = tick_time_ms - priv->last_frame_time_ms;
 
       /* if the clock rolled back between ticks we need to
        * account for it; the best course of action, since the
        * clock roll back can happen by any arbitrary amount
        * of milliseconds, is to drop a frame here
        */
-      if (msecs < 0)
+      if (elapsed_ms < 0)
         {
-          priv->last_frame_time = tick_time;
-          return FALSE;
+          priv->last_frame_time_ms = tick_time_ms;
+          return TRUE;
         }
 
-      if (msecs != 0)
+      if (elapsed_ms != 0)
         {
           /* Avoid accumulating error */
-          priv->last_frame_time += msecs;
-          priv->msecs_delta = msecs;
+          priv->last_frame_time_ms += elapsed_ms;
+          priv->delta_ms = elapsed_ms;
           return gtd_timeline_do_frame (self);
         }
     }
@@ -469,7 +468,7 @@ delay_timeout_func (gpointer data)
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
 
   priv->delay_id = 0;
-  priv->msecs_delta = 0;
+  priv->delta_ms = 0;
   set_is_playing (self, TRUE);
 
   g_signal_emit (self, timeline_signals[STARTED], 0);
@@ -549,7 +548,7 @@ gtd_timeline_get_property (GObject    *object,
   switch (prop_id)
     {
     case PROP_DELAY:
-      g_value_set_uint (value, priv->delay);
+      g_value_set_uint (value, priv->delay_ms);
       break;
 
     case PROP_DURATION:
@@ -911,16 +910,16 @@ gtd_timeline_start (GtdTimeline *self)
   if (priv->delay_id || priv->is_playing)
     return;
 
-  if (priv->duration == 0)
+  if (priv->duration_ms == 0)
     return;
 
-  if (priv->delay)
+  if (priv->delay_ms)
     {
-      priv->delay_id = g_timeout_add (priv->delay, delay_timeout_func, self);
+      priv->delay_id = g_timeout_add (priv->delay_ms, delay_timeout_func, self);
     }
   else
     {
-      priv->msecs_delta = 0;
+      priv->delta_ms = 0;
       set_is_playing (self, TRUE);
 
       g_signal_emit (self, timeline_signals[STARTED], 0);
@@ -947,7 +946,7 @@ gtd_timeline_pause (GtdTimeline *self)
   if (!priv->is_playing)
     return;
 
-  priv->msecs_delta = 0;
+  priv->delta_ms = 0;
   set_is_playing (self, FALSE);
 
   g_signal_emit (self, timeline_signals[PAUSED], 0);
@@ -1003,7 +1002,7 @@ gtd_timeline_rewind (GtdTimeline *self)
   if (priv->direction == GTD_TIMELINE_FORWARD)
     gtd_timeline_advance (self, 0);
   else if (priv->direction == GTD_TIMELINE_BACKWARD)
-    gtd_timeline_advance (self, priv->duration);
+    gtd_timeline_advance (self, priv->duration_ms);
 }
 
 /**
@@ -1025,20 +1024,20 @@ gtd_timeline_skip (GtdTimeline *self,
 
   if (priv->direction == GTD_TIMELINE_FORWARD)
     {
-      priv->elapsed_time += msecs;
+      priv->elapsed_time_ms += msecs;
 
-      if (priv->elapsed_time > priv->duration)
-        priv->elapsed_time = 1;
+      if (priv->elapsed_time_ms > priv->duration_ms)
+        priv->elapsed_time_ms = 1;
     }
   else if (priv->direction == GTD_TIMELINE_BACKWARD)
     {
-      priv->elapsed_time -= msecs;
+      priv->elapsed_time_ms -= msecs;
 
-      if (priv->elapsed_time < 1)
-        priv->elapsed_time = priv->duration - 1;
+      if (priv->elapsed_time_ms < 1)
+        priv->elapsed_time_ms = priv->duration_ms - 1;
     }
 
-  priv->msecs_delta = 0;
+  priv->delta_ms = 0;
 }
 
 /**
@@ -1063,7 +1062,7 @@ gtd_timeline_advance (GtdTimeline *self,
 
   priv = gtd_timeline_get_instance_private (self);
 
-  priv->elapsed_time = MIN (msecs, priv->duration);
+  priv->elapsed_time_ms = MIN (msecs, priv->duration_ms);
 }
 
 /**
@@ -1082,7 +1081,7 @@ gtd_timeline_get_elapsed_time (GtdTimeline *self)
   g_return_val_if_fail (GTD_IS_TIMELINE (self), 0);
 
   priv = gtd_timeline_get_instance_private (self);
-  return priv->elapsed_time;
+  return priv->elapsed_time_ms;
 }
 
 /**
@@ -1122,7 +1121,7 @@ gtd_timeline_get_delay (GtdTimeline *self)
   g_return_val_if_fail (GTD_IS_TIMELINE (self), 0);
 
   priv = gtd_timeline_get_instance_private (self);
-  return priv->delay;
+  return priv->delay_ms;
 }
 
 /**
@@ -1144,9 +1143,9 @@ gtd_timeline_set_delay (GtdTimeline *self,
 
   priv = gtd_timeline_get_instance_private (self);
 
-  if (priv->delay != msecs)
+  if (priv->delay_ms != msecs)
     {
-      priv->delay = msecs;
+      priv->delay_ms = msecs;
       g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_DELAY]);
     }
 }
@@ -1171,7 +1170,7 @@ gtd_timeline_get_duration (GtdTimeline *self)
 
   priv = gtd_timeline_get_instance_private (self);
 
-  return priv->duration;
+  return priv->duration_ms;
 }
 
 /**
@@ -1195,9 +1194,9 @@ gtd_timeline_set_duration (GtdTimeline *self,
 
   priv = gtd_timeline_get_instance_private (self);
 
-  if (priv->duration != msecs)
+  if (priv->duration_ms != msecs)
     {
-      priv->duration = msecs;
+      priv->duration_ms = msecs;
 
       g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_DURATION]);
     }
@@ -1228,11 +1227,11 @@ gtd_timeline_get_progress (GtdTimeline *self)
 
   /* short-circuit linear progress */
   if (priv->progress_func == NULL)
-    return (gdouble) priv->elapsed_time / (gdouble) priv->duration;
+    return (gdouble) priv->elapsed_time_ms / (gdouble) priv->duration_ms;
   else
     return priv->progress_func (self,
-                                (gdouble) priv->elapsed_time,
-                                (gdouble) priv->duration,
+                                (gdouble) priv->elapsed_time_ms,
+                                (gdouble) priv->duration_ms,
                                 priv->progress_data);
 }
 
@@ -1282,8 +1281,8 @@ gtd_timeline_set_direction (GtdTimeline          *self,
     {
       priv->direction = direction;
 
-      if (priv->elapsed_time == 0)
-        priv->elapsed_time = priv->duration;
+      if (priv->elapsed_time_ms == 0)
+        priv->elapsed_time_ms = priv->duration_ms;
 
       g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_DIRECTION]);
     }
@@ -1316,7 +1315,7 @@ gtd_timeline_get_delta (GtdTimeline *self)
     return 0;
 
   priv = gtd_timeline_get_instance_private (self);
-  return priv->msecs_delta;
+  return priv->delta_ms;
 }
 
 /**
@@ -1597,11 +1596,11 @@ gtd_timeline_get_duration_hint (GtdTimeline *self)
   priv = gtd_timeline_get_instance_private (self);
 
   if (priv->repeat_count == 0)
-    return priv->duration;
+    return priv->duration_ms;
   else if (priv->repeat_count < 0)
     return G_MAXINT64;
   else
-    return priv->repeat_count * priv->duration;
+    return priv->repeat_count * priv->duration_ms;
 }
 
 /**

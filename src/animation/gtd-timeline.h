@@ -79,9 +79,6 @@ struct _GtdTimelineClass
 GtdTimeline*         gtd_timeline_new_for_widget                 (GtdWidget            *widget,
                                                                   guint                 duration_ms);
 
-GtdTimeline*         gtd_timeline_new_for_frame_clock            (GdkFrameClock        *frame_clock,
-                                                                  guint                 duration_ms);
-
 GtdWidget*           gtd_timeline_get_widget                     (GtdTimeline          *timeline);
 
 void                 gtd_timeline_set_widget                     (GtdTimeline          *timeline,
@@ -146,11 +143,6 @@ GtdEaseMode          gtd_timeline_get_progress_mode              (GtdTimeline   
 
 gint64               gtd_timeline_get_duration_hint              (GtdTimeline          *timeline);
 gint                 gtd_timeline_get_current_repeat             (GtdTimeline          *timeline);
-
-GdkFrameClock*       gtd_timeline_get_frame_clock                (GtdTimeline           *timeline);
-
-void                 gtd_timeline_set_frame_clock                (GtdTimeline           *timeline,
-                                                                  GdkFrameClock         *frame_clock);
 
 G_END_DECLS
 

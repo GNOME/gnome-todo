@@ -151,7 +151,6 @@ enum
   PROP_DIRECTION,
   PROP_REPEAT_COUNT,
   PROP_PROGRESS_MODE,
-  PROP_FRAME_CLOCK,
   PROP_WIDGET,
 
   PROP_LAST
@@ -490,8 +489,6 @@ set_frame_clock_internal (GtdTimeline   *self,
 
   g_set_object (&priv->frame_clock, frame_clock);
 
-  g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_FRAME_CLOCK]);
-
   if (priv->is_playing)
     maybe_add_timeline (self);
 }
@@ -603,10 +600,6 @@ gtd_timeline_set_property (GObject      *object,
       gtd_timeline_set_progress_mode (self, g_value_get_enum (value));
       break;
 
-    case PROP_FRAME_CLOCK:
-      gtd_timeline_set_frame_clock (self, g_value_get_object (value));
-      break;
-
     case PROP_WIDGET:
       gtd_timeline_set_widget (self, g_value_get_object (value));
       break;
@@ -650,10 +643,6 @@ gtd_timeline_get_property (GObject    *object,
 
     case PROP_PROGRESS_MODE:
       g_value_set_enum (value, priv->progress_mode);
-      break;
-
-    case PROP_FRAME_CLOCK:
-      g_value_set_object (value, priv->frame_clock);
       break;
 
     case PROP_WIDGET:
@@ -821,18 +810,6 @@ gtd_timeline_class_init (GtdTimelineClass *klass)
                        GTD_TYPE_EASE_MODE,
                        GTD_EASE_LINEAR,
                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
-  /**
-   * GtdTimeline:frame-clock:
-   *
-   * The frame clock driving the timeline.
-   */
-  obj_props[PROP_FRAME_CLOCK] =
-    g_param_spec_object ("frame-clock",
-                         "Frame clock",
-                         "Frame clock driving the timeline",
-                         GDK_TYPE_FRAME_CLOCK,
-                         G_PARAM_CONSTRUCT | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   object_class->dispose = gtd_timeline_dispose;
   object_class->finalize = gtd_timeline_finalize;
@@ -1212,26 +1189,6 @@ gtd_timeline_new_for_widget (GtdWidget *widget,
   return g_object_new (GTD_TYPE_TIMELINE,
                        "duration", duration_ms,
                        "widget", widget,
-                       NULL);
-}
-
-/**
- * gtd_timeline_new_for_frame_clock:
- * @frame_clock: The #GdkFrameClock the timeline is driven by
- * @duration_ms: Duration of the timeline in milliseconds
- *
- * Creates a new #GtdTimeline with a duration of @duration_ms milli seconds.
- *
- * Return value: the newly created #GtdTimeline instance. Use
- *   g_object_unref() when done using it
- */
-GtdTimeline *
-gtd_timeline_new_for_frame_clock (GdkFrameClock *frame_clock,
-                                  guint          duration_ms)
-{
-  return g_object_new (GTD_TYPE_TIMELINE,
-                       "duration", duration_ms,
-                       "frame-clock", frame_clock,
                        NULL);
 }
 
@@ -1775,39 +1732,6 @@ gtd_timeline_cancel_delay (GtdTimeline *self)
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
 
   g_clear_handle_id (&priv->delay_id, g_source_remove);
-}
-
-
-/**
- * gtd_timeline_get_frame_clock: (skip)
- */
-GdkFrameClock *
-gtd_timeline_get_frame_clock (GtdTimeline *self)
-{
-  GtdTimelinePrivate *priv;
-
-  g_return_val_if_fail (GTD_IS_TIMELINE (self), NULL);
-
-  priv = gtd_timeline_get_instance_private (self);
-  return priv->frame_clock;
-}
-
-void
-gtd_timeline_set_frame_clock (GtdTimeline   *self,
-                              GdkFrameClock *frame_clock)
-{
-  GtdTimelinePrivate *priv;
-
-  g_return_if_fail (GTD_IS_TIMELINE (self));
-
-  priv = gtd_timeline_get_instance_private (self);
-
-  g_assert (!frame_clock || (frame_clock && !priv->widget));
-  g_return_if_fail (!frame_clock || (frame_clock && !priv->widget));
-
-  priv->custom_frame_clock = frame_clock;
-  if (!priv->widget)
-    set_frame_clock_internal (self, frame_clock);
 }
 
 /**

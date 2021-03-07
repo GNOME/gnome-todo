@@ -170,23 +170,4 @@ typedef enum
   GTD_TIMELINE_BACKWARD
 } GtdTimelineDirection;
 
-/**
- * GtdStepMode:
- * @GTD_STEP_MODE_START: The change in the value of a
- *   %GTD_STEP progress mode should occur at the start of
- *   the transition
- * @GTD_STEP_MODE_END: The change in the value of a
- *   %GTD_STEP progress mode should occur at the end of
- *   the transition
- *
- * Change the value transition of a step function.
- *
- * See gtd_timeline_set_step_progress().
- */
-typedef enum
-{
-  GTD_STEP_MODE_START,
-  GTD_STEP_MODE_END
-} GtdStepMode;
-
 G_END_DECLS

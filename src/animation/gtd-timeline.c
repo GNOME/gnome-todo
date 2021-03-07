@@ -119,10 +119,6 @@ typedef struct
   GDestroyNotify progress_notify;
   GtdEaseMode progress_mode;
 
-  /* step() parameters */
-  gint n_steps;
-  GtdStepMode step_mode;
-
   guint is_playing         : 1;
 
   /* If we've just started playing and haven't yet gotten
@@ -948,10 +944,6 @@ gtd_timeline_init (GtdTimeline *self)
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
 
   priv->progress_mode = GTD_EASE_LINEAR;
-
-  /* default steps() parameters are 1, end */
-  priv->n_steps = 1;
-  priv->step_mode = GTD_STEP_MODE_END;
 }
 
 static gboolean

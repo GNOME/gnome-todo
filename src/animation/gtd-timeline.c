@@ -223,7 +223,6 @@ gtd_timeline_do_frame (GtdTimeline *self)
       /* Handle loop or stop */
       GtdTimelineDirection saved_direction = priv->direction;
       gint64 overflow_us = priv->elapsed_time_us;
-      gint64 elapsed_time_delta_us = priv->delta_us;
       gint64 end_us;
 
       /* Update the current elapsed time in case the signal handlers
@@ -231,15 +230,9 @@ gtd_timeline_do_frame (GtdTimeline *self)
        * to correpondingly reduce elapsed_time_delta to reflect the correct
        * range of times */
       if (priv->direction == GTD_TIMELINE_FORWARD)
-        {
-          elapsed_time_delta_us -= (priv->elapsed_time_us - priv->duration_us);
-          priv->elapsed_time_us = priv->duration_us;
-        }
+        priv->elapsed_time_us = priv->duration_us;
       else if (priv->direction == GTD_TIMELINE_BACKWARD)
-        {
-          elapsed_time_delta_us -= - priv->elapsed_time_us;
-          priv->elapsed_time_us = 0;
-        }
+        priv->elapsed_time_us = 0;
 
       end_us = priv->elapsed_time_us;
 

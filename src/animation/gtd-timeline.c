@@ -216,9 +216,9 @@ gtd_timeline_do_frame (GtdTimeline *self)
     {
       /* Handle loop or stop */
       GtdTimelineDirection saved_direction = priv->direction;
-      gint elapsed_time_delta_ms = priv->delta_ms;
-      guint overflow_ms = priv->elapsed_time_ms;
-      gint end_ms;
+      gint64 overflow_ms = priv->elapsed_time_ms;
+      gint64 elapsed_time_delta_ms = priv->delta_ms;
+      gint64 end_ms;
 
       /* Update the current elapsed time in case the signal handlers
        * want to take a peek. If we clamp elapsed time, then we need

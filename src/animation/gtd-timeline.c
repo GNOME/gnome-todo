@@ -193,6 +193,7 @@ static gboolean
 gtd_timeline_do_frame (GtdTimeline *self)
 {
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
+  gboolean should_continue = priv->is_playing;
 
   g_object_ref (self);
 
@@ -214,9 +215,6 @@ gtd_timeline_do_frame (GtdTimeline *self)
     {
       /* Emit the signal */
       emit_frame_signal (self);
-      g_object_unref (self);
-
-      return priv->is_playing;
     }
   else
     {
@@ -224,6 +222,8 @@ gtd_timeline_do_frame (GtdTimeline *self)
       GtdTimelineDirection saved_direction = priv->direction;
       gint64 overflow_us = priv->elapsed_time_us;
       gint64 end_us;
+
+      should_continue = TRUE;
 
       /* Update the current elapsed time in case the signal handlers
        * want to take a peek. If we clamp elapsed time, then we need
@@ -241,10 +241,7 @@ gtd_timeline_do_frame (GtdTimeline *self)
 
       /* Did the signal handler modify the elapsed time? */
       if (priv->elapsed_time_us != end_us)
-        {
-          g_object_unref (self);
-          return TRUE;
-        }
+        goto out;
 
       /* Note: If the new-frame signal handler paused the timeline
        * on the last frame we will still go ahead and send the
@@ -299,8 +296,7 @@ gtd_timeline_do_frame (GtdTimeline *self)
             (priv->elapsed_time_us == priv->duration_us && end_us == 0)
           ))
         {
-          g_object_unref (self);
-          return TRUE;
+          goto out;
         }
 
       if (priv->repeat_count != 0)
@@ -314,18 +310,17 @@ gtd_timeline_do_frame (GtdTimeline *self)
           /* Or if the direction changed, we try and bounce */
           if (priv->direction != saved_direction)
             priv->elapsed_time_us = priv->duration_us - priv->elapsed_time_us;
-
-          g_object_unref (self);
-          return TRUE;
         }
       else
         {
           gtd_timeline_rewind (self);
-
-          g_object_unref (self);
-          return FALSE;
+          should_continue = FALSE;
         }
     }
+
+out:
+  g_object_unref (self);
+  return should_continue;
 }
 
 static gboolean

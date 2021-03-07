@@ -79,7 +79,6 @@
 
 #include "gtd-debug.h"
 #include "gnome-todo.h"
-#include "gtd-timeline-private.h"
 
 typedef struct
 {
@@ -87,8 +86,6 @@ typedef struct
 
   GtdWidget *widget;
   guint frame_tick_id;
-
-  guint delay_id;
 
   gint64 duration_us;
   gint64 delay_us;
@@ -101,6 +98,8 @@ typedef struct
 
   /* Time we last advanced the elapsed time and showed a frame */
   gint64 last_frame_time_us;
+
+  gint64 start_us;
 
   /* How many times the timeline should repeat */
   gint repeat_count;
@@ -166,6 +165,14 @@ static inline gint64
 ms_to_us (gint64 us)
 {
   return us * 1000;
+}
+
+static inline gboolean
+is_waiting_for_delay (GtdTimeline *self,
+                      gint64       frame_time_us)
+{
+  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
+  return priv->start_us + priv->delay_us > frame_time_us;
 }
 
 static void
@@ -316,6 +323,12 @@ tick_timeline (GtdTimeline *self,
   elapsed_us = tick_time_us - priv->last_frame_time_us;
   priv->last_frame_time_us = tick_time_us;
 
+  if (is_waiting_for_delay (self, tick_time_us))
+    {
+      GTD_TRACE_MSG ("- waiting for delay");
+      return G_SOURCE_CONTINUE;
+    }
+
   /* if the clock rolled back between ticks we need to
    * account for it; the best course of action, since the
    * clock roll back can happen by any arbitrary amount
@@ -416,7 +429,8 @@ set_is_playing (GtdTimeline *self,
 
   if (priv->is_playing)
     {
-      priv->last_frame_time_us = g_get_monotonic_time ();
+      priv->start_us = g_get_monotonic_time ();
+      priv->last_frame_time_us = priv->start_us;
       priv->current_repeat = 0;
 
       add_tick_callback (self);
@@ -425,21 +439,6 @@ set_is_playing (GtdTimeline *self,
     {
       remove_tick_callback (self);
     }
-}
-
-static gboolean
-delay_timeout_func (gpointer data)
-{
-  GtdTimeline *self = data;
-  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
-
-  priv->delay_id = 0;
-  priv->delta_us = 0;
-  set_is_playing (self, TRUE);
-
-  g_signal_emit (self, timeline_signals[STARTED], 0);
-
-  return G_SOURCE_REMOVE;
 }
 
 static gdouble
@@ -552,8 +551,6 @@ gtd_timeline_dispose (GObject *object)
 {
   GtdTimeline *self = GTD_TIMELINE (object);
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
-
-  gtd_timeline_cancel_delay (self);
 
   if (priv->progress_notify != NULL)
     {
@@ -874,23 +871,16 @@ gtd_timeline_start (GtdTimeline *self)
 
   priv = gtd_timeline_get_instance_private (self);
 
-  if (priv->delay_id || priv->is_playing)
+  if (priv->is_playing)
     return;
 
   if (priv->duration_us == 0)
     return;
 
-  if (priv->delay_us)
-    {
-      priv->delay_id = g_timeout_add (us_to_ms (priv->delay_us), delay_timeout_func, self);
-    }
-  else
-    {
-      priv->delta_us = 0;
-      set_is_playing (self, TRUE);
+  priv->delta_us = 0;
+  set_is_playing (self, TRUE);
 
-      g_signal_emit (self, timeline_signals[STARTED], 0);
-    }
+  g_signal_emit (self, timeline_signals[STARTED], 0);
 }
 
 /**
@@ -907,8 +897,6 @@ gtd_timeline_pause (GtdTimeline *self)
   g_return_if_fail (GTD_IS_TIMELINE (self));
 
   priv = gtd_timeline_get_instance_private (self);
-
-  gtd_timeline_cancel_delay (self);
 
   if (!priv->is_playing)
     return;
@@ -1591,14 +1579,6 @@ gtd_timeline_get_current_repeat (GtdTimeline *self)
 
   priv = gtd_timeline_get_instance_private (self);
   return priv->current_repeat;
-}
-
-void
-gtd_timeline_cancel_delay (GtdTimeline *self)
-{
-  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
-
-  g_clear_handle_id (&priv->delay_id, g_source_remove);
 }
 
 /**

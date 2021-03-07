@@ -23,7 +23,7 @@
 #include "gtd-debug.h"
 #include "gtd-animation-enums.h"
 #include "gtd-interval.h"
-#include "gtd-timeline-private.h"
+#include "gtd-timeline.h"
 #include "gtd-property-transition.h"
 
 #include <graphene-gobject.h>
@@ -129,8 +129,6 @@ transition_closure_free (gpointer data)
 
       if (gtd_timeline_is_playing (timeline))
         gtd_timeline_stop (timeline);
-      else if (gtd_timeline_get_delay (timeline) > 0)
-        gtd_timeline_cancel_delay (timeline);
 
       g_object_unref (closure->transition);
 

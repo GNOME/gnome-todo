@@ -271,7 +271,9 @@ gtd_timeline_do_frame (GtdTimeline *self)
           g_signal_emit (self, timeline_signals[STOPPED], 0, TRUE);
         }
       else
-        g_signal_emit (self, timeline_signals[COMPLETED], 0);
+        {
+          g_signal_emit (self, timeline_signals[COMPLETED], 0);
+        }
 
       priv->current_repeat += 1;
 

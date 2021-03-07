@@ -118,7 +118,6 @@ typedef struct
   /* If we've just started playing and haven't yet gotten
    * a tick from the master clock
    */
-  guint waiting_first_tick : 1;
   guint auto_reverse       : 1;
 } GtdTimelinePrivate;
 
@@ -339,6 +338,7 @@ tick_timeline (GtdTimeline *self,
                gint64       tick_time_us)
 {
   GtdTimelinePrivate *priv;
+  gint64 elapsed_us;
 
   priv = gtd_timeline_get_instance_private (self);
 
@@ -358,40 +358,19 @@ tick_timeline (GtdTimeline *self,
   if (!priv->is_playing)
     return FALSE;
 
-  if (priv->waiting_first_tick)
-    {
-      priv->last_frame_time_us = tick_time_us;
-      priv->delta_us = 0;
-      priv->waiting_first_tick = FALSE;
-      return gtd_timeline_do_frame (self);
-    }
-  else
-    {
-      gint64 elapsed_us;
+  elapsed_us = tick_time_us - priv->last_frame_time_us;
+  priv->last_frame_time_us = tick_time_us;
 
-      elapsed_us = tick_time_us - priv->last_frame_time_us;
+  /* if the clock rolled back between ticks we need to
+   * account for it; the best course of action, since the
+   * clock roll back can happen by any arbitrary amount
+   * of milliseconds, is to drop a frame here
+   */
+  if (elapsed_us <= 0)
+    return TRUE;
 
-      /* if the clock rolled back between ticks we need to
-       * account for it; the best course of action, since the
-       * clock roll back can happen by any arbitrary amount
-       * of milliseconds, is to drop a frame here
-       */
-      if (elapsed_us < 0)
-        {
-          priv->last_frame_time_us = elapsed_us;
-          return TRUE;
-        }
-
-      if (elapsed_us != 0)
-        {
-          /* Avoid accumulating error */
-          priv->last_frame_time_us += elapsed_us;
-          priv->delta_us = elapsed_us;
-          return gtd_timeline_do_frame (self);
-        }
-    }
-
-  return FALSE;
+  priv->delta_us = elapsed_us;
+  return gtd_timeline_do_frame (self);
 }
 
 static gboolean
@@ -457,7 +436,7 @@ set_is_playing (GtdTimeline *self,
 
   if (priv->is_playing)
     {
-      priv->waiting_first_tick = TRUE;
+      priv->last_frame_time_us = g_get_monotonic_time ();
       priv->current_repeat = 0;
 
       add_tick_callback (self);

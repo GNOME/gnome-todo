@@ -190,132 +190,100 @@ is_complete (GtdTimeline *self)
 }
 
 static gboolean
-gtd_timeline_do_frame (GtdTimeline *self)
+maybe_loop_timeline (GtdTimeline *self)
 {
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
-  gboolean should_continue = priv->is_playing;
+  GtdTimelineDirection saved_direction = priv->direction;
+  gint64 overflow_us = priv->elapsed_time_us;
+  gint64 end_us;
 
-  g_object_ref (self);
-
-  GTD_TRACE_MSG ("Timeline [%p] activated (elapsed time: %ldµs, "
-                 "duration: %ldµs, delta_us: %ldµs)",
-                 self,
-                 priv->elapsed_time_us,
-                 priv->duration_us,
-                 priv->delta_us);
-
-  /* Advance time */
+  /* Update the current elapsed time in case the signal handlers
+   * want to take a peek. If we clamp elapsed time, then we need
+   * to correpondingly reduce elapsed_time_delta to reflect the correct
+   * range of times */
   if (priv->direction == GTD_TIMELINE_FORWARD)
-    priv->elapsed_time_us += priv->delta_us;
-  else
-    priv->elapsed_time_us -= priv->delta_us;
+    priv->elapsed_time_us = priv->duration_us;
+  else if (priv->direction == GTD_TIMELINE_BACKWARD)
+    priv->elapsed_time_us = 0;
 
-  /* If we have not reached the end of the timeline: */
-  if (!is_complete (self))
+  end_us = priv->elapsed_time_us;
+
+  /* Emit the signal */
+  emit_frame_signal (self);
+
+  /* Did the signal handler modify the elapsed time? */
+  if (priv->elapsed_time_us != end_us)
+    return TRUE;
+
+  /* Note: If the new-frame signal handler paused the timeline
+   * on the last frame we will still go ahead and send the
+   * completed signal */
+  GTD_TRACE_MSG ("Timeline [%p] completed (cur: %ldµs, tot: %ldµs)",
+                self,
+                priv->elapsed_time_us,
+                priv->delta_us);
+
+  if (priv->is_playing &&
+      (priv->repeat_count == 0 ||
+       priv->repeat_count == priv->current_repeat))
     {
-      emit_frame_signal (self);
-    }
-  else
-    {
-      /* Handle loop or stop */
-      GtdTimelineDirection saved_direction = priv->direction;
-      gint64 overflow_us = priv->elapsed_time_us;
-      gint64 end_us;
-
-      should_continue = TRUE;
-
-      /* Update the current elapsed time in case the signal handlers
-       * want to take a peek. If we clamp elapsed time, then we need
-       * to correpondingly reduce elapsed_time_delta to reflect the correct
-       * range of times */
-      if (priv->direction == GTD_TIMELINE_FORWARD)
-        priv->elapsed_time_us = priv->duration_us;
-      else if (priv->direction == GTD_TIMELINE_BACKWARD)
-        priv->elapsed_time_us = 0;
-
-      end_us = priv->elapsed_time_us;
-
-      /* Emit the signal */
-      emit_frame_signal (self);
-
-      /* Did the signal handler modify the elapsed time? */
-      if (priv->elapsed_time_us != end_us)
-        goto out;
-
-      /* Note: If the new-frame signal handler paused the timeline
-       * on the last frame we will still go ahead and send the
-       * completed signal */
-      GTD_TRACE_MSG ("Timeline [%p] completed (cur: %ldµs, tot: %ldµs)",
-                    self,
-                    priv->elapsed_time_us,
-                    priv->delta_us);
-
-      if (priv->is_playing &&
-          (priv->repeat_count == 0 ||
-           priv->repeat_count == priv->current_repeat))
-        {
-          /* We stop the timeline now, so that the completed signal handler
-           * may choose to re-start the timeline
-           */
-          set_is_playing (self, FALSE);
-
-          g_signal_emit (self, timeline_signals[COMPLETED], 0);
-          g_signal_emit (self, timeline_signals[STOPPED], 0, TRUE);
-        }
-      else
-        {
-          g_signal_emit (self, timeline_signals[COMPLETED], 0);
-        }
-
-      priv->current_repeat += 1;
-
-      if (priv->auto_reverse)
-        {
-          /* :auto-reverse changes the direction of the timeline */
-          if (priv->direction == GTD_TIMELINE_FORWARD)
-            priv->direction = GTD_TIMELINE_BACKWARD;
-          else
-            priv->direction = GTD_TIMELINE_FORWARD;
-
-          g_object_notify_by_pspec (G_OBJECT (self),
-                                    obj_props[PROP_DIRECTION]);
-        }
-
-      /*
-       * Again check to see if the user has manually played with
-       * the elapsed time, before we finally stop or loop the timeline,
-       * except changing time from 0 -> duration (or vice-versa)
-       * since these are considered equivalent
+      /* We stop the timeline now, so that the completed signal handler
+       * may choose to re-start the timeline
        */
-      if (priv->elapsed_time_us != end_us &&
-          !((priv->elapsed_time_us == 0 && end_us == priv->duration_us) ||
-            (priv->elapsed_time_us == priv->duration_us && end_us == 0)))
-        {
-          goto out;
-        }
+      set_is_playing (self, FALSE);
 
-      if (priv->repeat_count != 0)
-        {
-          /* We try and interpolate smoothly around a loop */
-          if (saved_direction == GTD_TIMELINE_FORWARD)
-            priv->elapsed_time_us = overflow_us - priv->duration_us;
-          else
-            priv->elapsed_time_us = priv->duration_us + overflow_us;
-
-          /* Or if the direction changed, we try and bounce */
-          if (priv->direction != saved_direction)
-            priv->elapsed_time_us = priv->duration_us - priv->elapsed_time_us;
-        }
-      else
-        {
-          gtd_timeline_rewind (self);
-          should_continue = FALSE;
-        }
+      g_signal_emit (self, timeline_signals[COMPLETED], 0);
+      g_signal_emit (self, timeline_signals[STOPPED], 0, TRUE);
+    }
+  else
+    {
+      g_signal_emit (self, timeline_signals[COMPLETED], 0);
     }
 
-out:
-  g_object_unref (self);
-  return should_continue;
+  priv->current_repeat += 1;
+
+  if (priv->auto_reverse)
+    {
+      /* :auto-reverse changes the direction of the timeline */
+      if (priv->direction == GTD_TIMELINE_FORWARD)
+        priv->direction = GTD_TIMELINE_BACKWARD;
+      else
+        priv->direction = GTD_TIMELINE_FORWARD;
+
+      g_object_notify_by_pspec (G_OBJECT (self),
+                                obj_props[PROP_DIRECTION]);
+    }
+
+  /*
+   * Again check to see if the user has manually played with
+   * the elapsed time, before we finally stop or loop the timeline,
+   * except changing time from 0 -> duration (or vice-versa)
+   * since these are considered equivalent
+   */
+  if (priv->elapsed_time_us != end_us &&
+      !((priv->elapsed_time_us == 0 && end_us == priv->duration_us) ||
+        (priv->elapsed_time_us == priv->duration_us && end_us == 0)))
+    {
+      return TRUE;
+    }
+
+  if (priv->repeat_count == 0)
+    {
+      gtd_timeline_rewind (self);
+      return FALSE;
+    }
+
+  /* Try and interpolate smoothly around a loop */
+  if (saved_direction == GTD_TIMELINE_FORWARD)
+    priv->elapsed_time_us = overflow_us - priv->duration_us;
+  else
+    priv->elapsed_time_us = priv->duration_us + overflow_us;
+
+  /* Or if the direction changed, we try and bounce */
+  if (priv->direction != saved_direction)
+    priv->elapsed_time_us = priv->duration_us - priv->elapsed_time_us;
+
+  return TRUE;
 }
 
 static gboolean
@@ -323,6 +291,8 @@ tick_timeline (GtdTimeline *self,
                gint64       tick_time_us)
 {
   GtdTimelinePrivate *priv;
+  gboolean should_continue;
+  gboolean complete;
   gint64 elapsed_us;
 
   priv = gtd_timeline_get_instance_private (self);
@@ -355,7 +325,32 @@ tick_timeline (GtdTimeline *self,
     return TRUE;
 
   priv->delta_us = elapsed_us;
-  return gtd_timeline_do_frame (self);
+
+  GTD_TRACE_MSG ("Timeline [%p] activated (elapsed time: %ldµs, "
+                 "duration: %ldµs, delta_us: %ldµs)",
+                 self,
+                 priv->elapsed_time_us,
+                 priv->duration_us,
+                 priv->delta_us);
+
+  g_object_ref (self);
+
+  /* Advance time */
+  if (priv->direction == GTD_TIMELINE_FORWARD)
+    priv->elapsed_time_us += priv->delta_us;
+  else
+    priv->elapsed_time_us -= priv->delta_us;
+
+  complete = is_complete (self);
+  should_continue = !complete ? priv->is_playing : maybe_loop_timeline (self);
+
+  /* If we have not reached the end of the timeline */
+  if (!complete)
+    emit_frame_signal (self);
+
+  g_object_unref (self);
+
+  return should_continue;
 }
 
 static gboolean

@@ -831,6 +831,7 @@ gtd_timeline_init (GtdTimeline *self)
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
 
   priv->progress_mode = GTD_EASE_LINEAR;
+  priv->progress_func = timeline_progress_func;
 }
 
 /**
@@ -1240,14 +1241,10 @@ gtd_timeline_get_progress (GtdTimeline *self)
 
   priv = gtd_timeline_get_instance_private (self);
 
-  /* short-circuit linear progress */
-  if (priv->progress_func == NULL)
-    return (gdouble) priv->elapsed_time_us / (gdouble) priv->duration_us;
-  else
-    return priv->progress_func (self,
-                                (gdouble) priv->elapsed_time_us,
-                                (gdouble) priv->duration_us,
-                                priv->progress_data);
+  return priv->progress_func (self,
+                              (gdouble) priv->elapsed_time_us,
+                              (gdouble) priv->duration_us,
+                              priv->progress_data);
 }
 
 /**
@@ -1549,13 +1546,7 @@ gtd_timeline_set_progress_mode (GtdTimeline *self,
     priv->progress_notify (priv->progress_data);
 
   priv->progress_mode = mode;
-
-  /* short-circuit linear progress */
-  if (priv->progress_mode != GTD_EASE_LINEAR)
-    priv->progress_func = timeline_progress_func;
-  else
-    priv->progress_func = NULL;
-
+  priv->progress_func = timeline_progress_func;
   priv->progress_data = NULL;
   priv->progress_notify = NULL;
 

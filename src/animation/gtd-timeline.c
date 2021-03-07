@@ -462,31 +462,30 @@ set_is_playing (GtdTimeline *self,
     }
 }
 
-/**
- * gtd_timeline_set_widget:
- * @timeline: a #GtdTimeline
- * @widget: a #GtdWidget
- *
- * Set the widget the timeline is associated with.
- */
-void
-gtd_timeline_set_widget (GtdTimeline *self,
-                         GtdWidget   *widget)
+static gboolean
+delay_timeout_func (gpointer data)
+{
+  GtdTimeline *self = data;
+  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
+
+  priv->delay_id = 0;
+  priv->msecs_delta = 0;
+  set_is_playing (self, TRUE);
+
+  g_signal_emit (self, timeline_signals[STARTED], 0);
+
+  return G_SOURCE_REMOVE;
+}
+
+static gdouble
+timeline_progress_func (GtdTimeline *self,
+                        gdouble      elapsed,
+                        gdouble      duration,
+                        gpointer     user_data)
 {
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
 
-  g_return_if_fail (GTD_IS_TIMELINE (self));
-
-  if (priv->widget)
-    {
-      remove_tick_callback (self);
-      priv->widget = NULL;
-    }
-
-  priv->widget = widget;
-
-  if (priv->is_playing)
-    add_tick_callback (self);
+  return gtd_easing_for_mode (priv->progress_mode, elapsed, duration);
 }
 
 
@@ -828,19 +827,70 @@ gtd_timeline_init (GtdTimeline *self)
   priv->progress_mode = GTD_EASE_LINEAR;
 }
 
-static gboolean
-delay_timeout_func (gpointer data)
+/**
+ * gtd_timeline_new:
+ * @duration_ms: Duration of the timeline in milliseconds
+ *
+ * Creates a new #GtdTimeline with a duration of @duration_ms milli seconds.
+ *
+ * Return value: the newly created #GtdTimeline instance. Use
+ *   g_object_unref() when done using it
+ *
+ * Since: 0.6
+ */
+GtdTimeline *
+gtd_timeline_new (guint duration_ms)
 {
-  GtdTimeline *self = data;
+  return g_object_new (GTD_TYPE_TIMELINE,
+                       "duration", duration_ms,
+                       NULL);
+}
+
+/**
+ * gtd_timeline_new_for_widget:
+ * @widget: The #GtdWidget the timeline is associated with
+ * @duration_ms: Duration of the timeline in milliseconds
+ *
+ * Creates a new #GtdTimeline with a duration of @duration milli seconds.
+ *
+ * Return value: the newly created #GtdTimeline instance. Use
+ *   g_object_unref() when done using it
+ */
+GtdTimeline *
+gtd_timeline_new_for_widget (GtdWidget *widget,
+                             guint      duration_ms)
+{
+  return g_object_new (GTD_TYPE_TIMELINE,
+                       "duration", duration_ms,
+                       "widget", widget,
+                       NULL);
+}
+
+/**
+ * gtd_timeline_set_widget:
+ * @timeline: a #GtdTimeline
+ * @widget: a #GtdWidget
+ *
+ * Set the widget the timeline is associated with.
+ */
+void
+gtd_timeline_set_widget (GtdTimeline *self,
+                         GtdWidget   *widget)
+{
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
 
-  priv->delay_id = 0;
-  priv->msecs_delta = 0;
-  set_is_playing (self, TRUE);
+  g_return_if_fail (GTD_IS_TIMELINE (self));
 
-  g_signal_emit (self, timeline_signals[STARTED], 0);
+  if (priv->widget)
+    {
+      remove_tick_callback (self);
+      priv->widget = NULL;
+    }
 
-  return G_SOURCE_REMOVE;
+  priv->widget = widget;
+
+  if (priv->is_playing)
+    add_tick_callback (self);
 }
 
 /**
@@ -1052,45 +1102,6 @@ gtd_timeline_is_playing (GtdTimeline *self)
 
   priv = gtd_timeline_get_instance_private (self);
   return priv->is_playing;
-}
-
-/**
- * gtd_timeline_new:
- * @duration_ms: Duration of the timeline in milliseconds
- *
- * Creates a new #GtdTimeline with a duration of @duration_ms milli seconds.
- *
- * Return value: the newly created #GtdTimeline instance. Use
- *   g_object_unref() when done using it
- *
- * Since: 0.6
- */
-GtdTimeline *
-gtd_timeline_new (guint duration_ms)
-{
-  return g_object_new (GTD_TYPE_TIMELINE,
-                       "duration", duration_ms,
-                       NULL);
-}
-
-/**
- * gtd_timeline_new_for_widget:
- * @widget: The #GtdWidget the timeline is associated with
- * @duration_ms: Duration of the timeline in milliseconds
- *
- * Creates a new #GtdTimeline with a duration of @duration milli seconds.
- *
- * Return value: the newly created #GtdTimeline instance. Use
- *   g_object_unref() when done using it
- */
-GtdTimeline *
-gtd_timeline_new_for_widget (GtdWidget *widget,
-                             guint      duration_ms)
-{
-  return g_object_new (GTD_TYPE_TIMELINE,
-                       "duration", duration_ms,
-                       "widget", widget,
-                       NULL);
 }
 
 /**
@@ -1494,17 +1505,6 @@ gtd_timeline_set_progress_func (GtdTimeline             *self,
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_PROGRESS_MODE]);
 }
 
-static gdouble
-gtd_timeline_progress_func (GtdTimeline *self,
-                            gdouble      elapsed,
-                            gdouble      duration,
-                            gpointer     user_data)
-{
-  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
-
-  return gtd_easing_for_mode (priv->progress_mode, elapsed, duration);
-}
-
 /**
  * gtd_timeline_set_progress_mode:
  * @timeline: a #GtdTimeline
@@ -1538,7 +1538,7 @@ gtd_timeline_set_progress_mode (GtdTimeline *self,
 
   /* short-circuit linear progress */
   if (priv->progress_mode != GTD_EASE_LINEAR)
-    priv->progress_func = gtd_timeline_progress_func;
+    priv->progress_func = timeline_progress_func;
   else
     priv->progress_func = NULL;
 

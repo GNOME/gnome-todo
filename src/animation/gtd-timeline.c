@@ -128,19 +128,6 @@ typedef struct
   guint auto_reverse       : 1;
 } GtdTimelinePrivate;
 
-typedef struct
-{
-  gchar *name;
-  GQuark quark;
-
-  union {
-    guint msecs;
-    gdouble progress;
-  } data;
-
-  guint is_relative : 1;
-} TimelineMarker;
-
 enum
 {
   PROP_0,

@@ -85,13 +85,8 @@ typedef struct
 {
   GtdTimelineDirection direction;
 
-  GdkFrameClock *custom_frame_clock;
-  GdkFrameClock *frame_clock;
-
   GtdWidget *widget;
-  gulong widget_destroy_handler_id;
-  gulong widget_map_handler_id;
-  gulong widget_unmap_handler_id;
+  guint frame_tick_id;
 
   guint delay_id;
 
@@ -158,19 +153,15 @@ enum
 
 static guint timeline_signals[LAST_SIGNAL] = { 0, };
 
-static void update_frame_clock (GtdTimeline *self);
-static void maybe_add_timeline (GtdTimeline *self);
-static void maybe_remove_timeline (GtdTimeline *self);
+static void set_is_playing (GtdTimeline *self,
+                            gboolean     is_playing);
 
 G_DEFINE_TYPE_WITH_PRIVATE (GtdTimeline, gtd_timeline, G_TYPE_OBJECT)
 
-static void
-on_widget_destroyed (GtdWidget    *widget,
-                    GtdTimeline *self)
+static inline gint64
+us_to_ms (gint64 ms)
 {
-  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
-
-  priv->widget = NULL;
+  return ms / 1000;
 }
 
 static void
@@ -191,32 +182,6 @@ is_complete (GtdTimeline *self)
   return (priv->direction == GTD_TIMELINE_FORWARD
           ? priv->elapsed_time >= priv->duration
           : priv->elapsed_time <= 0);
-}
-
-static void
-set_is_playing (GtdTimeline *self,
-                gboolean         is_playing)
-{
-  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
-
-  is_playing = !!is_playing;
-
-  if (is_playing == priv->is_playing)
-    return;
-
-  priv->is_playing = is_playing;
-
-  if (priv->is_playing)
-    {
-      priv->waiting_first_tick = TRUE;
-      priv->current_repeat = 0;
-
-      maybe_add_timeline (self);
-    }
-  else
-    {
-      maybe_remove_timeline (self);
-    }
 }
 
 static gboolean
@@ -363,7 +328,7 @@ gtd_timeline_do_frame (GtdTimeline *self)
     }
 }
 
-static void
+static gboolean
 tick_timeline (GtdTimeline *self,
                gint64       tick_time)
 {
@@ -385,14 +350,14 @@ tick_timeline (GtdTimeline *self,
    * still be reached.
    */
   if (!priv->is_playing)
-    return;
+    return FALSE;
 
   if (priv->waiting_first_tick)
     {
       priv->last_frame_time = tick_time;
       priv->msecs_delta = 0;
       priv->waiting_first_tick = FALSE;
-      gtd_timeline_do_frame (self);
+      return gtd_timeline_do_frame (self);
     }
   else
     {
@@ -408,7 +373,7 @@ tick_timeline (GtdTimeline *self,
       if (msecs < 0)
         {
           priv->last_frame_time = tick_time;
-          return;
+          return FALSE;
         }
 
       if (msecs != 0)
@@ -416,93 +381,91 @@ tick_timeline (GtdTimeline *self,
           /* Avoid accumulating error */
           priv->last_frame_time += msecs;
           priv->msecs_delta = msecs;
-          gtd_timeline_do_frame (self);
+          return gtd_timeline_do_frame (self);
         }
+    }
+
+  return FALSE;
+}
+
+static gboolean
+frame_tick_cb (GtkWidget     *widget,
+               GdkFrameClock *frame_clock,
+               gpointer       user_data)
+{
+  GtdTimeline *self = GTD_TIMELINE (user_data);
+  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
+  gint64 frame_time_us;
+
+  frame_time_us = gdk_frame_clock_get_frame_time (frame_clock);
+
+  if (tick_timeline (self, us_to_ms (frame_time_us)))
+    return G_SOURCE_CONTINUE;
+
+  priv->frame_tick_id = 0;
+  return G_SOURCE_REMOVE;
+}
+
+static void
+add_tick_callback (GtdTimeline *self)
+{
+  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
+
+  g_assert (!(priv->frame_tick_id > 0 && !priv->widget));
+
+  if (priv->frame_tick_id == 0)
+    {
+      priv->frame_tick_id = gtk_widget_add_tick_callback (GTK_WIDGET (priv->widget),
+                                                          frame_tick_cb,
+                                                          self,
+                                                          NULL);
     }
 }
 
 static void
-on_frame_clock_after_paint_cb (GdkFrameClock *frame_clock,
-                               GtdTimeline   *self)
+remove_tick_callback (GtdTimeline *self)
 {
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
 
-  tick_timeline (self, gdk_frame_clock_get_frame_time (frame_clock) / 1000);
+  g_assert (!(priv->frame_tick_id > 0 && !priv->widget));
 
-  if (priv->widget)
-    gtk_widget_queue_allocate (GTK_WIDGET (priv->widget));
-  else
-    gdk_frame_clock_request_phase (priv->frame_clock, GDK_FRAME_CLOCK_PHASE_LAYOUT);
+  if (priv->frame_tick_id > 0)
+    {
+      gtk_widget_remove_tick_callback (GTK_WIDGET (priv->widget), priv->frame_tick_id);
+      priv->frame_tick_id = 0;
+    }
 }
 
 static void
-maybe_add_timeline (GtdTimeline *self)
+set_is_playing (GtdTimeline *self,
+                gboolean         is_playing)
 {
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
 
-  if (!priv->frame_clock)
+  is_playing = !!is_playing;
+
+  if (is_playing == priv->is_playing)
     return;
 
-  g_signal_connect (priv->frame_clock, "after-paint", G_CALLBACK (on_frame_clock_after_paint_cb), self);
-
-  if (priv->widget)
-    gtk_widget_queue_allocate (GTK_WIDGET (priv->widget));
-  else
-    gdk_frame_clock_request_phase (priv->frame_clock, GDK_FRAME_CLOCK_PHASE_LAYOUT);
-}
-
-static void
-maybe_remove_timeline (GtdTimeline *self)
-{
-  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
-
-  if (!priv->frame_clock)
-    return;
-
-  g_signal_handlers_disconnect_by_func (priv->frame_clock, on_frame_clock_after_paint_cb, self);
-}
-
-static void
-set_frame_clock_internal (GtdTimeline   *self,
-                          GdkFrameClock *frame_clock)
-{
-  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
-
-  if (priv->frame_clock == frame_clock)
-    return;
-
-  if (priv->frame_clock && priv->is_playing)
-    maybe_remove_timeline (self);
-
-  g_set_object (&priv->frame_clock, frame_clock);
+  priv->is_playing = is_playing;
 
   if (priv->is_playing)
-    maybe_add_timeline (self);
-}
+    {
+      priv->waiting_first_tick = TRUE;
+      priv->current_repeat = 0;
 
-static void
-update_frame_clock (GtdTimeline *self)
-{
-  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
-  GdkFrameClock *frame_clock = NULL;
-
-  if (priv->widget)
-    frame_clock = gtk_widget_get_frame_clock (GTK_WIDGET (priv->widget));
-
-  set_frame_clock_internal (self, frame_clock);
-}
-
-static void
-on_widget_map_changed_cb (GtdWidget   *widget,
-                          GtdTimeline *self)
-{
-  update_frame_clock (self);
+      add_tick_callback (self);
+    }
+  else
+    {
+      remove_tick_callback (self);
+    }
 }
 
 /**
  * gtd_timeline_set_widget:
  * @timeline: a #GtdTimeline
- * @widget: (nullable): a #GtdWidget
+ * @widget: a #GtdWidget
  *
  * Set the widget the timeline is associated with.
  */
@@ -512,40 +475,18 @@ gtd_timeline_set_widget (GtdTimeline *self,
 {
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
 
-  g_return_if_fail (!widget || (widget && !priv->custom_frame_clock));
+  g_return_if_fail (GTD_IS_TIMELINE (self));
 
   if (priv->widget)
     {
-      g_clear_signal_handler (&priv->widget_destroy_handler_id, priv->widget);
-      g_clear_signal_handler (&priv->widget_map_handler_id, priv->widget);
-      g_clear_signal_handler (&priv->widget_unmap_handler_id, priv->widget);
+      remove_tick_callback (self);
       priv->widget = NULL;
-
-      if (priv->is_playing)
-        maybe_remove_timeline (self);
-
-      priv->frame_clock = NULL;
     }
 
   priv->widget = widget;
 
-  if (priv->widget)
-    {
-      priv->widget_destroy_handler_id =
-        g_signal_connect (priv->widget, "destroy",
-                          G_CALLBACK (on_widget_destroyed),
-                          self);
-      priv->widget_map_handler_id =
-        g_signal_connect (priv->widget, "map",
-                          G_CALLBACK (on_widget_map_changed_cb),
-                          self);
-      priv->widget_unmap_handler_id =
-        g_signal_connect (priv->widget, "unmap",
-                          G_CALLBACK (on_widget_map_changed_cb),
-                          self);
-    }
-
-  update_frame_clock (self);
+  if (priv->is_playing)
+    add_tick_callback (self);
 }
 
 
@@ -643,34 +584,12 @@ gtd_timeline_get_property (GObject    *object,
 }
 
 static void
-gtd_timeline_finalize (GObject *object)
-{
-  GtdTimeline *self = GTD_TIMELINE (object);
-  GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
-
-  if (priv->is_playing)
-    maybe_remove_timeline (self);
-
-  g_clear_object (&priv->frame_clock);
-
-  G_OBJECT_CLASS (gtd_timeline_parent_class)->finalize (object);
-}
-
-static void
 gtd_timeline_dispose (GObject *object)
 {
   GtdTimeline *self = GTD_TIMELINE (object);
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
 
   gtd_timeline_cancel_delay (self);
-
-  if (priv->widget)
-    {
-      g_clear_signal_handler (&priv->widget_destroy_handler_id, priv->widget);
-      g_clear_signal_handler (&priv->widget_map_handler_id, priv->widget);
-      g_clear_signal_handler (&priv->widget_unmap_handler_id, priv->widget);
-      priv->widget = NULL;
-    }
 
   if (priv->progress_notify != NULL)
     {
@@ -799,7 +718,6 @@ gtd_timeline_class_init (GtdTimelineClass *klass)
                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   object_class->dispose = gtd_timeline_dispose;
-  object_class->finalize = gtd_timeline_finalize;
   object_class->set_property = gtd_timeline_set_property;
   object_class->get_property = gtd_timeline_get_property;
   g_object_class_install_properties (object_class, PROP_LAST, obj_props);
@@ -945,10 +863,6 @@ gtd_timeline_start (GtdTimeline *self)
 
   if (priv->duration == 0)
     return;
-
-  g_warn_if_fail ((priv->widget &&
-                   gtk_widget_get_mapped (GTK_WIDGET (priv->widget))) ||
-                  priv->frame_clock);
 
   if (priv->delay)
     {

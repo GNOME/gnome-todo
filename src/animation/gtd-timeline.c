@@ -123,10 +123,6 @@ typedef struct
   gint n_steps;
   GtdStepMode step_mode;
 
-  /* cubic-bezier() parameters */
-  graphene_point_t cb_1;
-  graphene_point_t cb_2;
-
   guint is_playing         : 1;
 
   /* If we've just started playing and haven't yet gotten
@@ -956,10 +952,6 @@ gtd_timeline_init (GtdTimeline *self)
   /* default steps() parameters are 1, end */
   priv->n_steps = 1;
   priv->step_mode = GTD_STEP_MODE_END;
-
-  /* default cubic-bezier() paramereters are (0, 0, 1, 1) */
-  graphene_point_init (&priv->cb_1, 0, 0);
-  graphene_point_init (&priv->cb_2, 1, 1);
 }
 
 static gboolean

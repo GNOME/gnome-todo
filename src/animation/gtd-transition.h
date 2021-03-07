@@ -55,7 +55,7 @@ struct _GtdTransitionClass
   void (* compute_value) (GtdTransition *transition,
                           GtdAnimatable *animatable,
                           GtdInterval   *interval,
-                          gdouble            progress);
+                          gdouble        progress);
 
   /*< private >*/
   gpointer _padding[8];

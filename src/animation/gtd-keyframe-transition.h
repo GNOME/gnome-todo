@@ -64,7 +64,6 @@ void                 gtd_keyframe_transition_set                 (GtdKeyframeTra
                                                                   guint                  n_key_frames,
                                                                   ...);
 
-
 void                 gtd_keyframe_transition_set_key_frame       (GtdKeyframeTransition *transition,
                                                                   guint                  index_,
                                                                   double                 key,
@@ -78,7 +77,6 @@ void                 gtd_keyframe_transition_get_key_frame       (GtdKeyframeTra
                                                                   GValue                *value);
 
 guint                gtd_keyframe_transition_get_n_key_frames    (GtdKeyframeTransition  *transition);
-
 
 void                 gtd_keyframe_transition_clear               (GtdKeyframeTransition  *transition);
 

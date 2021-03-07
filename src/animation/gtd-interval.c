@@ -236,11 +236,7 @@ gtd_interval_real_compute_value (GtdInterval *self,
 
   if (gtd_has_progress_function (value_type))
     {
-      retval = gtd_run_progress_function (value_type,
-                                          initial,
-                                          final,
-                                          factor,
-                                          value);
+      retval = gtd_run_progress_function (value_type, initial, final, factor, value);
       if (retval)
         return TRUE;
     }
@@ -386,9 +382,9 @@ gtd_interval_finalize (GObject *object)
 
 static void
 gtd_interval_set_property (GObject      *gobject,
-                               guint         prop_id,
-                               const GValue *value,
-                               GParamSpec   *pspec)
+                           guint         prop_id,
+                           const GValue *value,
+                           GParamSpec   *pspec)
 {
   GtdInterval *self = GTD_INTERVAL (gobject);
   GtdIntervalPrivate *priv = gtd_interval_get_instance_private (self);
@@ -421,9 +417,9 @@ gtd_interval_set_property (GObject      *gobject,
 
 static void
 gtd_interval_get_property (GObject    *gobject,
-                               guint       prop_id,
-                               GValue     *value,
-                               GParamSpec *pspec)
+                           guint       prop_id,
+                           GValue     *value,
+                           GParamSpec *pspec)
 {
   GtdIntervalPrivate *priv;
 
@@ -467,8 +463,6 @@ gtd_interval_class_init (GtdIntervalClass *klass)
    * GtdInterval:value-type:
    *
    * The type of the values in the interval.
-   *
-   * Since: 1.0
    */
   obj_props[PROP_VALUE_TYPE] =
     g_param_spec_gtype ("value-type",
@@ -481,31 +475,25 @@ gtd_interval_class_init (GtdIntervalClass *klass)
    * GtdInterval:initial:
    *
    * The initial value of the interval.
-   *
-   * Since: 1.12
    */
   obj_props[PROP_INITIAL] =
     g_param_spec_boxed ("initial",
                         "Initial Value",
                         "Initial value of the interval",
                         G_TYPE_VALUE,
-                        G_PARAM_READWRITE |
-                        G_PARAM_STATIC_STRINGS);
+                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   /**
    * GtdInterval:final:
    *
    * The final value of the interval.
-   *
-   * Since: 1.12
    */
   obj_props[PROP_FINAL] =
     g_param_spec_boxed ("final",
                         "Final Value",
                         "Final value of the interval",
                         G_TYPE_VALUE,
-                        G_PARAM_READWRITE |
-                        G_PARAM_STATIC_STRINGS);
+                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (gobject_class, PROP_LAST, obj_props);
 }
@@ -695,8 +683,6 @@ gtd_interval_get_interval_valist (GtdInterval *self,
  * ]|
  *
  * Return value: the newly created #GtdInterval
- *
- * Since: 1.0
  */
 GtdInterval *
 gtd_interval_new (GType gtype,
@@ -734,13 +720,11 @@ out:
  * This function is useful for language bindings.
  *
  * Return value: the newly created #GtdInterval
- *
- * Since: 1.0
  */
 GtdInterval *
 gtd_interval_new_with_values (GType         gtype,
-                                  const GValue *initial,
-                                  const GValue *final)
+                              const GValue *initial,
+                              const GValue *final)
 {
   g_return_val_if_fail (gtype != G_TYPE_INVALID, NULL);
   g_return_val_if_fail (initial == NULL || G_VALUE_TYPE (initial) == gtype, NULL);
@@ -760,8 +744,6 @@ gtd_interval_new_with_values (GType         gtype,
  * Creates a copy of @interval.
  *
  * Return value: (transfer full): the newly created #GtdInterval
- *
- * Since: 1.0
  */
 GtdInterval *
 gtd_interval_clone (GtdInterval *self)
@@ -793,8 +775,6 @@ gtd_interval_clone (GtdInterval *self)
  * Retrieves the #GType of the values inside @interval.
  *
  * Return value: the type of the value, or G_TYPE_INVALID
- *
- * Since: 1.0
  */
 GType
 gtd_interval_get_value_type (GtdInterval *self)
@@ -814,8 +794,6 @@ gtd_interval_get_value_type (GtdInterval *self)
  *
  * Sets the initial value of @interval to @value. The value is copied
  * inside the #GtdInterval.
- *
- * Since: 1.0
  */
 void
 gtd_interval_set_initial_value (GtdInterval  *self,
@@ -838,12 +816,10 @@ gtd_interval_set_initial_value (GtdInterval  *self,
  *
  * Language bindings should use gtd_interval_set_initial_value()
  * instead.
- *
- * Since: 1.10
  */
 void
 gtd_interval_set_initial (GtdInterval *self,
-                              ...)
+                          ...)
 {
   va_list args;
 
@@ -864,12 +840,10 @@ gtd_interval_set_initial (GtdInterval *self,
  *
  * The passed #GValue must be initialized to the value held by
  * the #GtdInterval.
- *
- * Since: 1.0
  */
 void
 gtd_interval_get_initial_value (GtdInterval *self,
-                                    GValue          *value)
+                                GValue      *value)
 {
   g_return_if_fail (GTD_IS_INTERVAL (self));
   g_return_if_fail (value != NULL);
@@ -886,8 +860,6 @@ gtd_interval_get_initial_value (GtdInterval *self,
  * Return value: (transfer none): the initial value of the interval.
  *   The value is owned by the #GtdInterval and it should not be
  *   modified or freed
- *
- * Since: 1.0
  */
 GValue *
 gtd_interval_peek_initial_value (GtdInterval *self)
@@ -907,12 +879,10 @@ gtd_interval_peek_initial_value (GtdInterval *self)
  *
  * Sets the final value of @interval to @value. The value is
  * copied inside the #GtdInterval.
- *
- * Since: 1.0
  */
 void
-gtd_interval_set_final_value (GtdInterval *self,
-                                  const GValue    *value)
+gtd_interval_set_final_value (GtdInterval  *self,
+                              const GValue *value)
 {
   g_return_if_fail (GTD_IS_INTERVAL (self));
   g_return_if_fail (value != NULL);
@@ -930,12 +900,10 @@ gtd_interval_set_final_value (GtdInterval *self,
  *
  * The passed #GValue must be initialized to the value held by
  * the #GtdInterval.
- *
- * Since: 1.0
  */
 void
 gtd_interval_get_final_value (GtdInterval *self,
-                                  GValue          *value)
+                              GValue      *value)
 {
   g_return_if_fail (GTD_IS_INTERVAL (self));
   g_return_if_fail (value != NULL);
@@ -953,12 +921,10 @@ gtd_interval_get_final_value (GtdInterval *self,
  * This function is meant as a convenience for the C API.
  *
  * Language bindings should use gtd_interval_set_final_value() instead.
- *
- * Since: 1.10
  */
 void
 gtd_interval_set_final (GtdInterval *self,
-                            ...)
+                        ...)
 {
   va_list args;
 
@@ -978,8 +944,6 @@ gtd_interval_set_final (GtdInterval *self,
  * Return value: (transfer none): the final value of the interval.
  *   The value is owned by the #GtdInterval and it should not be
  *   modified or freed
- *
- * Since: 1.0
  */
 GValue *
 gtd_interval_peek_final_value (GtdInterval *self)
@@ -1009,8 +973,6 @@ gtd_interval_peek_final_value (GtdInterval *self)
  *
  * This function is meant for the convenience of the C API; bindings
  * should reimplement this function using the #GValue-based API.
- *
- * Since: 1.0
  */
 void
 gtd_interval_set_interval (GtdInterval *self,
@@ -1050,8 +1012,6 @@ out:
  *
  * This function is meant for the convenience of the C API; bindings
  * should reimplement this function using the #GValue-based API.
- *
- * Since: 1.0
  */
 void
 gtd_interval_get_interval (GtdInterval *self,
@@ -1077,8 +1037,6 @@ gtd_interval_get_interval (GtdInterval *self,
  * a #GParamSpec.
  *
  * Return value: %TRUE if the #GtdInterval is valid, %FALSE otherwise
- *
- * Since: 1.0
  */
 gboolean
 gtd_interval_validate (GtdInterval *self,
@@ -1100,8 +1058,6 @@ gtd_interval_validate (GtdInterval *self,
  * progress @factor and copies it into @value.
  *
  * Return value: %TRUE if the operation was successful
- *
- * Since: 1.0
  */
 gboolean
 gtd_interval_compute_value (GtdInterval *self,
@@ -1131,8 +1087,6 @@ gtd_interval_compute_value (GtdInterval *self,
  *
  * Return value: (transfer none): a pointer to the computed value,
  *   or %NULL if the computation was not successfull
- *
- * Since: 1.4
  */
 const GValue *
 gtd_interval_compute (GtdInterval *self,
@@ -1149,9 +1103,7 @@ gtd_interval_compute (GtdInterval *self,
   if (G_VALUE_TYPE (value) == G_TYPE_INVALID)
     g_value_init (value, priv->value_type);
 
-  res = GTD_INTERVAL_GET_CLASS (self)->compute_value (self,
-                                                              factor,
-                                                              value);
+  res = GTD_INTERVAL_GET_CLASS (self)->compute_value (self, factor, value);
 
   if (res)
     return priv->values + RESULT;
@@ -1167,8 +1119,6 @@ gtd_interval_compute (GtdInterval *self,
  *
  * Return value: %TRUE if the #GtdInterval has an initial and
  *   final values, and %FALSE otherwise
- *
- * Since: 1.12
  */
 gboolean
 gtd_interval_is_valid (GtdInterval *self)

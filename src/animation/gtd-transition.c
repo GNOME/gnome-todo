@@ -102,16 +102,15 @@ gtd_transition_new_frame (GtdTimeline *timeline,
   GtdTransitionPrivate *priv = gtd_transition_get_instance_private (self);
   gdouble progress;
 
-  if (priv->interval == NULL ||
-      priv->animatable == NULL)
+  if (!priv->interval || !priv->animatable)
     return;
 
   progress = gtd_timeline_get_progress (timeline);
 
   GTD_TRANSITION_GET_CLASS (timeline)->compute_value (self,
-                                                          priv->animatable,
-                                                          priv->interval,
-                                                          progress);
+                                                      priv->animatable,
+                                                      priv->interval,
+                                                      progress);
 }
 
 static void
@@ -229,8 +228,6 @@ gtd_transition_class_init (GtdTransitionClass *klass)
    *
    * The #GtdInterval used to describe the initial and final states
    * of the transition.
-   *
-   * Since: 1.10
    */
   obj_props[PROP_INTERVAL] =
     g_param_spec_object ("interval",
@@ -243,8 +240,6 @@ gtd_transition_class_init (GtdTransitionClass *klass)
    * GtdTransition:animatable:
    *
    * The #GtdAnimatable instance currently being animated.
-   *
-   * Since: 1.10
    */
   obj_props[PROP_ANIMATABLE] =
     g_param_spec_object ("animatable",
@@ -264,8 +259,6 @@ gtd_transition_class_init (GtdTransitionClass *klass)
    * account the value of the #GtdTimeline:repeat-count property,
    * and it only detaches the transition if the transition is not
    * repeating.
-   *
-   * Since: 1.10
    */
   obj_props[PROP_REMOVE_ON_COMPLETE] =
     g_param_spec_boolean ("remove-on-complete",
@@ -291,8 +284,6 @@ gtd_transition_init (GtdTransition *self)
  *
  * The @transition will acquire a reference on the @interval, sinking
  * the floating flag on it if necessary.
- *
- * Since: 1.10
  */
 void
 gtd_transition_set_interval (GtdTransition *self,
@@ -325,8 +316,6 @@ gtd_transition_set_interval (GtdTransition *self,
  * Return value: (transfer none): a #GtdInterval, or %NULL; the returned
  *   interval is owned by the #GtdTransition and it should not be freed
  *   directly
- *
- * Since: 1.10
  */
 GtdInterval *
 gtd_transition_get_interval (GtdTransition *self)
@@ -352,12 +341,10 @@ gtd_transition_get_interval (GtdTransition *self)
  * If an existing #GtdAnimatable is attached to @self, the
  * reference will be released, and the #GtdTransitionClass.detached()
  * virtual function will be called.
- *
- * Since: 1.10
  */
 void
 gtd_transition_set_animatable (GtdTransition *self,
-                                   GtdAnimatable *animatable)
+                               GtdAnimatable *animatable)
 {
   GtdTransitionPrivate *priv;
   GtdWidget *widget;
@@ -394,8 +381,6 @@ gtd_transition_set_animatable (GtdTransition *self,
  * Return value: (transfer none): a #GtdAnimatable, or %NULL; the returned
  *   animatable is owned by the #GtdTransition, and it should not be freed
  *   directly.
- *
- * Since: 1.10
  */
 GtdAnimatable *
 gtd_transition_get_animatable (GtdTransition *self)
@@ -416,8 +401,6 @@ gtd_transition_get_animatable (GtdTransition *self)
  * Sets whether @transition should be detached from the #GtdAnimatable
  * set using gtd_transition_set_animatable() when the
  * #GtdTimeline::completed signal is emitted.
- *
- * Since: 1.10
  */
 void
 gtd_transition_set_remove_on_complete (GtdTransition *self,
@@ -435,8 +418,7 @@ gtd_transition_set_remove_on_complete (GtdTransition *self,
 
   priv->remove_on_complete = remove_complete;
 
-  g_object_notify_by_pspec (G_OBJECT (self),
-                            obj_props[PROP_REMOVE_ON_COMPLETE]);
+  g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_REMOVE_ON_COMPLETE]);
 }
 
 /**
@@ -447,8 +429,6 @@ gtd_transition_set_remove_on_complete (GtdTransition *self,
  *
  * Return value: %TRUE if the @transition should be detached when complete,
  *   and %FALSE otherwise
- *
- * Since: 1.10
  */
 gboolean
 gtd_transition_get_remove_on_complete (GtdTransition *self)
@@ -474,9 +454,7 @@ gtd_transition_set_value (GtdTransition   *self,
 
   if (priv->interval == NULL)
     {
-      priv->interval = gtd_interval_new_with_values (G_VALUE_TYPE (value),
-                                                         NULL,
-                                                         NULL);
+      priv->interval = gtd_interval_new_with_values (G_VALUE_TYPE (value), NULL, NULL);
       g_object_ref_sink (priv->interval);
     }
 
@@ -511,7 +489,9 @@ gtd_transition_set_value (GtdTransition   *self,
         }
     }
   else
-    interval_set_func (priv->interval, value);
+    {
+      interval_set_func (priv->interval, value);
+    }
 }
 
 /**
@@ -533,19 +513,15 @@ gtd_transition_set_value (GtdTransition   *self,
  * as the interval's #GtdInterval:value-type property.
  *
  * This function is meant to be used by language bindings.
- *
- * Since: 1.12
  */
 void
 gtd_transition_set_from_value (GtdTransition *self,
-                                   const GValue      *value)
+                               const GValue  *value)
 {
   g_return_if_fail (GTD_IS_TRANSITION (self));
   g_return_if_fail (G_IS_VALUE (value));
 
-  gtd_transition_set_value (self,
-                                gtd_interval_set_initial_value,
-                                value);
+  gtd_transition_set_value (self, gtd_interval_set_initial_value, value);
 }
 
 /**
@@ -567,12 +543,10 @@ gtd_transition_set_from_value (GtdTransition *self,
  * as the interval's #GtdInterval:value-type property.
  *
  * This function is meant to be used by language bindings.
- *
- * Since: 1.12
  */
 void
 gtd_transition_set_to_value (GtdTransition *self,
-                                 const GValue      *value)
+                             const GValue  *value)
 {
   g_return_if_fail (GTD_IS_TRANSITION (self));
   g_return_if_fail (G_IS_VALUE (value));
@@ -600,13 +574,11 @@ gtd_transition_set_to_value (GtdTransition *self,
  *
  * This is a convenience function for the C API; language bindings
  * should use gtd_transition_set_from_value() instead.
- *
- * Since: 1.12
  */
 void
 gtd_transition_set_from (GtdTransition *self,
-                             GType              value_type,
-                             ...)
+                         GType          value_type,
+                         ...)
 {
   GValue value = G_VALUE_INIT;
   gchar *error = NULL;
@@ -628,9 +600,7 @@ gtd_transition_set_from (GtdTransition *self,
       return;
     }
 
-  gtd_transition_set_value (self,
-                                gtd_interval_set_initial_value,
-                                &value);
+  gtd_transition_set_value (self, gtd_interval_set_initial_value, &value);
 
   g_value_unset (&value);
 }
@@ -653,8 +623,6 @@ gtd_transition_set_from (GtdTransition *self,
  *
  * This is a convenience function for the C API; language bindings
  * should use gtd_transition_set_to_value() instead.
- *
- * Since: 1.12
  */
 void
 gtd_transition_set_to (GtdTransition *self,
@@ -681,9 +649,7 @@ gtd_transition_set_to (GtdTransition *self,
       return;
     }
 
-  gtd_transition_set_value (self,
-                                gtd_interval_set_final_value,
-                                &value);
+  gtd_transition_set_value (self, gtd_interval_set_final_value, &value);
 
   g_value_unset (&value);
 }

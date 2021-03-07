@@ -26,8 +26,6 @@
  *
  * #GtdPropertyTransition is a specialized #GtdTransition that
  * can be used to tween a property of a #GtdAnimatable instance.
- *
- * #GtdPropertyTransition is available since Gtd 1.10
  */
 
 #include "gtd-property-transition.h"
@@ -253,8 +251,6 @@ gtd_property_transition_class_init (GtdPropertyTransitionClass *klass)
    * GtdPropertyTransition:property-name:
    *
    * The name of the property of a #GtdAnimatable to animate.
-   *
-   * Since: 1.10
    */
   obj_props[PROP_PROPERTY_NAME] =
     g_param_spec_string ("property-name",
@@ -299,8 +295,6 @@ gtd_property_transition_new_for_actor (GtdWidget  *widget,
  *
  * Return value: (transfer full): the newly created #GtdPropertyTransition.
  *   Use g_object_unref() when done
- *
- * Since: 1.10
  */
 GtdTransition *
 gtd_property_transition_new (const char *property_name)
@@ -316,8 +310,6 @@ gtd_property_transition_new (const char *property_name)
  * @property_name: (allow-none): a property name
  *
  * Sets the #GtdPropertyTransition:property-name property of @transition.
- *
- * Since: 1.10
  */
 void
 gtd_property_transition_set_property_name (GtdPropertyTransition *self,
@@ -354,8 +346,6 @@ gtd_property_transition_set_property_name (GtdPropertyTransition *self,
  * Return value: the name of the property being animated, or %NULL if
  *   none is set. The returned string is owned by the @transition and
  *   it should not be freed.
- *
- * Since: 1.10
  */
 const char *
 gtd_property_transition_get_property_name (GtdPropertyTransition *self)

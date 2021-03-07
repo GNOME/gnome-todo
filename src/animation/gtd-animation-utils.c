@@ -42,25 +42,25 @@ gtd_has_progress_function (GType gtype)
 }
 
 gboolean
-gtd_run_progress_function (GType gtype,
-                                const GValue *initial,
-                                const GValue *final,
-                                gdouble progress,
-                                GValue *retval)
+gtd_run_progress_function (GType         gtype,
+                           const GValue *initial,
+                           const GValue *final,
+                           gdouble       progress,
+                           GValue       *retval)
 {
   ProgressData *pdata;
   gboolean res;
 
   G_LOCK (progress_funcs);
 
-  if (G_UNLIKELY (progress_funcs == NULL))
+  if (G_UNLIKELY (!progress_funcs))
     {
       res = FALSE;
       goto out;
     }
 
   pdata = g_hash_table_lookup (progress_funcs, g_type_name (gtype));
-  if (G_UNLIKELY (pdata == NULL))
+  if (G_UNLIKELY (!pdata))
     {
       res = FALSE;
       goto out;
@@ -75,9 +75,9 @@ out:
 }
 
 static void
-progress_data_destroy (gpointer data_)
+progress_data_destroy (gpointer data)
 {
-  g_slice_free (ProgressData, data_);
+  g_free (data);
 }
 
 /**
@@ -124,8 +124,8 @@ progress_data_destroy (gpointer data_)
  * Since: 1.0
  */
 void
-gtd_interval_register_progress_func (GType               value_type,
-                                         GtdProgressFunc func)
+gtd_interval_register_progress_func (GType           value_type,
+                                     GtdProgressFunc func)
 {
   ProgressData *progress_func;
   const char *type_name;
@@ -136,27 +136,26 @@ gtd_interval_register_progress_func (GType               value_type,
 
   G_LOCK (progress_funcs);
 
-  if (G_UNLIKELY (progress_funcs == NULL))
-    progress_funcs = g_hash_table_new_full (NULL, NULL,
-                                            NULL,
-                                            progress_data_destroy);
+  if (G_UNLIKELY (!progress_funcs))
+    progress_funcs = g_hash_table_new_full (NULL, NULL, NULL, progress_data_destroy);
 
-  progress_func =
-    g_hash_table_lookup (progress_funcs, type_name);
+  progress_func = g_hash_table_lookup (progress_funcs, type_name);
 
   if (G_UNLIKELY (progress_func))
     {
       if (func == NULL)
         {
           g_hash_table_remove (progress_funcs, type_name);
-          g_slice_free (ProgressData, progress_func);
+          g_free (progress_func);
         }
       else
-        progress_func->func = func;
+        {
+          progress_func->func = func;
+        }
     }
   else
     {
-      progress_func = g_slice_new (ProgressData);
+      progress_func = g_new0 (ProgressData, 1);
       progress_func->value_type = value_type;
       progress_func->func = func;
 

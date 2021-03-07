@@ -416,7 +416,7 @@ remove_tick_callback (GtdTimeline *self)
 
 static void
 set_is_playing (GtdTimeline *self,
-                gboolean         is_playing)
+                gboolean     is_playing)
 {
   GtdTimelinePrivate *priv = gtd_timeline_get_instance_private (self);
 
@@ -585,8 +585,6 @@ gtd_timeline_class_init (GtdTimelineClass *klass)
    *
    * A delay, in milliseconds, that should be observed by the
    * timeline before actually starting.
-   *
-   * Since: 0.4
    */
   obj_props[PROP_DELAY] =
     g_param_spec_uint ("delay",
@@ -599,10 +597,7 @@ gtd_timeline_class_init (GtdTimelineClass *klass)
   /**
    * GtdTimeline:duration:
    *
-   * Duration of the timeline in milliseconds, depending on the
-   * GtdTimeline:fps value.
-   *
-   * Since: 0.6
+   * Duration of the timeline in milliseconds.
    */
   obj_props[PROP_DURATION] =
     g_param_spec_uint ("duration",
@@ -617,8 +612,6 @@ gtd_timeline_class_init (GtdTimelineClass *klass)
    *
    * The direction of the timeline, either %GTD_TIMELINE_FORWARD or
    * %GTD_TIMELINE_BACKWARD.
-   *
-   * Since: 0.6
    */
   obj_props[PROP_DIRECTION] =
     g_param_spec_enum ("direction",
@@ -633,8 +626,6 @@ gtd_timeline_class_init (GtdTimelineClass *klass)
    *
    * If the direction of the timeline should be automatically reversed
    * when reaching the end.
-   *
-   * Since: 1.6
    */
   obj_props[PROP_AUTO_REVERSE] =
     g_param_spec_boolean ("auto-reverse",
@@ -652,8 +643,6 @@ gtd_timeline_class_init (GtdTimelineClass *klass)
    *
    * If the repeat count is set to -1, the timeline will repeat until it is
    * stopped.
-   *
-   * Since: 1.10
    */
   obj_props[PROP_REPEAT_COUNT] =
     g_param_spec_int ("repeat-count",
@@ -667,8 +656,6 @@ gtd_timeline_class_init (GtdTimelineClass *klass)
    * GtdTimeline:progress-mode:
    *
    * Controls the way a #GtdTimeline computes the normalized progress.
-   *
-   * Since: 1.10
    */
   obj_props[PROP_PROGRESS_MODE] =
     g_param_spec_enum ("progress-mode",
@@ -767,8 +754,6 @@ gtd_timeline_class_init (GtdTimelineClass *klass)
    *
    * If the #GtdTimeline has is marked as infinitely repeating,
    * this signal will never be emitted.
-   *
-   * Since: 1.12
    */
   timeline_signals[STOPPED] =
     g_signal_new ("stopped",
@@ -798,8 +783,6 @@ gtd_timeline_init (GtdTimeline *self)
  *
  * Return value: the newly created #GtdTimeline instance. Use
  *   g_object_unref() when done using it
- *
- * Since: 0.6
  */
 GtdTimeline *
 gtd_timeline_new (guint duration_ms)
@@ -1069,8 +1052,6 @@ gtd_timeline_is_playing (GtdTimeline *self)
  * Retrieves the delay set using gtd_timeline_set_delay().
  *
  * Return value: the delay in milliseconds.
- *
- * Since: 0.4
  */
 guint
 gtd_timeline_get_delay (GtdTimeline *self)
@@ -1089,8 +1070,6 @@ gtd_timeline_get_delay (GtdTimeline *self)
  * @msecs: delay in milliseconds
  *
  * Sets the delay, in milliseconds, before @timeline should start.
- *
- * Since: 0.4
  */
 void
 gtd_timeline_set_delay (GtdTimeline *self,
@@ -1119,8 +1098,6 @@ gtd_timeline_set_delay (GtdTimeline *self,
  * See gtd_timeline_set_duration().
  *
  * Return value: the duration of the timeline, in milliseconds.
- *
- * Since: 0.6
  */
 guint
 gtd_timeline_get_duration (GtdTimeline *self)
@@ -1141,8 +1118,6 @@ gtd_timeline_get_duration (GtdTimeline *self)
  *
  * Sets the duration of the timeline, in milliseconds. The speed
  * of the timeline depends on the GtdTimeline:fps setting.
- *
- * Since: 0.6
  */
 void
 gtd_timeline_set_duration (GtdTimeline *self,
@@ -1176,8 +1151,6 @@ gtd_timeline_set_duration (GtdTimeline *self,
  * progress function set using gtd_timeline_set_progress_func().
  *
  * Return value: the normalized current position in the timeline.
- *
- * Since: 0.6
  */
 gdouble
 gtd_timeline_get_progress (GtdTimeline *self)
@@ -1202,8 +1175,6 @@ gtd_timeline_get_progress (GtdTimeline *self)
  * gtd_timeline_set_direction().
  *
  * Return value: the direction of the timeline
- *
- * Since: 0.6
  */
 GtdTimelineDirection
 gtd_timeline_get_direction (GtdTimeline *self)
@@ -1223,8 +1194,6 @@ gtd_timeline_get_direction (GtdTimeline *self)
  *
  * Sets the direction of @timeline, either %GTD_TIMELINE_FORWARD or
  * %GTD_TIMELINE_BACKWARD.
- *
- * Since: 0.6
  */
 void
 gtd_timeline_set_direction (GtdTimeline          *self,
@@ -1260,8 +1229,6 @@ gtd_timeline_set_direction (GtdTimeline          *self,
  *
  * Return value: the amount of time in milliseconds elapsed since the
  * last frame
- *
- * Since: 0.6
  */
 guint
 gtd_timeline_get_delta (GtdTimeline *self)
@@ -1318,8 +1285,6 @@ gtd_timeline_get_delta (GtdTimeline *self)
  *   gtd_timeline_set_repeat_count (self, -1);
  *   gtd_timeline_set_auto_reverse (self);
  * ]|
- *
- * Since: 1.6
  */
 void
 gtd_timeline_set_auto_reverse (GtdTimeline *self,
@@ -1348,8 +1313,6 @@ gtd_timeline_set_auto_reverse (GtdTimeline *self,
  *
  * Return value: %TRUE if the timeline should automatically reverse, and
  *   %FALSE otherwise
- *
- * Since: 1.6
  */
 gboolean
 gtd_timeline_get_auto_reverse (GtdTimeline *self)
@@ -1373,8 +1336,6 @@ gtd_timeline_get_auto_reverse (GtdTimeline *self)
  *
  * If @count is -1, the timeline will always repeat until
  * it's stopped.
- *
- * Since: 1.10
  */
 void
 gtd_timeline_set_repeat_count (GtdTimeline *self,
@@ -1401,8 +1362,6 @@ gtd_timeline_set_repeat_count (GtdTimeline *self,
  * Retrieves the number set using gtd_timeline_set_repeat_count().
  *
  * Return value: the number of repeats
- *
- * Since: 1.10
  */
 gint
 gtd_timeline_get_repeat_count (GtdTimeline *self)
@@ -1433,8 +1392,6 @@ gtd_timeline_get_repeat_count (GtdTimeline *self)
  *
  * If @func is %NULL, any previously set progress function will be unset, and
  * the #GtdTimeline:progress-mode property will be set to %GTD_EASE_LINEAR.
- *
- * Since: 1.10
  */
 void
 gtd_timeline_set_progress_func (GtdTimeline             *self,
@@ -1471,8 +1428,6 @@ gtd_timeline_set_progress_func (GtdTimeline             *self,
  * Sets the progress function using a value from the #GtdEaseMode
  * enumeration. The @mode cannot be %GTD_CUSTOM_MODE or bigger than
  * %GTD_ANIMATION_LAST.
- *
- * Since: 1.10
  */
 void
 gtd_timeline_set_progress_mode (GtdTimeline *self,
@@ -1508,8 +1463,6 @@ gtd_timeline_set_progress_mode (GtdTimeline *self,
  * or gtd_timeline_set_progress_func().
  *
  * Return value: a #GtdEaseMode
- *
- * Since: 1.10
  */
 GtdEaseMode
 gtd_timeline_get_progress_mode (GtdTimeline *self)
@@ -1536,8 +1489,6 @@ gtd_timeline_get_progress_mode (GtdTimeline *self)
  * as long as the @timeline hasn't been changed.
  *
  * Return value: the full duration of the #GtdTimeline
- *
- * Since: 1.10
  */
 gint64
 gtd_timeline_get_duration_hint (GtdTimeline *self)
@@ -1567,8 +1518,6 @@ gtd_timeline_get_duration_hint (GtdTimeline *self)
  * Repeats start at 0.
  *
  * Return value: the current repeat
- *
- * Since: 1.10
  */
 gint
 gtd_timeline_get_current_repeat (GtdTimeline *self)

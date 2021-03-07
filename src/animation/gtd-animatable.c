@@ -30,8 +30,6 @@
  * #GtdAnimatableInterface.interpolate_property() virtual function of the
  * interface to compute the animation state between two values of an interval
  * depending on a progress fwidget, expressed as a floating point value.
- *
- * #GtdAnimatable is available since Gtd 1.0
  */
 
 #include "gtd-animatable.h"
@@ -53,10 +51,7 @@ gtd_animatable_default_init (GtdAnimatableInterface *iface)
  *
  * Finds the #GParamSpec for @property_name
  *
- * Return value: (transfer none): The #GParamSpec for the given property
- *   or %NULL
- *
- * Since: 1.4
+ * Return value: (transfer none) (nullable): The #GParamSpec for the given property
  */
 GParamSpec *
 gtd_animatable_find_property (GtdAnimatable *animatable,
@@ -84,8 +79,6 @@ gtd_animatable_find_property (GtdAnimatable *animatable,
  * @value: a #GValue initialized to the type of the property to retrieve
  *
  * Retrieves the current state of @property_name and sets @value with it
- *
- * Since: 1.4
  */
 void
 gtd_animatable_get_initial_state (GtdAnimatable *animatable,
@@ -113,8 +106,6 @@ gtd_animatable_get_initial_state (GtdAnimatable *animatable,
  * @value: the value of the animatable property to set
  *
  * Sets the current state of @property_name to @value
- *
- * Since: 1.4
  */
 void
 gtd_animatable_set_final_state (GtdAnimatable *animatable,
@@ -157,8 +148,6 @@ gtd_animatable_set_final_state (GtdAnimatable *animatable,
  *
  * Return value: %TRUE if the interpolation was successful,
  *   and %FALSE otherwise
- *
- * Since: 1.8
  */
 gboolean
 gtd_animatable_interpolate_value (GtdAnimatable *animatable,

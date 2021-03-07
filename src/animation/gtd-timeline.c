@@ -213,7 +213,6 @@ gtd_timeline_do_frame (GtdTimeline *self)
   /* If we have not reached the end of the timeline: */
   if (!is_complete (self))
     {
-      /* Emit the signal */
       emit_frame_signal (self);
     }
   else
@@ -257,10 +256,6 @@ gtd_timeline_do_frame (GtdTimeline *self)
         {
           /* We stop the timeline now, so that the completed signal handler
            * may choose to re-start the timeline
-           *
-           * XXX Perhaps we should do this earlier, and regardless of
-           * priv->repeat_count. Are we limiting the things that could be
-           * done in the above new-frame signal handler?
            */
           set_is_playing (self, FALSE);
 
@@ -286,15 +281,15 @@ gtd_timeline_do_frame (GtdTimeline *self)
                                     obj_props[PROP_DIRECTION]);
         }
 
-      /* Again check to see if the user has manually played with
-       * the elapsed time, before we finally stop or loop the timeline */
-
+      /*
+       * Again check to see if the user has manually played with
+       * the elapsed time, before we finally stop or loop the timeline,
+       * except changing time from 0 -> duration (or vice-versa)
+       * since these are considered equivalent
+       */
       if (priv->elapsed_time_us != end_us &&
-          !(/* Except allow changing time from 0 -> duration (or vice-versa)
-               since these are considered equivalent */
-            (priv->elapsed_time_us == 0 && end_us == priv->duration_us) ||
-            (priv->elapsed_time_us == priv->duration_us && end_us == 0)
-          ))
+          !((priv->elapsed_time_us == 0 && end_us == priv->duration_us) ||
+            (priv->elapsed_time_us == priv->duration_us && end_us == 0)))
         {
           goto out;
         }

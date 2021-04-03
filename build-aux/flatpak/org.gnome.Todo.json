@@ -152,6 +152,22 @@
             ]
         },
         {
+            "name" : "libadwaita",
+            "buildsystem" : "meson",
+            "config-opts" : [
+                "-Dexamples=false",
+                "-Dtests=false",
+                "-Dvapi=false"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/libadwaita.git",
+                    "branch": "main"
+                }
+            ]
+        },
+        {
             "name" : "gnome-todo",
             "buildsystem" : "meson",
             "config-opts" : [

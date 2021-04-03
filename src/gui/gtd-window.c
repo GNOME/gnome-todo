@@ -56,7 +56,7 @@
 
 struct _GtdWindow
 {
-  GtkApplicationWindow application;
+  AdwApplicationWindow application;
 
   GtkHeaderBar       *headerbar;
   GtkBox             *headerbar_box;
@@ -98,7 +98,7 @@ enum
 
 static GParamSpec *properties[N_PROPS] = { NULL, };
 
-G_DEFINE_TYPE (GtdWindow, gtd_window, GTK_TYPE_APPLICATION_WINDOW)
+G_DEFINE_TYPE (GtdWindow, gtd_window, ADW_TYPE_APPLICATION_WINDOW)
 
 static gint             compare_workspaced_func                  (gconstpointer      a,
                                                                   gconstpointer      b,

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="3.16"/>
-  <template class="GtdWindow" parent="GtkApplicationWindow">
+  <template class="GtdWindow" parent="AdwApplicationWindow">
     <property name="default_width">800</property>
     <property name="default_height">600</property>
 
@@ -21,101 +21,124 @@
     <style>
       <class name="org-gnome-Todo"/>
     </style>
-    <child>
-      <object class="GtkOverlay" id="overlay">
-        <child type="overlay">
-          <object class="GtdNotificationWidget" id="notification_widget">
-            <property name="can_focus">False</property>
-            <property name="halign">center</property>
-            <property name="valign">start</property>
-          </object>
-        </child>
-
-        <child type="overlay">
-          <object class="GtkRevealer" id="headerbar_overlay_revealer">
-            <property name="transition-type">slide-down</property>
-            <property name="transition-duration">750</property>
-            <property name="can_focus">False</property>
-            <property name="valign">start</property>
-          </object>
-        </child>
-
-        <child>
-          <object class="GtkEventControllerMotion" id="overlay_motion_controller">
-            <property name="propagation-phase">none</property>
-            <signal name="motion" handler="on_overlay_motion_controller_motion_cb" object="GtdWindow" swapped="no" />
-          </object>
-        </child>
-
-        <!-- Main Stack -->
-        <child>
-          <object class="GtkStack" id="stack">
-            <property name="hexpand">true</property>
-            <property name="vexpand">true</property>
-            <property name="transition_duration">250</property>
-            <property name="transition_type">crossfade</property>
-            <signal name="notify::visible-child" handler="on_stack_visible_child_cb" object="GtdWindow" swapped="no"/>
-            <style>
-              <class name="background"/>
-            </style>
-          </object>
-        </child>
-
-      </object>
-    </child>
-    <child type="titlebar">
-      <object class="GtkBox" id="headerbar_box">
-        <child>
-          <object class="GtkHeaderBar" id="headerbar">
-            <property name="hexpand">1</property>
-            <property name="show-title-buttons">1</property>
-
-            <!-- Workspace Button -->
-            <child>
-              <object class="GtdMenuButton" id="workspaces_menu_button">
-                <property name="visible">false</property>
-                <property name="can_focus">1</property>
-                <property name="popover">workspaces_popover</property>
-              </object>
-            </child>
-
-            <child>
-              <object class="GtkBox" id="workspace_box_start">
-                <property name="spacing">6</property>
-              </object>
-            </child>
-
-            <!-- Omni Area -->
-            <child type="title">
-              <object class="GtdOmniArea" id="omni_area">
-              </object>
-            </child>
 
 
-            <child type="end">
-              <object class="GtkMenuButton">
-                <property name="menu-model">app-menu</property>
-                <property name="direction">none</property>
-              </object>
-            </child>
+    <!-- Main leaflet -->
+      <child>
+        <object class="AdwLeaflet" id="content_box">
+          <property name="can-swipe-back">true</property>
+          <property name="width-request">360</property>
 
-            <!-- Fullscreen Button -->
-            <child type="end">
-              <object class="GtkToggleButton">
-                <property name="action-name">win.toggle-fullscreen</property>
-                <property name="icon-name">view-fullscreen-symbolic</property>
-              </object>
-            </child>
+          <child>
+            <object class="GtkBox">
+              <property name="orientation">vertical</property>
+              <property name="hexpand">true</property>
 
-            <child type="end">
-              <object class="GtkBox" id="workspace_box_end">
-                <property name="spacing">6</property>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </child>
+              <child>
+                <object class="GtkBox" id="headerbar_box">
+                  <child>
+                    <object class="GtkHeaderBar" id="headerbar">
+                      <property name="hexpand">1</property>
+                      <property name="show-title-buttons">1</property>
+
+                      <!-- Workspace Button -->
+                      <child>
+                        <object class="GtdMenuButton" id="workspaces_menu_button">
+                          <property name="visible">false</property>
+                          <property name="can_focus">1</property>
+                          <property name="popover">workspaces_popover</property>
+                        </object>
+                      </child>
+
+                      <child>
+                        <object class="GtkBox" id="workspace_box_start">
+                          <property name="spacing">6</property>
+                        </object>
+                      </child>
+
+                      <!-- Omni Area -->
+                      <child type="title">
+                        <object class="GtdOmniArea" id="omni_area">
+                        </object>
+                      </child>
+
+
+                      <child type="end">
+                        <object class="GtkMenuButton">
+                          <property name="menu-model">app-menu</property>
+                          <property name="direction">none</property>
+                        </object>
+                      </child>
+
+                      <!-- Fullscreen Button -->
+                      <child type="end">
+                        <object class="GtkToggleButton">
+                          <property name="action-name">win.toggle-fullscreen</property>
+                          <property name="icon-name">view-fullscreen-symbolic</property>
+                        </object>
+                      </child>
+
+                      <child type="end">
+                        <object class="GtkBox" id="workspace_box_end">
+                          <property name="spacing">6</property>
+                        </object>
+                      </child>
+                    </object>
+                  </child>
+                </object>
+              </child>
+
+              <child>
+                <object class="GtkOverlay" id="overlay">
+                  <child type="overlay">
+                    <object class="GtdNotificationWidget" id="notification_widget">
+                      <property name="can_focus">False</property>
+                      <property name="halign">center</property>
+                      <property name="valign">start</property>
+                    </object>
+                  </child>
+
+                  <child type="overlay">
+                    <object class="GtkRevealer" id="headerbar_overlay_revealer">
+                      <property name="transition-type">slide-down</property>
+                      <property name="transition-duration">750</property>
+                      <property name="can_focus">False</property>
+                      <property name="valign">start</property>
+                    </object>
+                  </child>
+
+                  <child>
+                    <object class="GtkEventControllerMotion" id="overlay_motion_controller">
+                      <property name="propagation-phase">none</property>
+                      <signal name="motion" handler="on_overlay_motion_controller_motion_cb" object="GtdWindow" swapped="no" />
+                    </object>
+                  </child>
+
+                  <!-- Main Stack -->
+                  <child>
+                    <object class="GtkStack" id="stack">
+                      <property name="hexpand">true</property>
+                      <property name="vexpand">true</property>
+                      <property name="transition_duration">250</property>
+                      <property name="transition_type">crossfade</property>
+                      <signal name="notify::visible-child" handler="on_stack_visible_child_cb" object="GtdWindow" swapped="no"/>
+                      <style>
+                        <class name="background"/>
+                      </style>
+                    </object>
+                  </child>
+
+                </object>
+              </child>
+
+            </object>
+          </child>
+
+        </object>
+      </child>
+
+
+
   </template>
 
   <!-- Workspaces Popover -->

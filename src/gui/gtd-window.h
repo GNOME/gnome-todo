@@ -22,13 +22,13 @@
 
 #include "gtd-types.h"
 
-#include <gtk/gtk.h>
+#include <adwaita.h>
 
 G_BEGIN_DECLS
 
 #define GTD_TYPE_WINDOW (gtd_window_get_type())
 
-G_DECLARE_FINAL_TYPE (GtdWindow, gtd_window, GTD, WINDOW, GtkApplicationWindow)
+G_DECLARE_FINAL_TYPE (GtdWindow, gtd_window, GTD, WINDOW, AdwApplicationWindow)
 
 GtkWidget*                gtd_window_new                  (GtdApplication       *application);
 

@@ -154,6 +154,7 @@ gtk_dep = dependency('gtk4', version: '>= 3.92.0')
 gnome_todo_deps = [
   glib_dep,
   gtk_dep,
+  dependency('libadwaita-1'),
   dependency('gio-2.0', version: '>= 2.43.4'),
   dependency('gmodule-export-2.0'),
   dependency('goa-1.0', version: '>= 3.2.0'),

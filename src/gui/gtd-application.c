@@ -259,6 +259,8 @@ gtd_application_startup (GApplication *application)
 
   G_APPLICATION_CLASS (gtd_application_parent_class)->startup (application);
 
+  adw_init ();
+
   /* CSS provider */
   gtd_theme_manager_add_resources (self->theme_manager, "resource:///org/gnome/todo");
 

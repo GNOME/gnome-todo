@@ -40,9 +40,9 @@
  *   gtd_transition_set_from (keyframe, G_TYPE_UINT, 255);
  *   gtd_transition_set_to (keyframe, G_TYPE_UINT, 0);
  *   gtd_keyframe_transition_set (GTD_KEYFRAME_TRANSITION (keyframe),
- *                                    G_TYPE_UINT,
- *                                    1, /&ast; number of key frames &ast;/
- *                                    0.5, 128, GTD_EASE_IN_OUT_CUBIC);
+ *                                G_TYPE_UINT,
+ *                                1, /&ast; number of key frames &ast;/
+ *                                0.5, 128, GTD_EASE_IN_OUT_CUBIC);
  * ]|
  *
  * The example above sets up a keyframe transition for the #GtdActor:opacity
@@ -55,8 +55,6 @@
  * The #GtdKeyframeTransition will add an implicit key frame between the last
  * and the 1.0 value, to interpolate to the final value of the transition's
  * interval.
- *
- * #GtdKeyframeTransition is available since Gtd 1.12.
  */
 
 #include "gtd-keyframe-transition.h"
@@ -502,8 +500,6 @@ gtd_keyframe_transition_set_values (GtdKeyframeTransition *self,
  * If @transition does not hold any key frame, @n_modes key frames will
  * be created; if @transition already has key frames, @modes must have
  * at least as many elements as the number of key frames.
- *
- * Since: 1.12
  */
 void
 gtd_keyframe_transition_set_modes (GtdKeyframeTransition *self,
@@ -547,8 +543,6 @@ gtd_keyframe_transition_set_modes (GtdKeyframeTransition *self,
  * language bindings should use gtd_keyframe_transition_set_key_frames(),
  * gtd_keyframe_transition_set_modes(), and
  * gtd_keyframe_transition_set_values() instead.
- *
- * Since: 1.12
  */
 void
 gtd_keyframe_transition_set (GtdKeyframeTransition *self,
@@ -605,8 +599,6 @@ gtd_keyframe_transition_set (GtdKeyframeTransition *self,
  * @transition: a #GtdKeyframeTransition
  *
  * Removes all key frames from @transition.
- *
- * Since: 1.12
  */
 void
 gtd_keyframe_transition_clear (GtdKeyframeTransition *self)
@@ -630,8 +622,6 @@ gtd_keyframe_transition_clear (GtdKeyframeTransition *self)
  * Retrieves the number of key frames inside @transition.
  *
  * Return value: the number of key frames
- *
- * Since: 1.12
  */
 guint
 gtd_keyframe_transition_get_n_key_frames (GtdKeyframeTransition *self)
@@ -659,8 +649,6 @@ gtd_keyframe_transition_get_n_key_frames (GtdKeyframeTransition *self)
  *
  * The @transition must already have a key frame at @index_, and @index_
  * must be smaller than the number of key frames inside @transition.
- *
- * Since: 1.12
  */
 void
 gtd_keyframe_transition_set_key_frame (GtdKeyframeTransition *self,
@@ -698,8 +686,6 @@ gtd_keyframe_transition_set_key_frame (GtdKeyframeTransition *self,
  *
  * The @transition must already have key frames set, and @index_ must be
  * smaller than the number of key frames.
- *
- * Since: 1.12
  */
 void
 gtd_keyframe_transition_get_key_frame (GtdKeyframeTransition *self,

@@ -70,10 +70,10 @@ struct _GtdTimelineClass
   void               (*paused)         (GtdTimeline *timeline);
 
   void               (*new_frame)      (GtdTimeline *timeline,
-                                        gint             msecs);
+                                        gint         msecs);
 
   void               (*stopped)        (GtdTimeline *timeline,
-                                        gboolean         is_finished);
+                                        gboolean     is_finished);
 };
 
 GtdTimeline*         gtd_timeline_new_for_widget                 (GtdWidget            *widget,

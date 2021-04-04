@@ -58,7 +58,7 @@ struct _GtdWindow
 {
   AdwApplicationWindow application;
 
-  GtkHeaderBar       *headerbar;
+  AdwHeaderBar       *headerbar;
   GtkBox             *headerbar_box;
   GtkRevealer        *headerbar_overlay_revealer;
   GtkStack           *stack;
@@ -291,7 +291,7 @@ on_action_toggle_fullscreen_state_changed_cb (GSimpleAction *simple,
 
   g_clear_handle_id (&self->toggle_headerbar_revealer_id, g_source_remove);
 
-  gtk_header_bar_set_show_title_buttons (self->headerbar, !fullscreen);
+  adw_header_bar_set_show_end_title_buttons (self->headerbar, !fullscreen);
 
   g_object_ref (self->headerbar);
   if (fullscreen)

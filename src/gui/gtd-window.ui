@@ -37,9 +37,9 @@
               <child>
                 <object class="GtkBox" id="headerbar_box">
                   <child>
-                    <object class="GtkHeaderBar" id="headerbar">
+                    <object class="AdwHeaderBar" id="headerbar">
                       <property name="hexpand">1</property>
-                      <property name="show-title-buttons">1</property>
+                      <property name="show-end-title-buttons">1</property>
 
                       <!-- Workspace Button -->
                       <child>

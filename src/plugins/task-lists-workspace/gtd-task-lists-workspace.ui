@@ -2,31 +2,36 @@
 <interface>
   <template class="GtdTaskListsWorkspace" parent="GtkBox">
 
-    <!-- Sidebar -->
     <child>
-      <object class="GtkRevealer" id="sidebar_revealer">
-        <property name="transition-type">slide-left</property>
-        <property name="reveal-child" bind-source="toggle_sidebar_button" bind-property="active" bind-flags="default" />
-        <child>
+      <object class="AdwFlap" id="flap">
+        <property name="hexpand">true</property>
+        <property name="vexpand">true</property>
+        <property name="modal">true</property>
+        <property name="swipe-to-open">true</property>
+        <property name="swipe-to-close">true</property>
+
+        <!-- Sidebar -->
+        <property name="flap">
           <object class="GtdSidebar" id="sidebar">
             <property name="can_focus">False</property>
             <property name="vexpand">True</property>
           </object>
-        </child>
-      </object>
-    </child>
+        </property>
 
-    <!-- Panels Stack -->
-    <child>
-      <object class="GtkStack" id="stack">
-        <property name="hexpand">true</property>
-        <property name="vexpand">true</property>
-        <property name="transition_duration">250</property>
-        <property name="transition_type">crossfade</property>
-        <signal name="notify::visible-child" handler="on_stack_visible_child_cb" object="GtdTaskListsWorkspace" swapped="yes"/>
-        <style>
-          <class name="background"/>
-        </style>
+        <!-- Panels Stack -->
+        <property name="content">
+          <object class="GtkStack" id="stack">
+            <property name="hexpand">true</property>
+            <property name="vexpand">true</property>
+            <property name="transition_duration">250</property>
+            <property name="transition_type">crossfade</property>
+            <signal name="notify::visible-child" handler="on_stack_visible_child_cb" object="GtdTaskListsWorkspace" swapped="yes"/>
+            <style>
+              <class name="background"/>
+            </style>
+          </object>
+        </property>
+
       </object>
     </child>
 
@@ -62,6 +67,7 @@
       <object class="GtkToggleButton" id="toggle_sidebar_button">
         <property name="can_focus">1</property>
         <property name="icon-name">builder-view-left-pane-symbolic</property>
+        <property name="active" bind-source="flap" bind-property="reveal-flap" bind-flags="sync-create|bidirectional"/>
       </object>
     </child>
 

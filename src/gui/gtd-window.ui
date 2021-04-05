@@ -9,12 +9,6 @@
       <object class="GtkShortcutController">
         <property name="name">Main Window Shortcuts</property>
         <property name="scope">global</property>
-        <child>
-          <object class="GtkShortcut">
-            <property name="trigger">F11</property>
-            <property name="action">action(win.toggle-fullscreen)</property>
-          </object>
-        </child>
       </object>
     </child>
 
@@ -70,14 +64,6 @@
                         </object>
                       </child>
 
-                      <!-- Fullscreen Button -->
-                      <child type="end">
-                        <object class="GtkToggleButton">
-                          <property name="action-name">win.toggle-fullscreen</property>
-                          <property name="icon-name">view-fullscreen-symbolic</property>
-                        </object>
-                      </child>
-
                       <child type="end">
                         <object class="GtkBox" id="workspace_box_end">
                           <property name="spacing">6</property>
@@ -95,22 +81,6 @@
                       <property name="can_focus">False</property>
                       <property name="halign">center</property>
                       <property name="valign">start</property>
-                    </object>
-                  </child>
-
-                  <child type="overlay">
-                    <object class="GtkRevealer" id="headerbar_overlay_revealer">
-                      <property name="transition-type">slide-down</property>
-                      <property name="transition-duration">750</property>
-                      <property name="can_focus">False</property>
-                      <property name="valign">start</property>
-                    </object>
-                  </child>
-
-                  <child>
-                    <object class="GtkEventControllerMotion" id="overlay_motion_controller">
-                      <property name="propagation-phase">none</property>
-                      <signal name="motion" handler="on_overlay_motion_controller_motion_cb" object="GtdWindow" swapped="no" />
                     </object>
                   </child>
 

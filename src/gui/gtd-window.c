@@ -60,14 +60,11 @@ struct _GtdWindow
 
   AdwHeaderBar       *headerbar;
   GtkBox             *headerbar_box;
-  GtkRevealer        *headerbar_overlay_revealer;
   GtkStack           *stack;
   GtkBox             *workspace_box_end;
   GtkBox             *workspace_box_start;
   GtkListBox         *workspaces_listbox;
   GtdMenuButton      *workspaces_menu_button;
-
-  GtkEventController *overlay_motion_controller;
 
   GtdNotificationWidget *notification_widget;
 
@@ -247,18 +244,6 @@ remove_all_workspace_header_widgets (GtdWindow *self)
  * Callbacks
  */
 
-static gboolean
-toggle_headerbar_overlay_cb (gpointer user_data)
-{
-  GtdWindow *self = GTD_WINDOW (user_data);
-
-  gtk_revealer_set_reveal_child (self->headerbar_overlay_revealer,
-                                 !gtk_revealer_get_reveal_child (self->headerbar_overlay_revealer));
-
-  self->toggle_headerbar_revealer_id = 0;
-
-  return G_SOURCE_REMOVE;
-}
 
 static void
 on_action_activate_workspace_activated_cb (GSimpleAction *simple,
@@ -276,77 +261,6 @@ on_action_activate_workspace_activated_cb (GSimpleAction *simple,
                  NULL);
 
   gtk_stack_set_visible_child_name (self->stack, workspace_id);
-}
-
-static void
-on_action_toggle_fullscreen_state_changed_cb (GSimpleAction *simple,
-                                              GVariant      *state,
-                                              gpointer       user_data)
-{
-  GtdWindow *self;
-  gboolean fullscreen;
-
-  self = GTD_WINDOW (user_data);
-  fullscreen = g_variant_get_boolean (state);
-
-  g_clear_handle_id (&self->toggle_headerbar_revealer_id, g_source_remove);
-
-  adw_header_bar_set_show_end_title_buttons (self->headerbar, !fullscreen);
-
-  g_object_ref (self->headerbar);
-  if (fullscreen)
-    {
-      gtk_event_controller_set_propagation_phase (self->overlay_motion_controller, GTK_PHASE_BUBBLE);
-      gtk_box_remove (self->headerbar_box, GTK_WIDGET (self->headerbar));
-      gtk_revealer_set_child (self->headerbar_overlay_revealer, GTK_WIDGET (self->headerbar));
-      gtk_revealer_set_reveal_child (self->headerbar_overlay_revealer, TRUE);
-      gtk_window_fullscreen (GTK_WINDOW (self));
-
-      self->toggle_headerbar_revealer_id = g_timeout_add_seconds (2, toggle_headerbar_overlay_cb, self);
-    }
-  else
-    {
-      gtk_event_controller_set_propagation_phase (self->overlay_motion_controller, GTK_PHASE_NONE);
-      gtk_revealer_set_child (self->headerbar_overlay_revealer, NULL);
-      gtk_revealer_set_reveal_child (self->headerbar_overlay_revealer, FALSE);
-      gtk_box_append (self->headerbar_box, GTK_WIDGET (self->headerbar));
-      gtk_window_unfullscreen (GTK_WINDOW (self));
-    }
-  g_object_unref (self->headerbar);
-
-  g_simple_action_set_state (simple, state);
-}
-
-static void
-on_overlay_motion_controller_motion_cb (GtkEventControllerMotion *controller,
-                                        gdouble                   x,
-                                        gdouble                   y,
-                                        GtdWindow                *self)
-{
-  const gint y_threashold = 5;
-  GtkWidget *hovered_widget;
-
-  hovered_widget = gtk_widget_pick (GTK_WIDGET (self), x, y, GTK_PICK_DEFAULT);
-
-  /* Show headerbar when hovering it */
-  if (hovered_widget &&
-      gtk_widget_is_ancestor (hovered_widget, GTK_WIDGET (self->headerbar_overlay_revealer)))
-    {
-      gtk_revealer_set_reveal_child (self->headerbar_overlay_revealer, TRUE);
-      g_clear_handle_id (&self->toggle_headerbar_revealer_id, g_source_remove);
-      return;
-    }
-
-  if (y <= y_threashold)
-    {
-      gtk_revealer_set_reveal_child (self->headerbar_overlay_revealer, TRUE);
-      g_clear_handle_id (&self->toggle_headerbar_revealer_id, g_source_remove);
-    }
-  else if (self->toggle_headerbar_revealer_id == 0 &&
-           gtk_revealer_get_reveal_child (self->headerbar_overlay_revealer))
-    {
-      self->toggle_headerbar_revealer_id = g_timeout_add (500, toggle_headerbar_overlay_cb, self);
-    }
 }
 
 static gint
@@ -646,16 +560,13 @@ gtd_window_class_init (GtdWindowClass *klass)
 
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, headerbar);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, headerbar_box);
-  gtk_widget_class_bind_template_child (widget_class, GtdWindow, headerbar_overlay_revealer);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, notification_widget);
-  gtk_widget_class_bind_template_child (widget_class, GtdWindow, overlay_motion_controller);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, stack);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, workspace_box_end);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, workspace_box_start);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, workspaces_menu_button);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, workspaces_listbox);
 
-  gtk_widget_class_bind_template_callback (widget_class, on_overlay_motion_controller_motion_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_stack_visible_child_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_workspaces_listbox_row_activated_cb);
 }
@@ -665,7 +576,6 @@ gtd_window_init (GtdWindow *self)
 {
   static const GActionEntry entries[] = {
     { "activate-workspace", on_action_activate_workspace_activated_cb, "(sv)" },
-    { "toggle-fullscreen", NULL, NULL, "false", on_action_toggle_fullscreen_state_changed_cb },
   };
 
   g_action_map_add_action_entries (G_ACTION_MAP (self),

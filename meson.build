@@ -4,7 +4,7 @@ project(
           version: '3.91.1',
           license: 'GPL3+',
   default_options: [ 'buildtype=debugoptimized', 'warning_level=1' ],
-    meson_version: '>= 0.50.0'
+    meson_version: '>= 0.53.0'
 )
 
 gnome_todo_version = meson.project_version()
@@ -182,27 +182,19 @@ if enable_documentation
   subdir('doc/reference')
 endif
 
-output  = '\n\n'
-output += '  GNOME To Do ' + gnome_todo_version + '\n'
-output += '  ==================\n'
-output += '\n'
-output += '\n'
-output += '        Prefix................... ' + gnome_todo_prefix + '\n'
-output += '        Compiler................. ' + cc.get_id() + '\n'
-output += '        Flags.................... ' + ' '.join(compiler_flags) + ' '.join(get_option('c_link_args')) + '\n'
-output += '        Release.................. ' + (not gnome_todo_debug).to_string() + '\n'
-output += '\n'
-output += '    Options:\n'
-output += '\n'
-output += '        Tracing.................. ' + (gnome_todo_tracing).to_string() + '\n'
-output += '        Documentation............ ' + enable_documentation.to_string() + '\n'
-output += '\n'
-output += '    Plugins:\n'
-output += '\n'
-output += '        Unscheduled panel ....... ' + get_option('unscheduled_panel_plugin').to_string() + '\n'
-output += '        Todo.txt ................ ' + get_option('todo_txt_plugin').to_string() + '\n'
-output += '        Todoist ................. ' + get_option('todoist_plugin').to_string() + '\n'
-output += '\n'
-output += '  Now type \'ninja -C ' + meson.build_root() + '\' to build ' + meson.project_name()
-output += '\n\n'
-message(output)
+summary({
+  'Source': meson.source_root(),
+  'Prefix': gnome_todo_prefix,
+})
+
+summary({
+  'Debug': gnome_todo_debug,
+  'Tracing': gnome_todo_tracing,
+  'Documentation': enable_documentation,
+}, section: 'Development')
+
+summary({
+  'Unscheduled panel': get_option('unscheduled_panel_plugin'),
+  'todo.txt': get_option('todo_txt_plugin'),
+  'Todoist': get_option('todoist_plugin'),
+}, section: 'Plugins')

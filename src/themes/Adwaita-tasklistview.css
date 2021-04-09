@@ -3,14 +3,12 @@ tasklistview row {
 }
 
 tasklistview.dark stack spinner,
-tasklistview.dark emptylistwidget label,
-tasklistview.dark emptylistwidget image {
+tasklistview.dark emptylistwidget label {
     color: white;
 }
 
 tasklistview.light stack spinner,
-tasklistview.light emptylistwidget label,
-tasklistview.light emptylistwidget image {
+tasklistview.light emptylistwidget label {
     color: black;
 }
 

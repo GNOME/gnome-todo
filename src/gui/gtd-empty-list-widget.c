@@ -26,7 +26,6 @@ struct _GtdEmptyListWidget
 {
   GtkBox              parent;
 
-  GtkWidget          *icon;
   GtkWidget          *subtitle_label;
   GtkWidget          *title_label;
 
@@ -36,16 +35,6 @@ struct _GtdEmptyListWidget
 G_DEFINE_TYPE (GtdEmptyListWidget, gtd_empty_list_widget, GTK_TYPE_BOX)
 
 /* Icons that will be randomly picked */
-const gchar *icons[] =
-{
-  "face-cool-symbolic",
-  "face-laugh-symbolic",
-  "face-smirk-symbolic",
-  "face-smile-symbolic",
-  "face-smile-big-symbolic",
-  "face-wink-symbolic"
-};
-
 const gchar *messages[] =
 {
   N_("No more tasks left"),
@@ -66,28 +55,23 @@ const gchar *subtitles[] =
 static void
 update_message (GtdEmptyListWidget *self)
 {
-  const gchar *icon_name, *title_text, *subtitle_text;
+  const gchar *title_text, *subtitle_text;
 
   if (self->is_empty)
     {
-      icon_name = "checkbox-checked-symbolic";
       title_text = _("No tasks found");
       subtitle_text = _("You can add tasks using the <b>+</b> above");
     }
   else
     {
-      gint icon_index, message_index, subtitle_index;
+      gint message_index, subtitle_index;
 
-      icon_index = g_random_int_range (0, G_N_ELEMENTS (icons));
       message_index = g_random_int_range (0, G_N_ELEMENTS (messages));
       subtitle_index = g_random_int_range (0, G_N_ELEMENTS (subtitles));
 
-      icon_name = icons[icon_index];
       title_text = gettext (messages[message_index]);
       subtitle_text = gettext (subtitles[subtitle_index]);
     }
-
-  gtk_image_set_from_icon_name (GTK_IMAGE (self->icon), icon_name);
 
   gtk_label_set_markup (GTK_LABEL (self->title_label), title_text);
   gtk_label_set_markup (GTK_LABEL (self->subtitle_label), subtitle_text);
@@ -122,7 +106,6 @@ gtd_empty_list_widget_class_init (GtdEmptyListWidgetClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/todo/ui/gtd-empty-list-widget.ui");
 
-  gtk_widget_class_bind_template_child (widget_class, GtdEmptyListWidget, icon);
   gtk_widget_class_bind_template_child (widget_class, GtdEmptyListWidget, subtitle_label);
   gtk_widget_class_bind_template_child (widget_class, GtdEmptyListWidget, title_label);
 

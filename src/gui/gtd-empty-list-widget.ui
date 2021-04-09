@@ -5,12 +5,10 @@
     <property name="spacing">12</property>
     <child>
       <object class="GtkImage" id="icon">
+        <property name="resource">/org/gnome/todo/ui/assets/all-done.svg</property>
         <property name="margin_bottom">18</property>
         <property name="vexpand">1</property>
-        <property name="pixel_size">128</property>
-        <style>
-          <class name="dim-label"/>
-        </style>
+        <property name="pixel_size">512</property>
       </object>
     </child>
     <child>

@@ -120,7 +120,7 @@ gtd_empty_list_widget_class_init (GtdEmptyListWidgetClass *klass)
   object_class->get_property = gtd_empty_list_widget_get_property;
   object_class->set_property = gtd_empty_list_widget_set_property;
 
-  gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/todo/ui/widgets/gtd-empty-list.ui");
+  gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/todo/ui/gtd-empty-list-widget.ui");
 
   gtk_widget_class_bind_template_child (widget_class, GtdEmptyListWidget, icon);
   gtk_widget_class_bind_template_child (widget_class, GtdEmptyListWidget, subtitle_label);

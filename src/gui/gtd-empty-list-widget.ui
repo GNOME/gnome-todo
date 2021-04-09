@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="3.20"/>
   <template class="GtdEmptyListWidget" parent="GtkBox">
     <property name="orientation">vertical</property>
     <property name="spacing">12</property>

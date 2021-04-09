@@ -17,5 +17,8 @@
     <file compressed="true" preprocess="xml-stripblanks">gtd-task-list-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtd-task-row.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtd-window.ui</file>
+
+    <!-- Assets -->
+    <file>assets/all-done.svg</file>
   </gresource>
 </gresources>

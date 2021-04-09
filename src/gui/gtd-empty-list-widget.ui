@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <template class="GtdEmptyListWidget" parent="GtkBox">
+    <property name="margin-top">24</property>
+    <property name="margin-bottom">24</property>
+    <property name="margin-start">24</property>
+    <property name="margin-end">24</property>
     <property name="orientation">vertical</property>
     <property name="spacing">12</property>
     <child>

@@ -4,11 +4,11 @@
     <property name="orientation">vertical</property>
     <property name="spacing">12</property>
     <child>
-      <object class="GtkImage" id="icon">
-        <property name="resource">/org/gnome/todo/ui/assets/all-done.svg</property>
-        <property name="margin_bottom">18</property>
+      <object class="GtkPicture" id="picture">
         <property name="vexpand">1</property>
-        <property name="pixel_size">512</property>
+        <property name="can-shrink">true</property>
+        <property name="keep-aspect-ratio">true</property>
+        <property name="file">resource:///org/gnome/todo/ui/assets/all-done.svg</property>
       </object>
     </child>
     <child>

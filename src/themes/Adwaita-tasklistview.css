@@ -2,16 +2,6 @@ tasklistview row {
   border-radius: 5px;
 }
 
-tasklistview.dark stack spinner,
-tasklistview.dark emptylistwidget label {
-    color: white;
-}
-
-tasklistview.light stack spinner,
-tasklistview.light emptylistwidget label {
-    color: black;
-}
-
 tasklistview list:drop(active) {
     box-shadow: none;
     border: none;

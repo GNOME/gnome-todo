@@ -3,23 +3,22 @@
 #
 # Daniel Korostil <ted.korostiled@gmail.com>, 2016-2019.
 # Danylo Korostil <ted.korostiled@gmail.com>, 2020.
-# Yuri Chornoivan <yurchor@ukr.net>, 2020.
+# Yuri Chornoivan <yurchor@ukr.net>, 2020, 2021.
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2020-07-24 17:29+0000\n"
-"PO-Revision-Date: 2020-07-24 21:58+0300\n"
+"POT-Creation-Date: 2021-04-13 15:00+0000\n"
+"PO-Revision-Date: 2021-04-13 18:22+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n"
-"%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2\n"
+"Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2\n"
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1: 2);\n"
-"X-Generator: Lokalize 20.07.70\n"
+"X-Generator: Lokalize 20.12.0\n"
 "X-Project-Style: gnome\n"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:7
@@ -175,54 +174,61 @@ msgctxt "taskdate"
 msgid "None"
 msgstr "Немає"
 
-#: src/gui/gtd-empty-list-widget.c:51
+#: src/gui/gtd-empty-list-widget.c:50
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:53
 msgid "No more tasks left"
 msgstr "Більше не залишилось завдань"
 
-#: src/gui/gtd-empty-list-widget.c:52
+#: src/gui/gtd-empty-list-widget.c:51
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:54
 msgid "Nothing else to do here"
 msgstr "Тут більше нічого шукати"
 
-#: src/gui/gtd-empty-list-widget.c:53
+#: src/gui/gtd-empty-list-widget.c:52
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:55
 msgid "You made it!"
 msgstr "Ви зробили це!"
 
-#: src/gui/gtd-empty-list-widget.c:54
+#: src/gui/gtd-empty-list-widget.c:53
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:56
 msgid "Looks like there’s nothing else left here"
 msgstr "Схоже, що тут більше нічого шукати"
 
-#: src/gui/gtd-empty-list-widget.c:59
+#: src/gui/gtd-empty-list-widget.c:58
 msgid "Get some rest now"
 msgstr "А тепер можете відпочити"
 
-#: src/gui/gtd-empty-list-widget.c:60
+#: src/gui/gtd-empty-list-widget.c:59
 msgid "Enjoy the rest of your day"
 msgstr "Насолоджуйтесь рештою дня"
 
-#: src/gui/gtd-empty-list-widget.c:61
+#: src/gui/gtd-empty-list-widget.c:60
 msgid "Good job!"
 msgstr "Хороша роботу!"
 
-#: src/gui/gtd-empty-list-widget.c:62
+#: src/gui/gtd-empty-list-widget.c:61
 msgid "Meanwhile, spread the love"
 msgstr "І не забувайте дарувати любов"
 
-#: src/gui/gtd-empty-list-widget.c:63
+#: src/gui/gtd-empty-list-widget.c:62
 #: src/plugins/peace/gtd-peace-omni-area-addin.c:78
 msgid "Working hard is always rewarded"
 msgstr "Важка праця завжди винагороджується"
 
-#: src/gui/gtd-empty-list-widget.c:74
-msgid "No tasks found"
-msgstr "Не знайдено жодного завдання"
+#: src/gui/gtd-empty-list-widget.c:72
+msgid "Tasks Will Appear Here"
+msgstr ""
+"Тут буде показано завдання"
 
-#: src/gui/gtd-empty-list-widget.c:75
-msgid "You can add tasks using the <b>+</b> above"
-msgstr "Можете додавати завдання за допомогою <b>+</b> зверху"
+#: src/gui/gtd-empty-list-widget.c:74
+msgid "Add Tasks…"
+msgstr ""
+"Додати завдання…"
+
+#: src/gui/gtd-empty-list-widget.c:85
+msgid "Add More Tasks…"
+msgstr ""
+"Додати ще завдання…"
 
 #: src/gui/gtd-initial-setup-window.ui:20
 msgid "Welcome"
@@ -236,7 +242,7 @@ msgstr "Увійдіть до мережевого облікового запи
 msgid "To Do Setup"
 msgstr "Параметри To Do"
 
-#: src/gui/gtd-initial-setup-window.ui:56 src/gui/gtd-provider-popover.ui:43
+#: src/gui/gtd-initial-setup-window.ui:56 src/gui/gtd-provider-popover.ui:42
 msgid "_Cancel"
 msgstr "_Скасувати"
 
@@ -278,15 +284,15 @@ msgstr "Не знайдено жодного розширення"
 msgid "An error occurred while creating a task list"
 msgstr "Під час створення списку завдань сталася помилка"
 
-#: src/gui/gtd-provider-popover.ui:26
+#: src/gui/gtd-provider-popover.ui:25
 msgid "Create _List"
 msgstr "Створити _список"
 
-#: src/gui/gtd-provider-popover.ui:56
+#: src/gui/gtd-provider-popover.ui:55
 msgid "List Name"
 msgstr "Назва списку"
 
-#: src/gui/gtd-provider-popover.ui:133
+#: src/gui/gtd-provider-popover.ui:132
 msgid "Select a storage location"
 msgstr "Виберіть місце зберігання"
 
@@ -322,17 +328,17 @@ msgstr "Microsoft Exchange"
 msgid "Or you can just store your tasks on this computer"
 msgstr "Або можете просто зберігати завдання на цьому комп'ютері"
 
-#: src/gui/gtd-task-list-view.c:459
+#: src/gui/gtd-task-list-view.c:550
 #, c-format
 msgid "Task <b>%s</b> removed"
 msgstr "Завдання <b>%s</b> вилучено"
 
-#: src/gui/gtd-task-list-view.c:478
+#: src/gui/gtd-task-list-view.c:569
 #: src/plugins/task-lists-workspace/gtd-sidebar.c:422
 msgid "Undo"
 msgstr "Повернути"
 
-#: src/gui/gtd-task-row.c:130
+#: src/gui/gtd-task-row.c:131
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:133
 #: src/plugins/next-week-panel/gtd-next-week-panel.c:152
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:124
@@ -342,20 +348,20 @@ msgstr "Повернути"
 msgid "Today"
 msgstr "Сьогодні"
 
-#: src/gui/gtd-task-row.c:134
+#: src/gui/gtd-task-row.c:135
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:137
 #: src/plugins/next-week-panel/gtd-next-week-panel.c:156
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:128
 msgid "Tomorrow"
 msgstr "Завтра"
 
-#: src/gui/gtd-task-row.c:138
+#: src/gui/gtd-task-row.c:139
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:129
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:120
 msgid "Yesterday"
 msgstr "Вчора (%d день тому)"
 
-#: src/gui/gtd-window.c:112
+#: src/gui/gtd-window.c:109
 msgid ""
 "This is a development build of To Do. You may experience errors, wrong "
 "behaviors, and data loss."
@@ -363,11 +369,11 @@ msgstr ""
 "Це розробницька збірка To Do. Можливі помилки, неочікувана поведінка і "
 "втрати даних."
 
-#: src/gui/gtd-window.c:424
+#: src/gui/gtd-window.c:338
 msgid "Details"
 msgstr "Подробиці"
 
-#: src/gui/gtd-window.ui:158
+#: src/gui/gtd-window.ui:151
 msgid "_About To Do"
 msgstr "_Про програму"
 
@@ -498,7 +504,6 @@ msgid "At what point is it good enough?"
 msgstr "Коли ж уже буде досить?"
 
 #: src/plugins/peace/gtd-peace-omni-area-addin.c:65
-#| msgid "Remember to breath. Good. Don't stop."
 msgid "Remember to breathe. Good. Don't stop."
 msgstr "Дихайте. Чудово. Не зупиняйтеся."
 
@@ -600,7 +605,7 @@ msgstr "Вилучити"
 msgid "Task Lists"
 msgstr "Списки завдань"
 
-#: src/plugins/task-lists-workspace/gtd-task-lists-workspace.ui:43
+#: src/plugins/task-lists-workspace/gtd-task-lists-workspace.ui:48
 msgid "New List"
 msgstr "Новий список"
 
@@ -755,3 +760,9 @@ msgstr "Доброї ночі, %s"
 #: src/plugins/welcome/gtd-welcome-workspace.c:198
 msgid "Home"
 msgstr "Домівка"
+
+#~ msgid "No tasks found"
+#~ msgstr "Не знайдено жодного завдання"
+
+#~ msgid "You can add tasks using the <b>+</b> above"
+#~ msgstr "Можете додавати завдання за допомогою <b>+</b> зверху"

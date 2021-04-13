@@ -3,6 +3,9 @@
   <template class="GtdTaskListView" parent="GtkBox">
     <property name="vexpand">1</property>
     <property name="orientation">vertical</property>
+    <style>
+      <class name="view" />
+    </style>
 
     <!-- Main stack -->
     <child>

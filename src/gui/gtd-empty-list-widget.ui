@@ -42,6 +42,18 @@
                 </style>
               </object>
             </child>
+
+            <!-- Add Tasks button -->
+            <child>
+              <object class="GtkButton" id="add_button">
+                <property name="margin-top">24</property>
+                <signal name="clicked" handler="on_add_button_clicked_cb" object="GtdEmptyListWidget" swapped="no" />
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+            </child>
+
           </object>
         </child>
       </object>

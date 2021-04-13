@@ -26,6 +26,7 @@ struct _GtdEmptyListWidget
 {
   GtkBox              parent;
 
+  GtkWidget          *add_button;
   GtkWidget          *subtitle_label;
   GtkWidget          *title_label;
 
@@ -33,6 +34,15 @@ struct _GtdEmptyListWidget
 };
 
 G_DEFINE_TYPE (GtdEmptyListWidget, gtd_empty_list_widget, GTK_TYPE_BOX)
+
+enum
+{
+  ADD_TASKS,
+  N_SIGNALS,
+};
+
+static guint signals[N_SIGNALS] = { 0, };
+
 
 /* Icons that will be randomly picked */
 const gchar *messages[] =
@@ -55,12 +65,13 @@ const gchar *subtitles[] =
 static void
 update_message (GtdEmptyListWidget *self)
 {
-  const gchar *title_text, *subtitle_text;
+  const gchar *title_text, *subtitle_text, *button_text;
 
   if (self->is_empty)
     {
-      title_text = _("No tasks found");
-      subtitle_text = _("You can add tasks using the <b>+</b> above");
+      title_text = _("Tasks Will Appear Here");
+      subtitle_text = "";
+      button_text = _("Add Tasks…");
     }
   else
     {
@@ -71,11 +82,32 @@ update_message (GtdEmptyListWidget *self)
 
       title_text = gettext (messages[message_index]);
       subtitle_text = gettext (subtitles[subtitle_index]);
+      button_text = _("Add More Tasks…");
     }
 
   gtk_label_set_markup (GTK_LABEL (self->title_label), title_text);
   gtk_label_set_markup (GTK_LABEL (self->subtitle_label), subtitle_text);
+  gtk_button_set_label (GTK_BUTTON (self->add_button), button_text);
+
+  gtk_widget_set_visible (self->subtitle_label, !self->is_empty);
 }
+
+
+/*
+ * Callbacks
+ */
+
+static void
+on_add_button_clicked_cb (GtkButton          *button,
+                          GtdEmptyListWidget *self)
+{
+  g_signal_emit (self, signals[ADD_TASKS], 0);
+}
+
+
+/*
+ * GObject overrides
+ */
 
 static void
 gtd_empty_list_widget_get_property (GObject    *object,
@@ -104,10 +136,20 @@ gtd_empty_list_widget_class_init (GtdEmptyListWidgetClass *klass)
   object_class->get_property = gtd_empty_list_widget_get_property;
   object_class->set_property = gtd_empty_list_widget_set_property;
 
+  signals[ADD_TASKS] = g_signal_new ("add-tasks",
+                                     GTD_TYPE_EMPTY_LIST_WIDGET,
+                                     G_SIGNAL_RUN_LAST,
+                                     0, NULL, NULL, NULL,
+                                     G_TYPE_NONE,
+                                     0);
+
   gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/todo/ui/gtd-empty-list-widget.ui");
 
+  gtk_widget_class_bind_template_child (widget_class, GtdEmptyListWidget, add_button);
   gtk_widget_class_bind_template_child (widget_class, GtdEmptyListWidget, subtitle_label);
   gtk_widget_class_bind_template_child (widget_class, GtdEmptyListWidget, title_label);
+
+  gtk_widget_class_bind_template_callback (widget_class, on_add_button_clicked_cb);
 
   gtk_widget_class_set_css_name (widget_class, "emptylistwidget");
 }

@@ -69,7 +69,9 @@
 
 typedef struct
 {
+  GtdEmptyListWidget    *empty_list_widget;
   GtkListBox            *listbox;
+  GtkStack              *main_stack;
   GtkListBoxRow         *new_task_row;
   GtkWidget             *scrolled_window;
   GtkStack              *stack;
@@ -81,6 +83,9 @@ typedef struct
   gboolean               handle_subtasks;
   GListModel            *model;
   GDateTime             *default_date;
+
+  GListModel            *incomplete_tasks_model;
+  guint                  n_incomplete_tasks;
 
   guint                  scroll_to_bottom_handler_id;
 
@@ -142,9 +147,18 @@ typedef struct
 #define TASK_REMOVED_NOTIFICATION_ID "task-removed-id"
 
 
+static gboolean      filter_complete_func                        (gpointer            item,
+                                                                  gpointer            user_data);
+
 static void          on_clear_completed_tasks_activated_cb       (GSimpleAction      *simple,
                                                                   GVariant           *parameter,
                                                                   gpointer            user_data);
+
+static void          on_incomplete_tasks_items_changed_cb        (GListModel         *model,
+                                                                  guint               position,
+                                                                  guint               n_removed,
+                                                                  guint               n_added,
+                                                                  GtdTaskListView    *self);
 
 static void          on_remove_task_row_cb                       (GtdTaskRow         *row,
                                                                   GtdTaskListView    *self);
@@ -276,10 +290,87 @@ schedule_scroll_to_bottom (GtdTaskListView *self)
   priv->scroll_to_bottom_handler_id = g_timeout_add (250, scroll_to_bottom_cb, self);
 }
 
+static void
+update_empty_state (GtdTaskListView *self)
+{
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+  gboolean show_empty_list_widget;
+  gboolean is_empty;
+
+  g_assert (GTD_IS_TASK_LIST_VIEW (self));
+
+  is_empty = g_list_model_get_n_items (priv->model) == 0;
+  gtd_empty_list_widget_set_is_empty (priv->empty_list_widget, is_empty);
+
+  show_empty_list_widget = !GTD_IS_TASK_LIST (priv->model) &&
+                           (is_empty || priv->n_incomplete_tasks == 0);
+  gtk_stack_set_visible_child_name (priv->main_stack,
+                                    show_empty_list_widget ? "empty-list" : "task-list");
+}
+
+static void
+update_incomplete_tasks_model (GtdTaskListView *self)
+{
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+
+  if (!priv->incomplete_tasks_model)
+    {
+      g_autoptr (GtkFilterListModel) filter_model = NULL;
+      GtkCustomFilter *filter;
+
+      filter = gtk_custom_filter_new (filter_complete_func, self, NULL);
+      filter_model = gtk_filter_list_model_new (NULL, GTK_FILTER (filter));
+      gtk_filter_list_model_set_incremental (filter_model, TRUE);
+
+      priv->incomplete_tasks_model = G_LIST_MODEL (g_steal_pointer (&filter_model));
+    }
+
+  gtk_filter_list_model_set_model (GTK_FILTER_LIST_MODEL (priv->incomplete_tasks_model),
+                                   priv->model);
+  priv->n_incomplete_tasks = g_list_model_get_n_items (priv->incomplete_tasks_model);
+
+  g_signal_connect (priv->incomplete_tasks_model,
+                    "items-changed",
+                    G_CALLBACK (on_incomplete_tasks_items_changed_cb),
+                    self);
+}
+
 
 /*
  * Callbacks
  */
+
+static gboolean
+filter_complete_func (gpointer item,
+                      gpointer user_data)
+{
+  GtdTask *task = (GtdTask*) item;
+  return !gtd_task_get_complete (task);
+}
+
+static void
+on_incomplete_tasks_items_changed_cb (GListModel      *model,
+                                      guint            position,
+                                      guint            n_removed,
+                                      guint            n_added,
+                                      GtdTaskListView *self)
+{
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+
+  priv->n_incomplete_tasks -= n_removed;
+  priv->n_incomplete_tasks += n_added;
+
+  update_empty_state (self);
+}
+
+static void
+on_empty_list_widget_add_tasks_cb (GtdEmptyListWidget *empty_list_widget,
+                                   GtdTaskListView    *self)
+{
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+
+  gtk_stack_set_visible_child_name (priv->main_stack, "task-list");
+}
 
 static GtkWidget*
 create_row_for_task_cb (gpointer item,
@@ -944,6 +1035,7 @@ gtd_task_list_view_finalize (GObject *object)
   g_clear_handle_id (&priv->scroll_to_bottom_handler_id, g_source_remove);
   g_clear_pointer (&priv->task_to_row, g_hash_table_destroy);
   g_clear_pointer (&priv->default_date, g_date_time_unref);
+  g_clear_object (&priv->incomplete_tasks_model);
   g_clear_object (&priv->renderer);
   g_clear_object (&priv->model);
 
@@ -1051,12 +1143,15 @@ gtd_task_list_view_constructed (GObject *object)
 static void
 gtd_task_list_view_map (GtkWidget *widget)
 {
-  GtdTaskListViewPrivate *priv;
+  GtdTaskListView *self = GTD_TASK_LIST_VIEW (widget);
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
   GtkRoot *root;
+
+
+  update_empty_state (self);
 
   GTK_WIDGET_CLASS (gtd_task_list_view_parent_class)->map (widget);
 
-  priv = GTD_TASK_LIST_VIEW (widget)->priv;
   root = gtk_widget_get_root (widget);
 
   /* Clear previously added "list" actions */
@@ -1159,12 +1254,15 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/todo/ui/gtd-task-list-view.ui");
 
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, due_date_sizegroup);
+  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, empty_list_widget);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, listbox);
+  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, main_stack);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, new_task_row);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, tasklist_name_sizegroup);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, scrolled_window);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, stack);
 
+  gtk_widget_class_bind_template_callback (widget_class, on_empty_list_widget_add_tasks_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_listbox_row_activated_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_new_task_row_entered_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_new_task_row_exited_cb);
@@ -1300,6 +1398,8 @@ gtd_task_list_view_set_model (GtdTaskListView *view,
                            NULL);
 
   schedule_scroll_to_bottom (view);
+  update_incomplete_tasks_model (view);
+  update_empty_state (view);
 
   if (priv->task_list_selector_behavior == GTD_TASK_LIST_SELECTOR_BEHAVIOR_AUTOMATIC)
     gtd_new_task_row_set_show_list_selector (GTD_NEW_TASK_ROW (priv->new_task_row), !GTD_IS_TASK_LIST (model));

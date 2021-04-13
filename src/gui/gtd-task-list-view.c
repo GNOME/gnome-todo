@@ -99,10 +99,6 @@ typedef struct
   guint                  scroll_timeout_id;
   gboolean               scroll_up;
 
-  /* color provider */
-  GtkCssProvider        *color_provider;
-  GdkRGBA               *color;
-
   /* action */
   GActionGroup          *action_group;
 
@@ -141,9 +137,7 @@ typedef struct
   guint32               current_item;
 } GtdIdleData;
 
-#define COLOR_TEMPLATE               "tasklistview {background-color: %s;}"
 #define DND_SCROLL_OFFSET            24 //px
-#define LUMINANCE(c)                 (0.299 * c->red + 0.587 * c->green + 0.114 * c->blue)
 #define TASK_REMOVED_NOTIFICATION_ID "task-removed-id"
 
 
@@ -186,7 +180,6 @@ typedef struct
 
 enum {
   PROP_0,
-  PROP_COLOR,
   PROP_HANDLE_SUBTASKS,
   PROP_SHOW_LIST_NAME,
   PROP_SHOW_DUE_DATE,
@@ -248,35 +241,6 @@ iterate_subtasks (GtdTaskListView    *self,
     }
 
   return TRUE;
-}
-
-static void
-update_font_color (GtdTaskListView *self)
-{
-  GtdTaskListViewPrivate *priv;
-  GtkStyleContext *context;
-  GdkRGBA *color;
-
-  priv = gtd_task_list_view_get_instance_private (self);
-
-  if (!priv->model || !GTD_IS_TASK_LIST (priv->model))
-    return;
-
-  context = gtk_widget_get_style_context (GTK_WIDGET (self));
-  color = gtd_task_list_get_color (GTD_TASK_LIST (priv->model));
-
-  if (LUMINANCE (color) < 0.5)
-    {
-      gtk_style_context_add_class (context, "dark");
-      gtk_style_context_remove_class (context, "light");
-    }
-  else
-    {
-      gtk_style_context_add_class (context, "light");
-      gtk_style_context_remove_class (context, "dark");
-    }
-
-  gdk_rgba_free (color);
 }
 
 static void
@@ -577,36 +541,6 @@ on_remove_task_row_cb (GtdTaskRow      *row,
   set_active_row (self, NULL);
 }
 
-static void
-on_task_list_color_changed_cb (GtdTaskListView *self)
-{
-  GtdTaskListViewPrivate *priv = GTD_TASK_LIST_VIEW (self)->priv;
-  gchar *color_str;
-  gchar *parsed_css;
-
-  /* Add the color to provider */
-  if (priv->color)
-    {
-      color_str = gdk_rgba_to_string (priv->color);
-    }
-  else
-    {
-      GdkRGBA *color;
-
-      color = gtd_task_list_get_color (GTD_TASK_LIST (priv->model));
-      color_str = gdk_rgba_to_string (color);
-
-      gdk_rgba_free (color);
-    }
-
-  parsed_css = g_strdup_printf (COLOR_TEMPLATE, color_str);
-
-  gtk_css_provider_load_from_data (priv->color_provider, parsed_css, -1);
-
-  update_font_color (self);
-
-  g_free (color_str);
-}
 static void
 on_new_task_row_entered_cb (GtdTaskListView *self,
                             GtdNewTaskRow   *row)
@@ -1052,10 +986,6 @@ gtd_task_list_view_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_COLOR:
-      g_value_set_boxed (value, self->priv->color);
-      break;
-
     case PROP_HANDLE_SUBTASKS:
       g_value_set_boolean (value, self->priv->handle_subtasks);
       break;
@@ -1087,10 +1017,6 @@ gtd_task_list_view_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_COLOR:
-      gtd_task_list_view_set_color (self, g_value_get_boxed (value));
-      break;
-
     case PROP_HANDLE_SUBTASKS:
       gtd_task_list_view_set_handle_subtasks (self, g_value_get_boolean (value));
       break;
@@ -1126,13 +1052,6 @@ gtd_task_list_view_constructed (GObject *object)
                                    gtd_task_list_view_entries,
                                    G_N_ELEMENTS (gtd_task_list_view_entries),
                                    object);
-
-  /* css provider */
-  self->priv->color_provider = gtk_css_provider_new ();
-
-  gtk_style_context_add_provider (gtk_widget_get_style_context (GTK_WIDGET (self)),
-                                  GTK_STYLE_PROVIDER (self->priv->color_provider),
-                                  GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 2);
 }
 
 
@@ -1179,21 +1098,6 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
   g_type_ensure (GTD_TYPE_TASK_ROW);
   g_type_ensure (GTD_TYPE_DND_ROW);
   g_type_ensure (GTD_TYPE_EMPTY_LIST_WIDGET);
-
-  /**
-   * GtdTaskListView::color:
-   *
-   * The custom color of this list. If there is a custom color set,
-   * the tasklist's color is ignored.
-   */
-  g_object_class_install_property (
-        object_class,
-        PROP_COLOR,
-        g_param_spec_boxed ("color",
-                            "Color of the task list view",
-                            "The custom color of this task list view",
-                            GDK_TYPE_RGBA,
-                            G_PARAM_READWRITE));
 
   /**
    * GtdTaskListView::handle-subtasks:
@@ -1378,10 +1282,6 @@ gtd_task_list_view_set_model (GtdTaskListView *view,
                               GListModel      *model)
 {
   GtdTaskListViewPrivate *priv;
-  g_autoptr (GdkRGBA) color = NULL;
-  g_autofree gchar *parsed_css = NULL;
-  g_autofree gchar *color_str = NULL;
-  GtdTaskList *list;
 
   g_return_if_fail (GTD_IS_TASK_LIST_VIEW (view));
   g_return_if_fail (G_IS_LIST_MODEL (model));
@@ -1403,22 +1303,6 @@ gtd_task_list_view_set_model (GtdTaskListView *view,
 
   if (priv->task_list_selector_behavior == GTD_TASK_LIST_SELECTOR_BEHAVIOR_AUTOMATIC)
     gtd_new_task_row_set_show_list_selector (GTD_NEW_TASK_ROW (priv->new_task_row), !GTD_IS_TASK_LIST (model));
-
-  if (!GTD_IS_TASK_LIST (model))
-    return;
-
-  list = GTD_TASK_LIST (model);
-
-  g_debug ("%p: Setting task list to '%s'", view, gtd_task_list_get_name (list));
-
-  /* Add the color to provider */
-  color = gtd_task_list_get_color (list);
-  color_str = gdk_rgba_to_string (color);
-  parsed_css = g_strdup_printf (COLOR_TEMPLATE, color_str);
-
-  //gtk_css_provider_load_from_data (priv->color_provider, parsed_css, -1);
-
-  update_font_color (view);
 }
 
 /**
@@ -1613,57 +1497,6 @@ gtd_task_list_view_set_default_date   (GtdTaskListView *self,
 
   g_clear_pointer (&priv->default_date, g_date_time_unref);
   priv->default_date = default_date ? g_date_time_ref (default_date) : NULL;
-}
-
-/**
- * gtd_task_list_view_get_color:
- * @self: a #GtdTaskListView
- *
- * Retrieves the custom color of @self.
- *
- * Returns: (nullable): a #GdkRGBA, or %NULL if none is set.
- */
-GdkRGBA*
-gtd_task_list_view_get_color (GtdTaskListView *self)
-{
-  GtdTaskListViewPrivate *priv;
-
-  g_return_val_if_fail (GTD_IS_TASK_LIST_VIEW (self), NULL);
-
-  priv = gtd_task_list_view_get_instance_private (self);
-
-  return priv->color;
-}
-
-/**
- * gtd_task_list_view_set_color:
- * @self: a #GtdTaskListView
- * @color: (nullable): a #GdkRGBA
- *
- * Sets the custom color of @self to @color. If a custom color is set,
- * the tasklist's color is ignored. Passing %NULL makes the tasklist's
- * color apply again.
- */
-void
-gtd_task_list_view_set_color (GtdTaskListView *self,
-                              GdkRGBA         *color)
-{
-  GtdTaskListViewPrivate *priv;
-
-  g_return_if_fail (GTD_IS_TASK_LIST_VIEW (self));
-
-  priv = gtd_task_list_view_get_instance_private (self);
-
-  if (priv->color != color ||
-      (color && priv->color && !gdk_rgba_equal (color, priv->color)))
-    {
-      g_clear_pointer (&priv->color, gdk_rgba_free);
-      priv->color = gdk_rgba_copy (color);
-
-      on_task_list_color_changed_cb (self);
-
-      g_object_notify (G_OBJECT (self), "color");
-    }
 }
 
 /**

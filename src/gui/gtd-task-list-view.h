@@ -81,11 +81,6 @@ GDateTime*                gtd_task_list_view_get_default_date   (GtdTaskListView
 void                      gtd_task_list_view_set_default_date   (GtdTaskListView        *self,
                                                                  GDateTime              *default_date);
 
-GdkRGBA*                  gtd_task_list_view_get_color          (GtdTaskListView        *self);
-
-void                      gtd_task_list_view_set_color          (GtdTaskListView        *self,
-                                                                 GdkRGBA                *color);
-
 gboolean                  gtd_task_list_view_get_handle_subtasks (GtdTaskListView       *self);
 
 void                      gtd_task_list_view_set_handle_subtasks (GtdTaskListView       *self,

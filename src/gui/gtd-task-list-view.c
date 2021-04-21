@@ -80,7 +80,6 @@ typedef struct
   gboolean               can_toggle;
   gboolean               show_due_date;
   gboolean               show_list_name;
-  gboolean               handle_subtasks;
   GListModel            *model;
   GDateTime             *default_date;
 
@@ -180,15 +179,11 @@ typedef struct
 
 enum {
   PROP_0,
-  PROP_HANDLE_SUBTASKS,
   PROP_SHOW_LIST_NAME,
   PROP_SHOW_DUE_DATE,
   PROP_SHOW_NEW_TASK_ROW,
   LAST_PROP
 };
-
-typedef gboolean     (*IterateSubtaskFunc)                       (GtdTaskListView    *self,
-                                                                  GtdTask            *task);
 
 
 /*
@@ -220,27 +215,6 @@ set_active_row (GtdTaskListView *self,
       gtd_task_row_set_active (row, TRUE);
       gtk_widget_grab_focus (GTK_WIDGET (row));
     }
-}
-
-static gboolean
-iterate_subtasks (GtdTaskListView    *self,
-                  GtdTask            *task,
-                  IterateSubtaskFunc  func)
-{
-  GtdTask *aux;
-
-  if (!func (self, task))
-    return FALSE;
-
-  for (aux = gtd_task_get_first_subtask (task);
-       aux;
-       aux = gtd_task_get_next_sibling (aux))
-    {
-      if (!iterate_subtasks (self, aux, func))
-        return FALSE;
-    }
-
-  return TRUE;
 }
 
 static void
@@ -350,12 +324,6 @@ create_row_for_task_cb (gpointer item,
 
   row = gtd_task_row_new (item, priv->renderer);
 
-  g_object_bind_property (self,
-                          "handle-subtasks",
-                          row,
-                          "handle-subtasks",
-                          G_BINDING_DEFAULT | G_BINDING_SYNC_CREATE);
-
   gtd_task_row_set_list_name_visible (GTD_TASK_ROW (row), priv->show_list_name);
   gtd_task_row_set_due_date_visible (GTD_TASK_ROW (row), priv->show_due_date);
 
@@ -421,18 +389,6 @@ on_task_removed_cb (GObject      *source,
     g_warning ("Error removing task list: %s", error->message);
 }
 
-static inline gboolean
-remove_task_cb (GtdTaskListView *self,
-                GtdTask         *task)
-{
-  gtd_provider_remove_task (gtd_task_get_provider (task),
-                            task,
-                            NULL,
-                            on_task_removed_cb,
-                            self);
-  return TRUE;
-}
-
 static void
 on_clear_completed_tasks_activated_cb (GSimpleAction *simple,
                                        GVariant      *parameter,
@@ -452,11 +408,11 @@ on_clear_completed_tasks_activated_cb (GSimpleAction *simple,
       if (!gtd_task_get_complete (task))
         continue;
 
-      if (gtd_task_get_parent (task))
-        gtd_task_remove_subtask (gtd_task_get_parent (task), task);
-
-      /* Remove the subtasks recursively */
-      iterate_subtasks (self, task, remove_task_cb);
+      gtd_provider_remove_task (gtd_task_get_provider (task),
+                                task,
+                                NULL,
+                                on_task_removed_cb,
+                                self);
     }
 }
 
@@ -464,17 +420,13 @@ static void
 on_remove_task_action_cb (GtdNotification *notification,
                           gpointer         user_data)
 {
-  RemoveTaskData *data;
-  GtdTask *task;
+  RemoveTaskData *data = user_data;
 
-  data = user_data;
-  task = data->task;
-
-  if (gtd_task_get_parent (task))
-    gtd_task_remove_subtask (gtd_task_get_parent (task), task);
-
-  /* Remove the subtasks recursively */
-  iterate_subtasks (data->view, data->task, remove_task_cb);
+  gtd_provider_remove_task (gtd_task_get_provider (data->task),
+                            data->task,
+                            NULL,
+                            on_task_removed_cb,
+                            data->view);
 
   g_clear_pointer (&data, g_free);
 }
@@ -518,7 +470,7 @@ on_remove_task_row_cb (GtdTaskRow      *row,
   data->view = self;
   data->task = task;
 
-  /* Remove tasks and subtasks from the list */
+  /* Remove task from the list */
   list = gtd_task_get_list (task);
   gtd_task_list_remove_task (list, task);
 
@@ -635,19 +587,6 @@ internal_header_func (GtkListBoxRow   *row,
  * Drag n' Drop functions
  */
 
-static gboolean
-row_is_subtask_of (GtdTaskRow *row_a,
-                   GtdTaskRow *row_b)
-{
-  GtdTask *task_a;
-  GtdTask *task_b;
-
-  task_a = gtd_task_row_get_task (row_a);
-  task_b = gtd_task_row_get_task (row_b);
-
-  return gtd_task_is_subtask (task_a, task_b);
-}
-
 static GtkListBoxRow*
 get_drop_row_at_y (GtdTaskListView *self,
                    gdouble          y)
@@ -713,11 +652,7 @@ static void
 unset_previously_highlighted_row (GtdTaskListView *self)
 {
   GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
-  if (priv->highlighted_row)
-    {
-      gtd_task_row_unset_drag_offset (task_row_from_row (priv->highlighted_row));
-      priv->highlighted_row = NULL;
-    }
+  priv->highlighted_row = NULL;
 }
 
 static inline gboolean
@@ -800,13 +735,8 @@ on_drop_target_drag_motion_cb (GtkDropTarget   *drop_target,
 {
   GtdTaskListViewPrivate *priv;
   GtkListBoxRow *highlighted_row;
-  GtdTaskRow *highlighted_task_row;
-  GtdTaskRow *source_task_row;
-  const GValue *value;
   GdkDrop *drop;
-  GtdTask *task;
   GdkDrag *drag;
-  gdouble x_offset;
 
   GTD_ENTRY;
 
@@ -820,37 +750,12 @@ on_drop_target_drag_motion_cb (GtkDropTarget   *drop_target,
       GTD_GOTO (fail);
     }
 
-  value = gtk_drop_target_get_value (drop_target);
-  task = g_value_get_object (value);
-
-  source_task_row = g_hash_table_lookup (priv->task_to_row, task);
-
-  /* Update the x value according to the current offset */
-  if (gtk_widget_get_direction (GTK_WIDGET (self)) == GTK_TEXT_DIR_RTL)
-    x += gtd_task_row_get_x_offset (source_task_row);
-  else
-    x -= gtd_task_row_get_x_offset (source_task_row);
-
   unset_previously_highlighted_row (self);
 
   highlighted_row = get_drop_row_at_y (self, y);
   if (!highlighted_row)
     GTD_GOTO (success);
 
-  highlighted_task_row = task_row_from_row (highlighted_row);
-
-  /* Forbid dropping a row over a subtask row */
-  if (row_is_subtask_of (source_task_row, highlighted_task_row))
-    GTD_GOTO (fail);
-
-  gtk_widget_translate_coordinates (GTK_WIDGET (priv->listbox),
-                                    GTK_WIDGET (highlighted_task_row),
-                                    x,
-                                    0,
-                                    &x_offset,
-                                    NULL);
-
-  gtd_task_row_set_drag_offset (highlighted_task_row, source_task_row, x_offset);
   priv->highlighted_row = highlighted_row;
 
 success:
@@ -873,7 +778,6 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
   GtdProvider *provider;
   GtdTaskRow *hovered_row;
   GtkWidget *row;
-  GtdTask *new_parent_task;
   GtdTask *hovered_task;
   GtdTask *source_task;
   GdkDrop *drop;
@@ -896,6 +800,7 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
   unset_previously_highlighted_row (self);
 
   source_task = g_value_get_object (value);
+  g_assert (source_task != NULL);
 
   /*
    * When the drag operation began, the source row was hidden. Now is the time
@@ -907,34 +812,6 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
   drop_row = get_drop_row_at_y (self, y);
   hovered_row = task_row_from_row (drop_row);
   hovered_task = gtd_task_row_get_task (hovered_row);
-  new_parent_task = gtd_task_row_get_dnd_drop_task (hovered_row);
-
-  g_assert (source_task != NULL);
-  g_assert (source_task != new_parent_task);
-
-  if (new_parent_task)
-    {
-      /* Forbid adding the parent task as a subtask */
-      if (gtd_task_is_subtask (source_task, new_parent_task))
-        {
-          gdk_drop_finish (drop, 0);
-          GTD_RETURN (FALSE);
-        }
-
-      GTD_TRACE_MSG ("Making '%s' (%s) subtask of '%s' (%s)",
-                     gtd_task_get_title (source_task),
-                     gtd_object_get_uid (GTD_OBJECT (source_task)),
-                     gtd_task_get_title (new_parent_task),
-                     gtd_object_get_uid (GTD_OBJECT (new_parent_task)));
-
-      gtd_task_add_subtask (new_parent_task, source_task);
-    }
-  else
-    {
-      GtdTask *current_parent_task = gtd_task_get_parent (source_task);
-      if (current_parent_task)
-        gtd_task_remove_subtask (current_parent_task, source_task);
-    }
 
   /*
    * FIXME: via DnD, we only support moving the task to below another
@@ -986,10 +863,6 @@ gtd_task_list_view_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_HANDLE_SUBTASKS:
-      g_value_set_boolean (value, self->priv->handle_subtasks);
-      break;
-
     case PROP_SHOW_DUE_DATE:
       g_value_set_boolean (value, self->priv->show_due_date);
       break;
@@ -1017,10 +890,6 @@ gtd_task_list_view_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_HANDLE_SUBTASKS:
-      gtd_task_list_view_set_handle_subtasks (self, g_value_get_boolean (value));
-      break;
-
     case PROP_SHOW_DUE_DATE:
       gtd_task_list_view_set_show_due_date (self, g_value_get_boolean (value));
       break;
@@ -1100,20 +969,6 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
   g_type_ensure (GTD_TYPE_EMPTY_LIST_WIDGET);
 
   /**
-   * GtdTaskListView::handle-subtasks:
-   *
-   * Whether the list is able to handle subtasks.
-   */
-  g_object_class_install_property (
-        object_class,
-        PROP_HANDLE_SUBTASKS,
-        g_param_spec_boolean ("handle-subtasks",
-                              "Whether it handles subtasks",
-                              "Whether the list handles subtasks, or not",
-                              TRUE,
-                              G_PARAM_READWRITE));
-
-  /**
    * GtdTaskListView::show-new-task-row:
    *
    * Whether the list shows the "New Task" row or not.
@@ -1190,7 +1045,6 @@ gtd_task_list_view_init (GtdTaskListView *self)
   priv->task_to_row = g_hash_table_new (NULL, NULL);
 
   priv->can_toggle = TRUE;
-  priv->handle_subtasks = TRUE;
   priv->show_due_date = TRUE;
   priv->show_due_date = TRUE;
 
@@ -1498,58 +1352,6 @@ gtd_task_list_view_set_default_date   (GtdTaskListView *self,
   g_clear_pointer (&priv->default_date, g_date_time_unref);
   priv->default_date = default_date ? g_date_time_ref (default_date) : NULL;
 }
-
-/**
- * gtd_task_list_view_get_handle_subtasks:
- * @self: a #GtdTaskListView
- *
- * Retirves whether @self handle subtasks, i.e. make the rows
- * change padding depending on their depth, show an arrow button
- * to toggle subtasks, among others.
- *
- * Returns: %TRUE if @self handles subtasks, %FALSE otherwise
- */
-gboolean
-gtd_task_list_view_get_handle_subtasks (GtdTaskListView *self)
-{
-  GtdTaskListViewPrivate *priv;
-
-  g_return_val_if_fail (GTD_IS_TASK_LIST_VIEW (self), FALSE);
-
-  priv = gtd_task_list_view_get_instance_private (self);
-
-  return priv->handle_subtasks;
-}
-
-/**
- * gtd_task_list_view_set_handle_subtasks:
- * @self: a #GtdTaskListView
- * @handle_subtasks: %TRUE to make @self handle subtasks, %FALSE to disable subtasks.
- *
- * If %TRUE, makes @self handle subtasks, adjust the task rows according to their
- * hierarchy level at the subtask tree and show the arrow button to toggle subtasks
- * of a given task.
- *
- * Drag and drop tasks will only work if @self handles subtasks as well.
- */
-void
-gtd_task_list_view_set_handle_subtasks (GtdTaskListView *self,
-                                        gboolean         handle_subtasks)
-{
-  GtdTaskListViewPrivate *priv;
-
-  g_return_if_fail (GTD_IS_TASK_LIST_VIEW (self));
-
-  priv = gtd_task_list_view_get_instance_private (self);
-
-  if (priv->handle_subtasks == handle_subtasks)
-    return;
-
-  priv->handle_subtasks = handle_subtasks;
-
-  g_object_notify (G_OBJECT (self), "handle-subtasks");
-}
-
 
 GtdTaskListSelectorBehavior
 gtd_task_list_view_get_task_list_selector_behavior (GtdTaskListView *self)

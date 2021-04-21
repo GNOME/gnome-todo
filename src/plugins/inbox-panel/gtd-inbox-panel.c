@@ -251,7 +251,6 @@ gtd_inbox_panel_init (GtdInboxPanel *self)
   /* The main view */
   self->view = GTD_TASK_LIST_VIEW (gtd_task_list_view_new ());
   gtd_task_list_view_set_model (GTD_TASK_LIST_VIEW (self->view), G_LIST_MODEL (self->filter_model));
-  gtd_task_list_view_set_handle_subtasks (GTD_TASK_LIST_VIEW (self->view), FALSE);
   gtd_task_list_view_set_show_list_name (GTD_TASK_LIST_VIEW (self->view), FALSE);
   gtd_task_list_view_set_show_due_date (GTD_TASK_LIST_VIEW (self->view), FALSE);
   gtd_task_list_view_set_task_list_selector_behavior (GTD_TASK_LIST_VIEW (self->view),

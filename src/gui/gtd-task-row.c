@@ -925,69 +925,10 @@ gtd_task_row_set_sizegroups (GtdTaskRow   *self,
   gtk_size_group_add_widget (name_group, GTK_WIDGET (self->task_date_label));
 }
 
-gint
-gtd_task_row_get_x_offset (GtdTaskRow *self)
-{
-  g_return_val_if_fail (GTD_IS_TASK_ROW (self), -1);
-
-  if (gtk_widget_get_direction (GTK_WIDGET (self)) == GTK_TEXT_DIR_RTL)
-    return gtk_widget_get_width (GTK_WIDGET (self)) - self->clicked_x;
-  else
-    return self->clicked_x;
-}
-
-void
-gtd_task_row_set_drag_offset (GtdTaskRow *self,
-                              GtdTaskRow *source_row,
-                              gint        x_offset)
-{
-  gint current_task_depth;
-  gint min_height;
-  gint depth;
-
-  g_return_if_fail (GTD_IS_TASK_ROW (self));
-
-  /* Negative values are discarded */
-  x_offset = MAX (x_offset, 0);
-
-  /* Make the DnD frame match the height of the dragged row */
-  gtk_widget_measure (GTK_WIDGET (self), GTK_ORIENTATION_VERTICAL, -1, &min_height, NULL, NULL, NULL);
-  gtk_widget_set_size_request (self->dnd_frame, -1, min_height);
-
-  current_task_depth = gtd_task_get_depth (self->task);
-  depth = CLAMP (x_offset / 32, 0, current_task_depth + 1);
-  gtk_widget_set_margin_start (self->dnd_frame, depth * 32 + 12);
-
-  GTD_TRACE_MSG ("DnD frame height: %d, depth: %d", min_height, depth);
-
-  gtk_widget_show (self->dnd_frame);
-}
-
 void
 gtd_task_row_unset_drag_offset (GtdTaskRow *self)
 {
   g_return_if_fail (GTD_IS_TASK_ROW (self));
 
   gtk_widget_hide (self->dnd_frame);
-}
-
-GtdTask*
-gtd_task_row_get_dnd_drop_task (GtdTaskRow *self)
-{
-  GtdTask *task;
-  gint task_depth;
-  gint depth;
-  gint i;
-
-  g_return_val_if_fail (GTD_IS_TASK_ROW (self), NULL);
-
-  task = self->task;
-  task_depth = gtd_task_get_depth (task);
-  depth = (gtk_widget_get_margin_start (self->dnd_frame) - 12) / 32;
-
-  /* Find the real parent */
-  for (i = task_depth - depth; i >= 0; i--)
-    task = gtd_task_get_parent (task);
-
-  return task;
 }

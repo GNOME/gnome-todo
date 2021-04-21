@@ -53,6 +53,7 @@
                 </child>
                 <child>
                   <object class="GtkBox" id="header_event_box">
+                    <property name="spacing">12</property>
                     <child>
                       <object class="GtkGestureClick">
                         <property name="propagation-phase">capture</property>
@@ -79,7 +80,6 @@
                     <child>
                       <object class="GtkLabel" id="task_date_label">
                         <property name="xalign">1.0</property>
-                        <property name="margin-start">6</property>
                         <style>
                           <class name="dim-label"/>
                         </style>
@@ -100,7 +100,7 @@
                     <!-- Star Widget -->
                     <child>
                       <object class="GtkBox">
-                        <property name="margin-start">18</property>
+                        <property name="margin-start">6</property>
                         <child>
                           <object class="GtdStarWidget" id="star_widget">
                           </object>

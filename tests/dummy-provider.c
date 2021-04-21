@@ -364,10 +364,7 @@ dummy_provider_generate_task_list (DummyProvider *self)
       g_autoptr (GtdTask) task = NULL;
       g_autofree gchar *title = NULL;
       g_autofree gchar *uuid = NULL;
-      gint n_subtasks;
-      gint j;
 
-      n_subtasks = i;
       uuid = g_uuid_string_random ();
       title = g_strdup_printf ("%d", i);
 
@@ -377,24 +374,6 @@ dummy_provider_generate_task_list (DummyProvider *self)
       gtd_task_set_title (task, title);
       gtd_task_set_position (task, n_generated_tasks++);
       gtd_task_list_add_task (list, task);
-
-      for (j = 0; j < n_subtasks; j++)
-        {
-          g_autoptr (GtdTask) subtask = NULL;
-          g_autofree gchar *subtask_title = NULL;
-          g_autofree gchar *subtask_uuid = NULL;
-
-          subtask_uuid = g_uuid_string_random ();
-          subtask_title = g_strdup_printf ("%d:%d", i, j);
-
-          subtask = gtd_task_new ();
-          gtd_task_set_list (subtask, list);
-          gtd_object_set_uid (GTD_OBJECT (subtask), subtask_uuid);
-          gtd_task_set_title (subtask, subtask_title);
-          gtd_task_set_position (subtask, n_generated_tasks++);
-          gtd_task_add_subtask (task, subtask);
-          gtd_task_list_add_task (list, g_steal_pointer (&subtask));
-        }
     }
 
   return n_generated_tasks;

@@ -55,13 +55,11 @@ test_move (void)
   g_assert_nonnull (first_root_task);
   g_assert_cmpint (gtd_task_get_position (first_root_task), ==, 0);
   g_assert_true (g_list_model_get_item (model, 0) == first_root_task);
-  g_assert_cmpuint (gtd_task_get_n_total_subtasks (first_root_task), ==, 0);
 
   last_root_task = g_list_model_get_item (model, 6);
   g_assert_nonnull (last_root_task);
   g_assert_cmpint (gtd_task_get_position (last_root_task), ==, 6);
   g_assert_true (g_list_model_get_item (model, 6) == last_root_task);
-  g_assert_cmpuint (gtd_task_get_n_total_subtasks (last_root_task), ==, 3);
 
   /* Move the task to 0 */
   gtd_task_list_move_task_to_position (list, last_root_task, 0);

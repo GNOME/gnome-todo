@@ -152,8 +152,6 @@ sources += files(
   'gui/gtd-max-size-layout.c',
   'gui/gtd-omni-area.c',
   'gui/gtd-omni-area-addin.c',
-  'gui/gtd-plugin-dialog.c',
-  'gui/gtd-plugin-dialog-row.c',
   'gui/gtd-theme-manager.c',
   'gui/gtd-widget.c',
   'gui/gtd-window.c',

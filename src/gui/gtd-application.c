@@ -26,7 +26,6 @@
 #include "gtd-log.h"
 #include "gtd-manager.h"
 #include "gtd-manager-protected.h"
-#include "gtd-plugin-dialog.h"
 #include "gtd-theme-manager.h"
 #include "gtd-vcs.h"
 #include "gtd-window.h"
@@ -45,7 +44,6 @@ struct _GtdApplication
   GtdThemeManager       *theme_manager;
 
   GtkWindow             *window;
-  GtkWidget             *plugin_dialog;
   GtkWidget             *initial_setup;
 };
 
@@ -54,10 +52,6 @@ static void           gtd_application_activate_action             (GSimpleAction
                                                                    gpointer              user_data);
 
 static void           gtd_application_start_client                (GSimpleAction        *simple,
-                                                                   GVariant             *parameter,
-                                                                   gpointer              user_data);
-
-static void           gtd_application_show_extensions             (GSimpleAction        *simple,
                                                                    GVariant             *parameter,
                                                                    gpointer              user_data);
 
@@ -80,7 +74,6 @@ static GOptionEntry cmd_options[] = {
 static const GActionEntry gtd_application_entries[] = {
   { "activate", gtd_application_activate_action },
   { "start-client", gtd_application_start_client },
-  { "show-extensions",  gtd_application_show_extensions },
   { "about",  gtd_application_show_about },
   { "quit",   gtd_application_quit }
 };
@@ -102,16 +95,6 @@ gtd_application_start_client (GSimpleAction *simple,
 {
   /* TODO */
   g_debug ("Starting up client");
-}
-
-static void
-gtd_application_show_extensions (GSimpleAction *simple,
-                                 GVariant      *parameter,
-                                 gpointer       user_data)
-{
-  GtdApplication *self = GTD_APPLICATION (user_data);
-
-  gtk_widget_show (self->plugin_dialog);
 }
 
 static void
@@ -267,11 +250,6 @@ gtd_application_startup (GApplication *application)
   /* window */
   gtk_window_set_default_icon_name (APPLICATION_ID);
   self->window = GTK_WINDOW (gtd_window_new (self));
-
-  /* plugin dialog */
-  self->plugin_dialog = gtd_plugin_dialog_new ();
-
-  gtk_window_set_transient_for (GTK_WINDOW (self->plugin_dialog), GTK_WINDOW (self->window));
 
   /* Load the plugins */
   gtd_manager_load_plugins (gtd_manager_get_default ());

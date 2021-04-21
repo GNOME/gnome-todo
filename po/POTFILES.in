@@ -10,8 +10,6 @@ src/gui/gtd-initial-setup-window.ui
 src/gui/gtd-new-task-row.c
 src/gui/gtd-new-task-row.ui
 src/gui/gtd-omni-area.ui
-src/gui/gtd-plugin-dialog-row.c
-src/gui/gtd-plugin-dialog.ui
 src/gui/gtd-provider-popover.c
 src/gui/gtd-provider-popover.ui
 src/gui/gtd-provider-row.ui

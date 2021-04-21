@@ -8,8 +8,6 @@
     <file compressed="true" preprocess="xml-stripblanks">gtd-new-task-row.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtd-notification-widget.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtd-omni-area.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">gtd-plugin-dialog.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">gtd-plugin-dialog-row.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtd-provider-popover.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtd-provider-row.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtd-provider-selector.ui</file>

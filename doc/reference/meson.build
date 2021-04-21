@@ -16,8 +16,6 @@ private_headers = [
   'gtd-list-selector-panel.h',
   'gtd-manager-protected.h',
   'gtd-notification-widget.h',
-  'gtd-plugin-dialog.h',
-  'gtd-plugin-dialog-row.h',
   'gtd-plugin-manager.h',
   'gtd-provider-dialog.h',
   'gtd-provider-popover.h',

@@ -65,15 +65,7 @@ struct _GtdTaskClass
   void          (*set_title)                          (GtdTask              *self,
                                                        const gchar          *title);
 
-  /*< signals >*/
-
-  void          (*subtask_added)                      (GtdTask              *self,
-                                                       GtdTask              *subtask);
-
-  void          (*subtask_removed)                    (GtdTask              *self,
-                                                       GtdTask              *subtask);
-
-  gpointer       padding[6];
+  gpointer       padding[8];
 };
 
 GtdTask*            gtd_task_new                      (void);
@@ -122,29 +114,6 @@ void                gtd_task_set_title                (GtdTask              *tas
 
 gint                gtd_task_compare                  (GtdTask              *t1,
                                                        GtdTask              *t2);
-
-GtdTask*            gtd_task_get_parent               (GtdTask              *self);
-
-void                gtd_task_add_subtask              (GtdTask              *self,
-                                                       GtdTask              *subtask);
-
-void                gtd_task_remove_subtask           (GtdTask              *self,
-                                                       GtdTask              *subtask);
-
-gboolean            gtd_task_is_subtask               (GtdTask              *self,
-                                                       GtdTask              *subtask);
-
-gint                gtd_task_get_depth                (GtdTask              *self);
-
-GtdTask*            gtd_task_get_first_subtask        (GtdTask              *self);
-
-GtdTask*            gtd_task_get_previous_sibling     (GtdTask              *self);
-
-GtdTask*            gtd_task_get_next_sibling         (GtdTask              *self);
-
-guint64             gtd_task_get_n_direct_subtasks    (GtdTask              *self);
-
-guint64             gtd_task_get_n_total_subtasks     (GtdTask              *self);
 
 GtdProvider*        gtd_task_get_provider             (GtdTask              *self);
 

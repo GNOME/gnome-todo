@@ -358,19 +358,6 @@ on_complete_changed_cb (GtdTaskRow *self,
 }
 
 static void
-on_depth_changed_cb (GtdTaskRow *self,
-                     GParamSpec *pspec,
-                     GtdTask    *task)
-{
-  gint margin = 0;
-
-  if (self->handle_subtasks)
-    margin = 32 * gtd_task_get_depth (task);
-
-  gtk_widget_set_margin_start (self->content_box, margin);
-}
-
-static void
 on_task_important_changed_cb (GtdTask    *task,
                               GParamSpec *pspec,
                               GtdTaskRow *self)
@@ -466,10 +453,7 @@ gtd_task_row_dispose (GObject *object)
   g_clear_pointer (&self->bindings, g_ptr_array_unref);
 
   if (task)
-    {
-      g_signal_handlers_disconnect_by_func (task, on_depth_changed_cb, self);
-      g_signal_handlers_disconnect_by_func (task, on_complete_changed_cb, self);
-    }
+    g_signal_handlers_disconnect_by_func (task, on_complete_changed_cb, self);
 
   G_OBJECT_CLASS (gtd_task_row_parent_class)->dispose (object);
 }
@@ -700,7 +684,6 @@ gtd_task_row_set_task (GtdTaskRow *self,
   if (old_task)
     {
       g_signal_handlers_disconnect_by_func (old_task, on_complete_changed_cb, self);
-      g_signal_handlers_disconnect_by_func (old_task, on_depth_changed_cb, self);
       g_signal_handlers_disconnect_by_func (old_task, on_task_important_changed_cb, self);
       g_signal_handlers_disconnect_by_func (old_task, on_star_widget_activated_cb, self);
       g_ptr_array_set_size (self->bindings, 0);
@@ -747,13 +730,6 @@ gtd_task_row_set_task (GtdTaskRow *self,
       g_signal_connect_object (task,
                                "notify::complete",
                                G_CALLBACK (on_complete_changed_cb),
-                               self,
-                               G_CONNECT_SWAPPED);
-
-      on_depth_changed_cb (self, NULL, task);
-      g_signal_connect_object (task,
-                               "notify::depth",
-                               G_CALLBACK (on_depth_changed_cb),
                                self,
                                G_CONNECT_SWAPPED);
 
@@ -845,7 +821,6 @@ gtd_task_row_set_handle_subtasks (GtdTaskRow *self,
 
   gtk_widget_set_visible (self->dnd_box, handle_subtasks);
   gtk_widget_set_visible (self->dnd_icon, handle_subtasks);
-  on_depth_changed_cb (self, NULL, self->task);
 
   g_object_notify (G_OBJECT (self), "handle-subtasks");
 }

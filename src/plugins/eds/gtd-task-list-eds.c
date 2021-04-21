@@ -35,8 +35,6 @@ struct _GtdTaskListEds
   ECalClientView     *client_view;
   ESource            *source;
 
-  GPtrArray           *pending_subtasks;
-
   GCancellable       *cancellable;
 };
 
@@ -46,12 +44,6 @@ typedef struct
   ESource            *source;
   ECalClient         *client;
 } NewTaskListData;
-
-typedef struct
-{
-  GtdTask            *child;
-  gchar              *parent_uid;
-} PendingSubtaskData;
 
 static void          on_client_objects_modified_for_migration_cb (GObject            *object,
                                                                   GAsyncResult       *result,
@@ -84,26 +76,6 @@ new_task_list_data_free (gpointer data)
   g_clear_object (&list_data->source);
   g_clear_object (&list_data->client);
   g_free (list_data);
-}
-
-static PendingSubtaskData*
-pending_subtask_data_new (GtdTask     *child,
-                          const gchar *parent_uid)
-{
-  PendingSubtaskData *data;
-
-  data = g_new0 (PendingSubtaskData, 1);
-  data->child = child;
-  data->parent_uid = g_strdup (parent_uid);
-
-  return data;
-}
-
-static void
-pending_subtask_data_free (PendingSubtaskData *data)
-{
-  g_free (data->parent_uid);
-  g_free (data);
 }
 
 static void
@@ -250,70 +222,6 @@ maybe_migrate_todo_api_version (GtdTaskListEds *self)
   update_changed_tasks (self, changed_tasks);
 
   GTD_EXIT;
-}
-
-static void
-setup_parent_task (GtdTaskListEds *self,
-                   GtdTask        *task)
-{
-  ECalComponent *component;
-  ICalComponent *ical_comp;
-  ICalProperty *property;
-  GtdTask *parent_task;
-  const gchar *parent_uid;
-
-  component = gtd_task_eds_get_component (GTD_TASK_EDS (task));
-  ical_comp = e_cal_component_get_icalcomponent (component);
-  property = i_cal_component_get_first_property (ical_comp, I_CAL_RELATEDTO_PROPERTY);
-
-  if (!property)
-    return;
-
-  parent_uid = i_cal_property_get_relatedto (property);
-  parent_task = gtd_task_list_get_task_by_id (GTD_TASK_LIST (self), parent_uid);
-
-  /* Nothing to do, parent task is already set */
-  if (gtd_task_get_parent (task) == parent_task)
-    return;
-
-  if (parent_task)
-    {
-      gtd_task_add_subtask (parent_task, task);
-    }
-  else
-    {
-      PendingSubtaskData *data;
-
-      data = pending_subtask_data_new (task, parent_uid);
-
-      g_ptr_array_add (self->pending_subtasks, data);
-    }
-
-  g_object_unref (property);
-}
-
-static void
-process_pending_subtasks (GtdTaskListEds *self,
-                          GtdTask        *task)
-{
-  const gchar *uid;
-  guint i;
-
-  uid = gtd_object_get_uid (GTD_OBJECT (task));
-
-  for (i = 0; i < self->pending_subtasks->len; i++)
-    {
-      PendingSubtaskData *data;
-
-      data = g_ptr_array_index (self->pending_subtasks, i);
-
-      if (g_strcmp0 (uid, data->parent_uid) == 0)
-        {
-          gtd_task_add_subtask (task, data->child);
-          g_ptr_array_remove (self->pending_subtasks, data);
-          i--;
-        }
-    }
 }
 
 
@@ -689,16 +597,6 @@ gtd_task_list_eds_set_archived (GtdTaskList *list,
   GTD_EXIT;
 }
 
-static void
-gtd_task_list_eds_task_added (GtdTaskList *list,
-                              GtdTask     *task)
-{
-  GtdTaskListEds *self = GTD_TASK_LIST_EDS (list);
-
-  process_pending_subtasks (self, task);
-  setup_parent_task (self, task);
-}
-
 
 /*
  * GtdObject overrides
@@ -803,7 +701,6 @@ gtd_task_list_eds_class_init (GtdTaskListEdsClass *klass)
 
   task_list_class->get_archived = gtd_task_list_eds_get_archived;
   task_list_class->set_archived = gtd_task_list_eds_set_archived;
-  task_list_class->task_added = gtd_task_list_eds_task_added;
 
   gtd_object_class->get_uid = gtd_task_list_eds_get_uid;
   gtd_object_class->set_uid = gtd_task_list_eds_set_uid;
@@ -843,7 +740,6 @@ gtd_task_list_eds_class_init (GtdTaskListEdsClass *klass)
 static void
 gtd_task_list_eds_init (GtdTaskListEds *self)
 {
-  self->pending_subtasks = g_ptr_array_new_with_free_func ((GDestroyNotify) pending_subtask_data_free);
 }
 
 void

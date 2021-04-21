@@ -484,60 +484,6 @@ gtd_task_eds_set_title (GtdTask     *task,
   e_cal_component_text_free (new_summary);
 }
 
-static void
-gtd_task_eds_subtask_added (GtdTask *task,
-                            GtdTask *subtask)
-{
-  const gchar *uid;
-  ECalComponent *comp;
-  ICalComponent *ical_comp;
-  ICalProperty *property;
-  GtdTaskEds *subtask_self;
-  GtdTaskEds *self;
-
-  self = GTD_TASK_EDS (task);
-  subtask_self = GTD_TASK_EDS (subtask);
-
-  /* Hook with parent's :subtask_added */
-  GTD_TASK_CLASS (gtd_task_eds_parent_class)->subtask_added (task, subtask);
-
-  uid = e_cal_component_get_uid (self->new_component);
-  comp = subtask_self->new_component;
-  ical_comp = e_cal_component_get_icalcomponent (comp);
-  property = i_cal_component_get_first_property (ical_comp, I_CAL_RELATEDTO_PROPERTY);
-
-  if (property)
-    i_cal_property_set_relatedto (property, uid);
-  else
-    i_cal_component_take_property (ical_comp, i_cal_property_new_relatedto (uid));
-
-  g_clear_object (&property);
-}
-
-static void
-gtd_task_eds_subtask_removed (GtdTask *task,
-                              GtdTask *subtask)
-{
-  ICalComponent *ical_comp;
-  ICalProperty *property;
-  GtdTaskEds *subtask_self;
-
-  subtask_self = GTD_TASK_EDS (subtask);
-
-  /* Hook with parent's :subtask_removed */
-  GTD_TASK_CLASS (gtd_task_eds_parent_class)->subtask_removed (task, subtask);
-
-  /* Remove the parent link from the subtask's component */
-  ical_comp = e_cal_component_get_icalcomponent (subtask_self->new_component);
-  property = i_cal_component_get_first_property (ical_comp, I_CAL_RELATEDTO_PROPERTY);
-
-  if (!property)
-    return;
-
-  i_cal_component_remove_property (ical_comp, property);
-  g_object_unref (property);
-}
-
 
 /*
  * GObject overrides
@@ -619,8 +565,6 @@ gtd_task_eds_class_init (GtdTaskEdsClass *klass)
   task_class->set_position = gtd_task_eds_set_position;
   task_class->get_title = gtd_task_eds_get_title;
   task_class->set_title = gtd_task_eds_set_title;
-  task_class->subtask_added = gtd_task_eds_subtask_added;
-  task_class->subtask_removed = gtd_task_eds_subtask_removed;
 
   gtd_object_class->get_uid = gtd_task_eds_get_uid;
   gtd_object_class->set_uid = gtd_task_eds_set_uid;

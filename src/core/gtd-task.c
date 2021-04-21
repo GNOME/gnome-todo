@@ -46,16 +46,6 @@ typedef struct
 
   gchar           *title;
 
-  GtdTask         *previous_sibling;
-  GtdTask         *next_sibling;
-
-  GtdTask         *parent_task;
-  GtdTask         *first_subtask;
-  GtdTask         *last_subtask;
-  guint64          n_direct_subtasks;
-  guint64          n_total_subtasks;
-  gint             depth;
-
   gint32           priority;
   gint64           position;
   gboolean         complete;
@@ -68,320 +58,15 @@ enum
 {
   PROP_0,
   PROP_COMPLETE,
-  PROP_DEPTH,
   PROP_DESCRIPTION,
   PROP_CREATION_DATE,
   PROP_DUE_DATE,
   PROP_IMPORTANT,
   PROP_LIST,
-  PROP_PARENT,
   PROP_POSITION,
   PROP_TITLE,
   LAST_PROP
 };
-
-enum
-{
-  SUBTASK_ADDED,
-  SUBTASK_REMOVED,
-  N_SIGNALS
-};
-
-static guint signals[N_SIGNALS] = { 0, };
-
-static gboolean
-share_same_ancestor (GtdTask *t1,
-                     GtdTask *t2)
-{
-  GtdTask *p1, *p2;
-  gint depth_difference;
-
-  depth_difference = ABS (gtd_task_get_depth (t1) - gtd_task_get_depth (t2));
-
-  /* Put the tasks at the same depth */
-  if (depth_difference != 0)
-    {
-      gint i;
-
-      for (i = 0; i < depth_difference; i++)
-        {
-          if (gtd_task_get_depth (t1) > gtd_task_get_depth (t2))
-            t1 = gtd_task_get_parent (t1);
-          else
-            t2 = gtd_task_get_parent (t2);
-        }
-    }
-
-  p1 = t1;
-  p2 = t2;
-
-  /* Walk up in the tree, if they match, we found the ancestor */
-  while (p1 && p2)
-    {
-      if (p1 == p2)
-        return TRUE;
-
-      p1 = gtd_task_get_parent (p1);
-      p2 = gtd_task_get_parent (p2);
-    }
-
-  return FALSE;
-}
-
-static GtdTask*
-get_root_task (GtdTask *self)
-{
-  GtdTaskPrivate *priv = gtd_task_get_instance_private (self);
-  GtdTask *aux = self;
-
-  while (priv->parent_task)
-    {
-      aux = priv->parent_task;
-      priv = gtd_task_get_instance_private (aux);
-    }
-
-  return aux;
-}
-
-static void
-append_subtask (GtdTask *self,
-                GtdTask *subtask)
-{
-  GtdTaskPrivate *priv, *subtask_priv;
-
-  priv = gtd_task_get_instance_private (self);
-  subtask_priv = gtd_task_get_instance_private (subtask);
-
-  subtask_priv->previous_sibling = priv->last_subtask;
-
-  if (priv->last_subtask)
-    {
-      GtdTaskPrivate *last_subtask_priv = gtd_task_get_instance_private (priv->last_subtask);
-      last_subtask_priv->next_sibling = subtask;
-    }
-
-  priv->last_subtask = subtask;
-
-  if (!priv->first_subtask)
-    priv->first_subtask = subtask;
-}
-
-static void
-remove_subtask (GtdTask *self,
-                GtdTask *subtask)
-{
-  GtdTaskPrivate *priv, *subtask_priv;
-
-  priv = gtd_task_get_instance_private (self);
-  subtask_priv = gtd_task_get_instance_private (subtask);
-
-  if (subtask_priv->previous_sibling)
-    {
-      GtdTaskPrivate *previous_subtask_sibling_priv = gtd_task_get_instance_private (subtask_priv->previous_sibling);
-      previous_subtask_sibling_priv->next_sibling = subtask_priv->next_sibling;
-    }
-  else
-    {
-      /*
-       * This is the first subtask, so advance the parent's first subtask
-       * to the next one (which might be NULL).
-       */
-      priv->first_subtask = subtask_priv->next_sibling;
-    }
-
-  if (subtask_priv->next_sibling)
-    {
-      GtdTaskPrivate *next_subtask_sibling_priv = gtd_task_get_instance_private (subtask_priv->next_sibling);
-      next_subtask_sibling_priv->previous_sibling = subtask_priv->previous_sibling;
-    }
-  else
-    {
-      /*
-       * This is the last subtask, so rewind the parent's last subtask to
-       * the previous one (which might be NULL).
-       */
-      priv->last_subtask = subtask_priv->previous_sibling;
-    }
-}
-
-static gint
-compare_by_subtasks (GtdTask **t1,
-                     GtdTask **t2)
-{
-  GtdTask *task1, *task2;
-
-  task1 = *t1;
-  task2 = *t2;
-
-  if (!task1 && !task2)
-    return  0;
-  if (!task1)
-    return  1;
-  if (!task2)
-    return -1;
-
-  if (share_same_ancestor (task1, task2))
-    {
-      gint depth_difference;
-
-      depth_difference = ABS (gtd_task_get_depth (task1) - gtd_task_get_depth (task2));
-
-      if (gtd_task_is_subtask (task1, task2))
-        {
-          return -1;
-        }
-      else if (gtd_task_is_subtask (task2, task1))
-        {
-          return 1;
-        }
-      else
-        {
-          GtdTask *p1, *p2;
-          gint i;
-
-          for (i = depth_difference; i > 0; i--)
-            {
-              if (gtd_task_get_depth (task1) > gtd_task_get_depth (task2))
-                task1 = gtd_task_get_parent (task1);
-              else
-                task2 = gtd_task_get_parent (task2);
-            }
-
-          p1 = task1;
-          p2 = task2;
-
-          /* Walk up in the tree, if they match, we found the ancestor */
-          while (gtd_task_get_parent (p1) && gtd_task_get_parent (p2))
-            {
-              if (gtd_task_get_parent (p1) == gtd_task_get_parent (p2))
-                break;
-
-              p1 = gtd_task_get_parent (p1);
-              p2 = gtd_task_get_parent (p2);
-            }
-
-          *t1 = p1;
-          *t2 = p2;
-        }
-    }
-  else
-    {
-      /*
-       * If either t1 or t2 have a parent, we have to compare them
-       * solely based on the root task of the subtask tree.
-       */
-      *t1 = get_root_task (task1);
-      *t2 = get_root_task (task2);
-    }
-
-  return 0;
-}
-
-static void
-set_depth (GtdTask *self,
-           gint     depth)
-{
-  GtdTaskPrivate *priv = gtd_task_get_instance_private (self);
-  GtdTask *aux;
-
-  priv->depth = depth;
-  g_object_notify (G_OBJECT (self), "depth");
-
-  aux = priv->first_subtask;
-  while (aux)
-    {
-      GtdTaskPrivate *aux_priv = gtd_task_get_instance_private (aux);
-
-      set_depth (aux, depth + 1);
-      aux = aux_priv->next_sibling;
-    }
-}
-
-static void
-update_total_subtasks_counters (GtdTask *self,
-                                gint64   total_difference)
-{
-  GtdTask *aux;
-
-  aux = self;
-  while (aux)
-    {
-      GtdTaskPrivate *aux_priv = gtd_task_get_instance_private (aux);
-
-      aux_priv->n_total_subtasks += total_difference;
-
-      aux = aux_priv->parent_task;
-    }
-}
-
-static void
-real_add_subtask (GtdTask *self,
-                  GtdTask *subtask)
-{
-  GtdTaskPrivate *priv, *subtask_priv;
-
-  GTD_ENTRY;
-
-  g_assert (!gtd_task_is_subtask (self, subtask));
-
-  priv = gtd_task_get_instance_private (self);
-  subtask_priv = gtd_task_get_instance_private (subtask);
-
-  /* First, remove the subtask from it's parent's subtasks list */
-  if (subtask_priv->parent_task)
-    gtd_task_remove_subtask (subtask_priv->parent_task, subtask);
-
-  /* Append to this task's list of subtasks */
-  append_subtask (self, subtask);
-
-  /* Update counters */
-  priv->n_direct_subtasks += 1;
-  update_total_subtasks_counters (self, subtask_priv->n_total_subtasks + 1);
-
-  GTD_TRACE_MSG ("Task %p is now subtask of %p", subtask, self);
-
-  /* Update the subtask's parent property */
-  subtask_priv->next_sibling = NULL;
-  subtask_priv->parent_task = self;
-
-  g_object_notify (G_OBJECT (subtask), "parent");
-
-  /* And also the task's depth */
-  set_depth (subtask, priv->depth + 1);
-
-  GTD_EXIT;
-}
-
-static void
-real_remove_subtask (GtdTask *self,
-                     GtdTask *subtask)
-{
-  GtdTaskPrivate *priv, *subtask_priv;
-
-  g_assert (gtd_task_is_subtask (self, subtask));
-
-  priv = gtd_task_get_instance_private (self);
-  subtask_priv = gtd_task_get_instance_private (subtask);
-
-  /* Detach subtask from the linked list of subtasks */
-  remove_subtask (self, subtask);
-
-  /* Update counters */
-  priv->n_direct_subtasks -= 1;
-  update_total_subtasks_counters (self, -subtask_priv->n_total_subtasks - 1);
-
-  GTD_TRACE_MSG ("Task %p was detached from %p", subtask, self);
-
-  /* Update the subtask's parent and siblings */
-  subtask_priv->previous_sibling = NULL;
-  subtask_priv->next_sibling = NULL;
-  subtask_priv->parent_task = NULL;
-
-  g_object_notify (G_OBJECT (subtask), "parent");
-
-  /* And also the task's depth */
-  set_depth (subtask, 0);
-}
 
 static void
 task_list_weak_notified (gpointer  data,
@@ -586,10 +271,6 @@ gtd_task_get_property (GObject    *object,
       g_value_set_boxed (value, gtd_task_get_creation_date (self));
       break;
 
-    case PROP_DEPTH:
-      g_value_set_uint (value, priv->depth);
-      break;
-
     case PROP_DESCRIPTION:
       g_value_set_string (value, gtd_task_get_description (self));
       break;
@@ -606,10 +287,6 @@ gtd_task_get_property (GObject    *object,
 
     case PROP_LIST:
       g_value_set_object (value, priv->list);
-      break;
-
-    case PROP_PARENT:
-      g_value_set_object (value, priv->parent_task);
       break;
 
     case PROP_POSITION:
@@ -693,8 +370,6 @@ gtd_task_class_init (GtdTaskClass *klass)
   klass->set_position = gtd_task_real_set_position;
   klass->get_title = gtd_task_real_get_title;
   klass->set_title = gtd_task_real_set_title;
-  klass->subtask_added = real_add_subtask;
-  klass->subtask_removed = real_remove_subtask;
 
   object_class->finalize = gtd_task_finalize;
   object_class->get_property = gtd_task_get_property;
@@ -728,22 +403,6 @@ gtd_task_class_init (GtdTaskClass *klass)
                             "The day the task was created.",
                             G_TYPE_DATE_TIME,
                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-
-  /**
-   * GtdTask::depth:
-   *
-   * The depth of the task inside the subtask tree.
-   */
-  g_object_class_install_property (
-        object_class,
-        PROP_DEPTH,
-        g_param_spec_uint ("depth",
-                           "Depth of the task",
-                           "The depth of the task inside the subtasks tree.",
-                           0,
-                           G_MAXUINT,
-                           0,
-                           G_PARAM_READABLE));
 
   /**
    * GtdTask::description:
@@ -803,20 +462,6 @@ gtd_task_class_init (GtdTaskClass *klass)
                              G_PARAM_READWRITE));
 
   /**
-   * GtdTask::parent:
-   *
-   * The parent of the task.
-   */
-  g_object_class_install_property (
-        object_class,
-        PROP_PARENT,
-        g_param_spec_object ("parent",
-                              "Parent of the task",
-                              "The GtdTask that is parent of this task.",
-                              GTD_TYPE_TASK,
-                              G_PARAM_READABLE));
-
-  /**
    * GtdTask::position:
    *
    * Position of the task, -1 if not set.
@@ -845,39 +490,6 @@ gtd_task_class_init (GtdTaskClass *klass)
                              "The title of the task",
                              NULL,
                              G_PARAM_READWRITE));
-
-  /* Signals */
-  /**
-   * GtdTask:subtask-added:
-   *
-   * Emited when a subtask is added to @self.
-   */
-  signals[SUBTASK_ADDED] = g_signal_new ("subtask-added",
-                                         GTD_TYPE_TASK,
-                                         G_SIGNAL_RUN_LAST,
-                                         G_STRUCT_OFFSET (GtdTaskClass, subtask_added),
-                                         NULL,
-                                         NULL,
-                                         NULL,
-                                         G_TYPE_NONE,
-                                         1,
-                                         GTD_TYPE_TASK);
-
-  /**
-   * GtdTask:subtask-removed:
-   *
-   * Emited when a subtask is removed from @self.
-   */
-  signals[SUBTASK_REMOVED] = g_signal_new ("subtask-removed",
-                                           GTD_TYPE_TASK,
-                                           G_SIGNAL_RUN_LAST,
-                                           G_STRUCT_OFFSET (GtdTaskClass, subtask_removed),
-                                           NULL,
-                                           NULL,
-                                           NULL,
-                                           G_TYPE_NONE,
-                                           1,
-                                           GTD_TYPE_TASK);
 }
 
 static void
@@ -1294,12 +906,6 @@ gtd_task_compare (GtdTask *t1,
         return retval;
     }
 
-  /* Compare by subtask hierarchy */
-  retval = compare_by_subtasks (&t1, &t2);
-
-  if (retval != 0)
-    return retval;
-
   /* Compare by due date */
   dt1 = gtd_task_get_due_date (t1);
   dt2 = gtd_task_get_due_date (t2);
@@ -1352,256 +958,6 @@ gtd_task_compare (GtdTask *t1,
   g_free (txt2);
 
   return retval;
-}
-
-/**
- * gtd_task_get_parent:
- * @self: a #GtdTask
- *
- * Retrieves the parent task of @self, or %NULL if none is set.
- *
- * Returns: (transfer none)(nullable): the #GtdTask that is parent of @self
- */
-GtdTask*
-gtd_task_get_parent (GtdTask *self)
-{
-  GtdTaskPrivate *priv;
-
-  g_return_val_if_fail (GTD_IS_TASK (self), NULL);
-
-  priv = gtd_task_get_instance_private (self);
-
-  return priv->parent_task;
-}
-
-/**
- * gtd_task_add_subtask:
- * @self: a #GtdTask
- * @subtask: the subtask to be added to @self
- *
- * Adds @subtask as a subtask of @self.
- */
-void
-gtd_task_add_subtask (GtdTask *self,
-                      GtdTask *subtask)
-{
-  g_return_if_fail (GTD_IS_TASK (self));
-  g_return_if_fail (GTD_IS_TASK (subtask));
-  g_return_if_fail (!gtd_task_is_subtask (self, subtask));
-
-  g_signal_emit (self, signals[SUBTASK_ADDED], 0, subtask);
-}
-
-/**
- * gtd_task_remove_subtask:
- * @self: a #GtdTask
- * @subtask: the subtask to be removed to @self
- *
- * Removes @subtask from @self.
- */
-void
-gtd_task_remove_subtask (GtdTask *self,
-                         GtdTask *subtask)
-{
-  g_return_if_fail (GTD_IS_TASK (self));
-  g_return_if_fail (GTD_IS_TASK (subtask));
-  g_return_if_fail (gtd_task_is_subtask (self, subtask));
-
-  g_signal_emit (self, signals[SUBTASK_REMOVED], 0, subtask);
-}
-
-/**
- * gtd_task_is_subtask:
- * @self: a #GtdTask
- * @subtask: a #GtdTask
- *
- * Checks if @subtask is a subtask of @self, directly or indirectly.
- *
- * Returns: %TRUE is @subtask is a subtask of @self, %FALSE otherwise
- */
-gboolean
-gtd_task_is_subtask (GtdTask *self,
-                     GtdTask *subtask)
-{
-  GtdTask *aux;
-
-  g_return_val_if_fail (GTD_IS_TASK (self), FALSE);
-  g_return_val_if_fail (GTD_IS_TASK (subtask), FALSE);
-
-  aux = subtask;
-  while (aux)
-    {
-      GtdTaskPrivate *aux_priv = gtd_task_get_instance_private (aux);
-
-      if (aux == self)
-        return TRUE;
-
-      aux = aux_priv->parent_task;
-    }
-
-  return FALSE;
-}
-
-/**
- * gtd_task_get_depth:
- * @self: a #GtdTask
- *
- * Retrieves the depth of @self in the subtasks tree.
- *
- * Returns: the depth of the task.
- */
-gint
-gtd_task_get_depth (GtdTask *self)
-{
-  GtdTaskPrivate *priv;
-
-  g_return_val_if_fail (GTD_IS_TASK (self), 0);
-
-  priv = gtd_task_get_instance_private (self);
-
-  return priv->depth;
-}
-
-/**
- * gtd_task_get_first_subtask:
- * @self: a #GtdTaskList
- *
- * Return the first subtask of @self. This is useful for
- * copy-less iteration, for example:
- *
- * |[<!-- language="C" -->
- * for (aux = gtd_task_get_first_subtask (task);
- *      aux;
- *      aux = gtd_task_get_next_sibling (aux))
- *   {
- *     // Do something with aux
- *   }
- * ]|
- *
- * The siblings have no particular order. See also
- * gtd_task_get_previous_sibling() and gtd_task_get_next_sibling().
- *
- * Returns: (nullable): the first subtask of @self
- */
-GtdTask*
-gtd_task_get_first_subtask (GtdTask *self)
-{
-  GtdTaskPrivate *priv;
-
-  g_return_val_if_fail (GTD_IS_TASK (self), 0);
-
-  priv = gtd_task_get_instance_private (self);
-
-  return priv->first_subtask;
-}
-
-/**
- * gtd_task_get_previous_sibling:
- * @self: a #GtdTaskList
- *
- * Retrieves the previous sibling of @self. This is useful for
- * copy-less iteration.
- *
- * Only subtasks have a previous and a next sibling set. Root
- * tasks depend do not have them, and it is a programming error
- * to assume so.
- *
- * The siblings have no particular order. It is a programming
- * error to assume that siblings are sorted.
- *
- * Returns: (nullable): the previous sibling of @self
- */
-GtdTask*
-gtd_task_get_previous_sibling (GtdTask *self)
-{
-  GtdTaskPrivate *priv;
-
-  g_return_val_if_fail (GTD_IS_TASK (self), 0);
-
-  priv = gtd_task_get_instance_private (self);
-
-  return priv->previous_sibling;
-}
-
-/**
- * gtd_task_get_next_sibling:
- * @self: a #GtdTaskList
- *
- * Retrieves the next sibling of @self. This is useful for
- * copy-less iteration, for example:
- *
- * |[<!-- language="C" -->
- * for (aux = gtd_task_get_first_subtask (task);
- *      aux;
- *      aux = gtd_task_get_next_sibling (aux))
- *   {
- *     // Do something with aux
- *   }
- * ]|
- *
- * Only subtasks have a previous and a next sibling set. Root
- * tasks depend do not have them, and it is a programming error
- * to assume so.
- *
- * The siblings have no particular order. It is a programming
- * error to assume that siblings are sorted.
- *
- * Returns: (nullable): the next sibling of @self
- */
-GtdTask*
-gtd_task_get_next_sibling (GtdTask *self)
-{
-  GtdTaskPrivate *priv;
-
-  g_return_val_if_fail (GTD_IS_TASK (self), 0);
-
-  priv = gtd_task_get_instance_private (self);
-
-  return priv->next_sibling;
-}
-
-/**
- * gtd_task_get_n_direct_subtasks:
- * @self: a #GtdTaskList
- *
- * Returns the number of only direct subtasks of this
- * task. This number is updated when adding and removing
- * subtasks, and cached.
- *
- * Returns: the number of direct subtasks of @self
- */
-guint64
-gtd_task_get_n_direct_subtasks (GtdTask *self)
-{
-  GtdTaskPrivate *priv;
-
-  g_return_val_if_fail (GTD_IS_TASK (self), 0);
-
-  priv = gtd_task_get_instance_private (self);
-
-  return priv->n_direct_subtasks;
-}
-
-/**
- * gtd_task_get_n_total_subtasks:
- * @self: a #GtdTaskList
- *
- * Returns the number of direct and indirect subtasks of
- * this task. This number is updated when adding and removing
- * subtasks, and cached.
- *
- * Returns: the number of direct and indirect subtasks of @self
- */
-guint64
-gtd_task_get_n_total_subtasks (GtdTask *self)
-{
-  GtdTaskPrivate *priv;
-
-  g_return_val_if_fail (GTD_IS_TASK (self), 0);
-
-  priv = gtd_task_get_instance_private (self);
-
-  return priv->n_total_subtasks;
 }
 
 /**

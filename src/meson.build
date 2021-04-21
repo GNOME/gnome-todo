@@ -136,7 +136,6 @@ sources += files(
   'gui/gtd-provider-row.c',
   'gui/gtd-provider-selector.c',
   'gui/gtd-edit-pane.c',
-  'gui/gtd-dnd-row.c',
   'gui/gtd-markdown-renderer.c',
   'gui/gtd-new-task-row.c',
   'gui/gtd-task-list-popover.c',

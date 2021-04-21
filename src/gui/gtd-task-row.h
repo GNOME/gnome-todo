@@ -40,11 +40,6 @@ void                      gtd_task_row_set_list_name_visible    (GtdTaskRow     
 void                      gtd_task_row_set_due_date_visible     (GtdTaskRow          *row,
                                                                  gboolean             show_due_date);
 
-gboolean                  gtd_task_row_get_handle_subtasks      (GtdTaskRow          *self);
-
-void                      gtd_task_row_set_handle_subtasks      (GtdTaskRow          *self,
-                                                                 gboolean             handle_subtasks);
-
 gboolean                  gtd_task_row_get_active               (GtdTaskRow          *self);
 
 void                      gtd_task_row_set_active               (GtdTaskRow          *self,

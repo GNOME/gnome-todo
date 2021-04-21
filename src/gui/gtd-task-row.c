@@ -60,8 +60,6 @@ struct _GtdTaskRow
   gint                clicked_x;
   gint                clicked_y;
 
-  gboolean            handle_subtasks : 1;
-
   /* data */
   GtdTask            *task;
 
@@ -93,7 +91,6 @@ enum
 enum
 {
   PROP_0,
-  PROP_HANDLE_SUBTASKS,
   PROP_RENDERER,
   PROP_TASK,
   LAST_PROP
@@ -468,10 +465,6 @@ gtd_task_row_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_HANDLE_SUBTASKS:
-      g_value_set_boolean (value, self->handle_subtasks);
-      break;
-
     case PROP_RENDERER:
       g_value_set_object (value, self->renderer);
       break;
@@ -495,10 +488,6 @@ gtd_task_row_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_HANDLE_SUBTASKS:
-      gtd_task_row_set_handle_subtasks (self, g_value_get_boolean (value));
-      break;
-
     case PROP_RENDERER:
       self->renderer = g_value_get_object (value);
       break;
@@ -522,20 +511,6 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
   object_class->finalize = gtd_task_row_finalize;
   object_class->get_property = gtd_task_row_get_property;
   object_class->set_property = gtd_task_row_set_property;
-
-  /**
-   * GtdTaskRow::handle-subtasks:
-   *
-   * If the row consider the task's subtasks to adjust various UI properties.
-   */
-  g_object_class_install_property (
-          object_class,
-          PROP_HANDLE_SUBTASKS,
-          g_param_spec_boolean ("handle-subtasks",
-                                "If the row adapts to subtasks",
-                                "Whether the row adapts to the task's subtasks",
-                                TRUE,
-                                G_PARAM_READWRITE));
 
   /**
    * GtdTaskRow::renderer:
@@ -641,7 +616,6 @@ gtd_task_row_init (GtdTaskRow *self)
   GtkDragSource *drag_source;
 
   self->bindings = g_ptr_array_new_with_free_func ((GDestroyNotify) g_binding_unbind);
-  self->handle_subtasks = TRUE;
   self->active = FALSE;
 
   gtk_widget_init_template (GTK_WIDGET (self));
@@ -798,31 +772,6 @@ gtd_task_row_set_due_date_visible (GtdTaskRow *row,
   g_return_if_fail (GTD_IS_TASK_ROW (row));
 
   gtk_widget_set_visible (GTK_WIDGET (row->task_date_label), show_due_date);
-}
-
-gboolean
-gtd_task_row_get_handle_subtasks (GtdTaskRow *self)
-{
-  g_return_val_if_fail (GTD_IS_TASK_ROW (self), FALSE);
-
-  return self->handle_subtasks;
-}
-
-void
-gtd_task_row_set_handle_subtasks (GtdTaskRow *self,
-                                  gboolean    handle_subtasks)
-{
-  g_return_if_fail (GTD_IS_TASK_ROW (self));
-
-  if (self->handle_subtasks == handle_subtasks)
-    return;
-
-  self->handle_subtasks = handle_subtasks;
-
-  gtk_widget_set_visible (self->dnd_box, handle_subtasks);
-  gtk_widget_set_visible (self->dnd_icon, handle_subtasks);
-
-  g_object_notify (G_OBJECT (self), "handle-subtasks");
 }
 
 gboolean

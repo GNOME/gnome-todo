@@ -593,10 +593,10 @@ get_drop_row_at_y (GtdTaskListView *self,
                    gdouble          y)
 {
   GtdTaskListViewPrivate *priv;
+  GtkAllocation row_allocation;
   GtkListBoxRow *hovered_row;
   GtkListBoxRow *task_row;
   GtkListBoxRow *drop_row;
-  gdouble row_y, row_height;
 
   priv = gtd_task_list_view_get_instance_private (self);
 
@@ -608,36 +608,27 @@ get_drop_row_at_y (GtdTaskListView *self,
 
   drop_row = NULL;
   task_row = hovered_row;
-  row_height = gtk_widget_get_allocated_height (GTK_WIDGET (hovered_row));
-  gtk_widget_translate_coordinates (GTK_WIDGET (priv->listbox),
-                                    GTK_WIDGET (hovered_row),
-                                    0,
-                                    y,
-                                    NULL,
-                                    &row_y);
+
+  gtk_widget_get_allocation (GTK_WIDGET (hovered_row), &row_allocation);
 
   /*
    * If the pointer if in the top part of the row, move the DnD row to
    * the previous row.
    */
-  if (row_y < row_height / 2)
+  if (y < row_allocation.y + row_allocation.height / 2)
     {
-      gint row_index, i;
-
-      row_index = gtk_list_box_row_get_index (hovered_row);
+      GtkWidget *aux;
 
       /* Search for a valid task row */
-      for (i = row_index - 1; i >= 0; i--)
+      for (aux = gtk_widget_get_prev_sibling (GTK_WIDGET (hovered_row));
+           aux;
+           aux = gtk_widget_get_prev_sibling (aux))
         {
-          GtkListBoxRow *aux;
-
-          aux = gtk_list_box_get_row_at_index (GTK_LIST_BOX (priv->listbox), i);
-
           /* Skip DnD, New task and hidden rows */
-          if (aux && !gtk_widget_get_visible (GTK_WIDGET (aux)))
+          if (!gtk_widget_get_visible (aux))
             continue;
 
-          drop_row = aux;
+          drop_row = GTK_LIST_BOX_ROW (aux);
           break;
         }
     }

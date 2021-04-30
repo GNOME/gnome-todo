@@ -93,7 +93,6 @@ typedef struct
   GtdMarkdownRenderer   *renderer;
 
   /* DnD */
-  GtkListBoxRow         *highlighted_row;
   guint                  scroll_timeout_id;
   gboolean               scroll_up;
 
@@ -647,13 +646,6 @@ get_drop_row_at_y (GtdTaskListView *self,
   return drop_row ? drop_row : NULL;
 }
 
-static void
-unset_previously_highlighted_row (GtdTaskListView *self)
-{
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
-  priv->highlighted_row = NULL;
-}
-
 static inline gboolean
 scroll_to_dnd (gpointer user_data)
 {
@@ -718,12 +710,37 @@ check_dnd_scroll (GtdTaskListView *self,
     }
 }
 
+static GdkDragAction
+on_drop_target_drag_enter_cb (GtkDropTarget   *drop_target,
+                              gdouble          x,
+                              gdouble          y,
+                              GtdTaskListView *self)
+{
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+  GtkListBoxRow *highlighted_row;
+
+  GTD_ENTRY;
+
+  gtk_list_box_drag_unhighlight_row (priv->listbox);
+  highlighted_row = get_drop_row_at_y (self, y);
+  if (highlighted_row)
+    gtk_list_box_drag_highlight_row (priv->listbox, highlighted_row);
+
+  GTD_RETURN (GDK_ACTION_MOVE);
+}
+
 static void
 on_drop_target_drag_leave_cb (GtkDropTarget   *drop_target,
                               GtdTaskListView *self)
 {
-  unset_previously_highlighted_row (self);
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+
+  GTD_ENTRY;
+
+  gtk_list_box_drag_unhighlight_row (priv->listbox);
   check_dnd_scroll (self, TRUE, -1);
+
+  GTD_EXIT;
 }
 
 static GdkDragAction
@@ -749,15 +766,12 @@ on_drop_target_drag_motion_cb (GtkDropTarget   *drop_target,
       GTD_GOTO (fail);
     }
 
-  unset_previously_highlighted_row (self);
+  gtk_list_box_drag_unhighlight_row (priv->listbox);
 
   highlighted_row = get_drop_row_at_y (self, y);
-  if (!highlighted_row)
-    GTD_GOTO (success);
+  if (highlighted_row)
+    gtk_list_box_drag_highlight_row (priv->listbox, highlighted_row);
 
-  priv->highlighted_row = highlighted_row;
-
-success:
   check_dnd_scroll (self, FALSE, y);
   GTD_RETURN (GDK_ACTION_MOVE);
 
@@ -774,7 +788,6 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
 {
   GtdTaskListViewPrivate *priv;
   GtkListBoxRow *drop_row;
-  GtdProvider *provider;
   GtdTaskRow *hovered_row;
   GtkWidget *row;
   GtdTask *hovered_task;
@@ -796,7 +809,7 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
       GTD_RETURN (FALSE);
     }
 
-  unset_previously_highlighted_row (self);
+  gtk_list_box_drag_unhighlight_row (priv->listbox);
 
   source_task = g_value_get_object (value);
   g_assert (source_task != NULL);
@@ -819,15 +832,16 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
   new_position = gtd_task_get_position (hovered_task) + 1;
   current_position = gtd_task_get_position (source_task);
 
-  if (new_position != current_position)
-    gtd_task_list_move_task_to_position (GTD_TASK_LIST (priv->model), source_task, new_position);
+  GTD_TRACE_MSG ("Dropping task %p at %ld", source_task, new_position);
 
-  /* Finally, save the task */
-  provider = gtd_task_list_get_provider (gtd_task_get_list (source_task));
-  gtd_provider_update_task (provider, source_task, NULL, NULL, NULL);
+  if (new_position != current_position)
+    {
+      gtd_task_list_move_task_to_position (GTD_TASK_LIST (priv->model),
+                                           source_task,
+                                           new_position);
+    }
 
   check_dnd_scroll (self, TRUE, -1);
-  gdk_drop_finish (drop, GDK_ACTION_MOVE);
 
   GTD_RETURN (TRUE);
 }
@@ -1051,6 +1065,7 @@ gtd_task_list_view_init (GtdTaskListView *self)
   target = gtk_drop_target_new (GTD_TYPE_TASK, GDK_ACTION_MOVE);
   gtk_drop_target_set_preload (target, TRUE);
   g_signal_connect (target, "drop", G_CALLBACK (on_drop_target_drag_drop_cb), self);
+  g_signal_connect (target, "enter", G_CALLBACK (on_drop_target_drag_enter_cb), self);
   g_signal_connect (target, "leave", G_CALLBACK (on_drop_target_drag_leave_cb), self);
   g_signal_connect (target, "motion", G_CALLBACK (on_drop_target_drag_motion_cb), self);
 

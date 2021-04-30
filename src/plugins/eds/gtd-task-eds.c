@@ -430,9 +430,7 @@ gtd_task_eds_get_position (GtdTask *task)
 
   value = e_cal_util_component_dup_x_property (ical_comp, ICAL_X_GNOME_TODO_POSITION);
   if (value)
-    {
-        position = g_ascii_strtoll (value, NULL, 10);
-    }
+    position = g_ascii_strtoll (value, NULL, 10);
 
   return position;
 }

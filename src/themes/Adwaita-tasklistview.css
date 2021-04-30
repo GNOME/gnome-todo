@@ -2,6 +2,14 @@ tasklistview row {
   border-radius: 5px;
 }
 
+tasklistview row.top-highlight {
+  border-top: 2px solid #2ec27e;
+}
+
+tasklistview row.bottom-highlight {
+  border-bottom: 2px solid #2ec27e;
+}
+
 tasklistview list:drop(active) {
     box-shadow: none;
     border: none;

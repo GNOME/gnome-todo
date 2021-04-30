@@ -99,6 +99,11 @@ typedef struct
   /* action */
   GActionGroup          *action_group;
 
+  struct {
+    GtkWidget *top;
+    GtkWidget *bottom;
+  } drag_highlight;
+
   /* Custom header function data */
   GtdTaskListViewHeaderFunc header_func;
   gpointer                  header_user_data;
@@ -588,6 +593,97 @@ internal_header_func (GtkListBoxRow   *row,
  * Drag n' Drop functions
  */
 
+static void
+clear_drag_highlights (GtdTaskListView *self)
+{
+  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
+
+  if (priv->drag_highlight.top)
+    {
+      gtk_widget_remove_css_class (priv->drag_highlight.top, "top-highlight");
+      priv->drag_highlight.top = NULL;
+    }
+
+  if (priv->drag_highlight.bottom)
+    {
+      gtk_widget_remove_css_class (priv->drag_highlight.bottom, "bottom-highlight");
+      priv->drag_highlight.bottom = NULL;
+    }
+}
+
+static void
+update_row_drag_highlight (GtdTaskListView *self,
+                           gdouble          y)
+{
+  GtdTaskListViewPrivate *priv;
+  GtkAllocation row_allocation;
+  GtkListBoxRow *hovered_row;
+  GtkListBoxRow *bottom_highlight;
+  GtkListBoxRow *top_highlight;
+
+  priv = gtd_task_list_view_get_instance_private (self);
+  hovered_row = gtk_list_box_get_row_at_y (priv->listbox, y);
+  bottom_highlight = NULL;
+  top_highlight = NULL;
+
+  gtk_widget_get_allocation (GTK_WIDGET (hovered_row), &row_allocation);
+
+  /*
+   * If the pointer if in the top part of the row, move the DnD row to
+   * the previous row.
+   */
+  if (y < row_allocation.y + row_allocation.height / 2)
+    {
+      GtkWidget *aux;
+
+      top_highlight = hovered_row;
+
+      /* Search for a valid task row */
+      for (aux = gtk_widget_get_prev_sibling (GTK_WIDGET (hovered_row));
+           aux;
+           aux = gtk_widget_get_prev_sibling (aux))
+        {
+          /* Skip DnD, New task and hidden rows */
+          if (!gtk_widget_get_visible (aux))
+            continue;
+
+          bottom_highlight = GTK_LIST_BOX_ROW (aux);
+          break;
+        }
+    }
+  else
+    {
+      GtkWidget *aux;
+
+      bottom_highlight = hovered_row;
+
+      /* Search for a valid task row */
+      for (aux = gtk_widget_get_next_sibling (GTK_WIDGET (hovered_row));
+           aux;
+           aux = gtk_widget_get_next_sibling (aux))
+        {
+          /* Skip DnD, New task and hidden rows */
+          if (!gtk_widget_get_visible (aux))
+            continue;
+
+          top_highlight = GTK_LIST_BOX_ROW (aux);
+          break;
+        }
+    }
+
+  /* Unhighlight previously highlighted rows */
+  clear_drag_highlights (self);
+
+  priv->drag_highlight.top = GTK_WIDGET (top_highlight);
+  priv->drag_highlight.bottom = GTK_WIDGET (bottom_highlight);
+
+  /* Highlight new rows */
+  if (priv->drag_highlight.top)
+    gtk_widget_add_css_class (priv->drag_highlight.top, "top-highlight");
+  if (priv->drag_highlight.bottom)
+    gtk_widget_add_css_class (priv->drag_highlight.bottom, "bottom-highlight");
+}
+
 static GtkListBoxRow*
 get_drop_row_at_y (GtdTaskListView *self,
                    gdouble          y)
@@ -710,15 +806,9 @@ on_drop_target_drag_enter_cb (GtkDropTarget   *drop_target,
                               gdouble          y,
                               GtdTaskListView *self)
 {
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
-  GtkListBoxRow *highlighted_row;
-
   GTD_ENTRY;
 
-  gtk_list_box_drag_unhighlight_row (priv->listbox);
-  highlighted_row = get_drop_row_at_y (self, y);
-  if (highlighted_row)
-    gtk_list_box_drag_highlight_row (priv->listbox, highlighted_row);
+  update_row_drag_highlight (self, y);
 
   GTD_RETURN (GDK_ACTION_MOVE);
 }
@@ -727,11 +817,9 @@ static void
 on_drop_target_drag_leave_cb (GtkDropTarget   *drop_target,
                               GtdTaskListView *self)
 {
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
-
   GTD_ENTRY;
 
-  gtk_list_box_drag_unhighlight_row (priv->listbox);
+  clear_drag_highlights (self);
   check_dnd_scroll (self, TRUE, -1);
 
   GTD_EXIT;
@@ -743,14 +831,11 @@ on_drop_target_drag_motion_cb (GtkDropTarget   *drop_target,
                                gdouble          y,
                                GtdTaskListView *self)
 {
-  GtdTaskListViewPrivate *priv;
-  GtkListBoxRow *highlighted_row;
   GdkDrop *drop;
   GdkDrag *drag;
 
   GTD_ENTRY;
 
-  priv = gtd_task_list_view_get_instance_private (self);
   drop = gtk_drop_target_get_drop (drop_target);
   drag = gdk_drop_get_drag (drop);
 
@@ -760,12 +845,7 @@ on_drop_target_drag_motion_cb (GtkDropTarget   *drop_target,
       GTD_GOTO (fail);
     }
 
-  gtk_list_box_drag_unhighlight_row (priv->listbox);
-
-  highlighted_row = get_drop_row_at_y (self, y);
-  if (highlighted_row)
-    gtk_list_box_drag_highlight_row (priv->listbox, highlighted_row);
-
+  update_row_drag_highlight (self, y);
   check_dnd_scroll (self, FALSE, y);
   GTD_RETURN (GDK_ACTION_MOVE);
 
@@ -803,7 +883,7 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
       GTD_RETURN (FALSE);
     }
 
-  gtk_list_box_drag_unhighlight_row (priv->listbox);
+  clear_drag_highlights (self);
 
   source_task = g_value_get_object (value);
   g_assert (source_task != NULL);

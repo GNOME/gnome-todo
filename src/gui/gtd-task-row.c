@@ -55,7 +55,6 @@ struct _GtdTaskRow
 
   /* dnd widgets */
   GtkWidget          *dnd_box;
-  GtkWidget          *dnd_frame;
   GtkWidget          *dnd_icon;
   gint                clicked_x;
   gint                clicked_y;
@@ -245,13 +244,8 @@ on_drag_prepare_cb (GtkDragSource *source,
                     gdouble        y,
                     GtdTaskRow    *self)
 {
-  GdkContentProvider *content;
   GTD_ENTRY;
-
-  /* Setup the content provider */
-  content = gdk_content_provider_new_typed (GTD_TYPE_TASK, self->task);
-
-  GTD_RETURN (content);
+  GTD_RETURN (gdk_content_provider_new_typed (GTD_TYPE_TASK, self->task));
 }
 
 static void
@@ -262,7 +256,6 @@ on_drag_begin_cb (GtkDragSource *source,
   GtkWidget *drag_icon;
   GtkWidget *new_row;
   GtkWidget *widget;
-  gint x_offset;
 
   GTD_ENTRY;
 
@@ -273,9 +266,7 @@ on_drag_begin_cb (GtkDragSource *source,
   new_row = create_transient_row (self);
   drag_icon = gtk_drag_icon_get_for_drag (drag);
   gtk_drag_icon_set_child (GTK_DRAG_ICON (drag_icon), new_row);
-
-  x_offset = gtk_widget_get_margin_start (self->content_box);
-  gdk_drag_set_hotspot (drag, self->clicked_x + x_offset, self->clicked_y);
+  gdk_drag_set_hotspot (drag, self->clicked_x, self->clicked_y);
 
   gtk_widget_hide (widget);
 
@@ -290,8 +281,6 @@ on_drag_end_cb (GtkDragSource *source,
 {
   GTD_ENTRY;
 
-  gtd_task_row_unset_drag_offset (self);
-
   gtk_widget_set_cursor_from_name (GTK_WIDGET (self), NULL);
   gtk_widget_show (GTK_WIDGET (self));
 
@@ -305,8 +294,6 @@ on_drag_cancelled_cb (GtkDragSource       *source,
                       GtdTaskRow          *self)
 {
   GTD_ENTRY;
-
-  gtd_task_row_unset_drag_offset (self);
 
   gtk_widget_set_cursor_from_name (GTK_WIDGET (self), NULL);
   gtk_widget_show (GTK_WIDGET (self));
@@ -589,7 +576,6 @@ gtd_task_row_class_init (GtdTaskRowClass *klass)
 
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, content_box);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, dnd_box);
-  gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, dnd_frame);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, dnd_icon);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, done_check);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskRow, edit_panel_revealer);
@@ -847,12 +833,4 @@ gtd_task_row_set_sizegroups (GtdTaskRow   *self,
 {
   gtk_size_group_add_widget (name_group, GTK_WIDGET (self->task_list_label));
   gtk_size_group_add_widget (name_group, GTK_WIDGET (self->task_date_label));
-}
-
-void
-gtd_task_row_unset_drag_offset (GtdTaskRow *self)
-{
-  g_return_if_fail (GTD_IS_TASK_ROW (self));
-
-  gtk_widget_hide (self->dnd_frame);
 }

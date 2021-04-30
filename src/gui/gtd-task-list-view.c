@@ -235,6 +235,9 @@ update_empty_state (GtdTaskListView *self)
 
   g_assert (GTD_IS_TASK_LIST_VIEW (self));
 
+  if (!priv->model)
+    return;
+
   is_empty = g_list_model_get_n_items (priv->model) == 0;
   gtd_empty_list_widget_set_is_empty (priv->empty_list_widget, is_empty);
 

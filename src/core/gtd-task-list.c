@@ -905,6 +905,7 @@ gtd_task_list_move_task_to_position (GtdTaskList *self,
   GSequenceIter *block_start_iter;
   GSequenceIter *block_end_iter;
   GSequenceIter *new_position_iter;
+  GSequenceIter *iter;
   gboolean moving_up;
   guint block1_start;
   guint block1_new_start;
@@ -932,7 +933,8 @@ gtd_task_list_move_task_to_position (GtdTaskList *self,
   g_return_if_fail (gtd_task_list_contains (self, task));
   g_return_if_fail (g_list_model_get_n_items (G_LIST_MODEL (self)) >= new_position);
 
-  block1_start = gtd_task_get_position (task);
+  iter = g_hash_table_lookup (priv->tasks, gtd_object_get_uid (GTD_OBJECT (task)));
+  block1_start = g_sequence_iter_get_position (iter);
 
   g_return_if_fail (new_position < block1_start || new_position >= block1_start + 1);
 

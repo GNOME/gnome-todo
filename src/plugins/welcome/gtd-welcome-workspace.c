@@ -114,6 +114,14 @@ is_today (GDateTime *today,
  */
 
 static gboolean
+inbox_filter_func (gpointer item,
+                   gpointer user_data)
+{
+  GtdTask *task = (GtdTask*) item;
+  return !gtd_task_get_complete (task);
+}
+
+static gboolean
 filter_func (gpointer  item,
              gpointer  user_data)
 {
@@ -305,8 +313,10 @@ gtd_welcome_workspace_class_init (GtdWelcomeWorkspaceClass *klass)
 static void
 gtd_welcome_workspace_init (GtdWelcomeWorkspace *self)
 {
+  g_autoptr (GtkFlattenListModel) flatten_inbox_model = NULL;
   GtdManager *manager;
   GListModel *inbox_model;
+  GtkCustomFilter *inbox_filter;
   GtkCustomFilter *filter;
 
   gtk_widget_init_template (GTK_WIDGET (self));
@@ -320,8 +330,12 @@ gtd_welcome_workspace_init (GtdWelcomeWorkspace *self)
   update_welcome_label (self);
 
   /* Inbox */
+  inbox_filter = gtk_custom_filter_new (inbox_filter_func, self, NULL);
   inbox_model = gtd_manager_get_inbox_model (manager);
-  self->inbox_tasks_model = G_LIST_MODEL (gtk_flatten_list_model_new (inbox_model));
+  flatten_inbox_model = gtk_flatten_list_model_new (inbox_model);
+  self->inbox_tasks_model =
+    G_LIST_MODEL (gtk_filter_list_model_new (G_LIST_MODEL (flatten_inbox_model),
+                                             GTK_FILTER (inbox_filter)));
   g_signal_connect_object (self->inbox_tasks_model,
                            "items-changed",
                            G_CALLBACK (on_inbox_model_items_changed_cb),

@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/org/gnome/todo">
     <file compressed="true">themes/Adwaita.css</file>
+    <file compressed="true">themes/Adwaita-light.css</file>
     <file compressed="true">themes/Adwaita-omniarea.css</file>
     <file compressed="true">themes/Adwaita-tasklistview.css</file>
     <file compressed="true">themes/Adwaita-taskrow.css</file>

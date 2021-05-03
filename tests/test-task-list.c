@@ -29,8 +29,8 @@ static void
 test_move (void)
 {
   g_autoptr (DummyProvider) dummy_provider = NULL;
-  g_autoptr (GtdTask) first_root_task = NULL;
-  g_autoptr (GtdTask) last_root_task = NULL;
+  g_autoptr (GtdTask) first_task = NULL;
+  g_autoptr (GtdTask) last_task = NULL;
   g_autoptr (GList) lists = NULL;
   GtdTaskList *list = NULL;
   GListModel *model;
@@ -51,37 +51,37 @@ test_move (void)
   g_assert_nonnull (list);
   g_assert_cmpstr (gtd_task_list_get_name (list), ==, "List");
 
-  first_root_task = g_list_model_get_item (model, 0);
-  g_assert_nonnull (first_root_task);
-  g_assert_cmpint (gtd_task_get_position (first_root_task), ==, 0);
-  g_assert_true (g_list_model_get_item (model, 0) == first_root_task);
+  first_task = g_list_model_get_item (model, 0);
+  g_assert_nonnull (first_task);
+  g_assert_cmpint (gtd_task_get_position (first_task), ==, 0);
+  g_assert_true (g_list_model_get_item (model, 0) == first_task);
 
-  last_root_task = g_list_model_get_item (model, 6);
-  g_assert_nonnull (last_root_task);
-  g_assert_cmpint (gtd_task_get_position (last_root_task), ==, 6);
-  g_assert_true (g_list_model_get_item (model, 6) == last_root_task);
+  last_task = g_list_model_get_item (model, 9);
+  g_assert_nonnull (last_task);
+  g_assert_cmpint (gtd_task_get_position (last_task), ==, 9);
+  g_assert_true (g_list_model_get_item (model, 9) == last_task);
 
   /* Move the task to 0 */
-  gtd_task_list_move_task_to_position (list, last_root_task, 0);
+  gtd_task_list_move_task_to_position (list, last_task, 0);
 
-  g_assert_cmpint (gtd_task_get_position (last_root_task), ==, 0);
-  g_assert_cmpint (gtd_task_get_position (first_root_task), ==, 4);
-  g_assert_true (g_list_model_get_item (model, 0) == last_root_task);
-  g_assert_true (g_list_model_get_item (model, 4) == first_root_task);
+  g_assert_cmpint (gtd_task_get_position (last_task), ==, 0);
+  g_assert_cmpint (gtd_task_get_position (first_task), ==, 1);
+  g_assert_true (g_list_model_get_item (model, 0) == last_task);
+  g_assert_true (g_list_model_get_item (model, 1) == first_task);
 
   /* Move the task to 1 */
-  gtd_task_list_move_task_to_position (list, last_root_task, 5);
+  gtd_task_list_move_task_to_position (list, last_task, 1);
 
-  g_assert_cmpint (gtd_task_get_position (last_root_task), ==, 1);
-  g_assert_cmpint (gtd_task_get_position (first_root_task), ==, 0);
-  g_assert_true (g_list_model_get_item (model, 0) == first_root_task);
-  g_assert_true (g_list_model_get_item (model, 1) == last_root_task);
+  g_assert_cmpint (gtd_task_get_position (last_task), ==, 1);
+  g_assert_cmpint (gtd_task_get_position (first_task), ==, 0);
+  g_assert_true (g_list_model_get_item (model, 0) == first_task);
+  g_assert_true (g_list_model_get_item (model, 1) == last_task);
 
-  /* Move the task to 10 */
-  gtd_task_list_move_task_to_position (list, last_root_task, 10);
+  /* Move the task to 9 */
+  gtd_task_list_move_task_to_position (list, last_task, 9);
 
-  g_assert_cmpint (gtd_task_get_position (last_root_task), ==, 6);
-  g_assert_true (g_list_model_get_item (model, 6) == last_root_task);
+  g_assert_cmpint (gtd_task_get_position (last_task), ==, 9);
+  g_assert_true (g_list_model_get_item (model, 9) == last_task);
 }
 
 gint

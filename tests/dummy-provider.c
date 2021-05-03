@@ -359,7 +359,7 @@ dummy_provider_generate_task_list (DummyProvider *self)
 
   n_generated_tasks = 0;
 
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < 10; i++)
     {
       g_autoptr (GtdTask) task = NULL;
       g_autofree gchar *title = NULL;

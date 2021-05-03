@@ -273,20 +273,6 @@ on_drag_begin_cb (GtkDragSource *source,
   GTD_EXIT;
 }
 
-static void
-on_drag_end_cb (GtkDragSource *source,
-                GdkDrag       *drag,
-                gboolean       delete_data,
-                GtdTaskRow    *self)
-{
-  GTD_ENTRY;
-
-  gtk_widget_set_cursor_from_name (GTK_WIDGET (self), NULL);
-  gtk_widget_show (GTK_WIDGET (self));
-
-  GTD_EXIT;
-}
-
 static gboolean
 on_drag_cancelled_cb (GtkDragSource       *source,
                       GdkDrag             *drag,
@@ -612,7 +598,6 @@ gtd_task_row_init (GtdTaskRow *self)
   g_signal_connect (drag_source, "prepare", G_CALLBACK (on_drag_prepare_cb), self);
   g_signal_connect (drag_source, "drag-begin", G_CALLBACK (on_drag_begin_cb), self);
   g_signal_connect (drag_source, "drag-cancel", G_CALLBACK (on_drag_cancelled_cb), self);
-  g_signal_connect (drag_source, "drag-end", G_CALLBACK (on_drag_end_cb), self);
 
   gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (drag_source));
 

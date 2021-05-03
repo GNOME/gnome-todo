@@ -1,17 +1,13 @@
 project(
      'gnome-todo',
               'c',
-          version: '3.91.1',
+          version: '40.0',
           license: 'GPL3+',
   default_options: [ 'buildtype=debugoptimized', 'warning_level=1' ],
     meson_version: '>= 0.53.0'
 )
 
 gnome_todo_version = meson.project_version()
-version_array = gnome_todo_version.split('.')
-gnome_todo_major_version = version_array[0].to_int()
-gnome_todo_minor_version = version_array[1].to_int()
-gnome_todo_micro_version = version_array[2].to_int()
 
 gnome_todo_gir_namespace = 'Gtd'
 gnome_todo_gir_version = '1.0'
@@ -56,7 +52,7 @@ config_h = configuration_data()
 config_h.set_quoted('GETTEXT_PACKAGE', meson.project_name())
 
 # development build
-config_h.set('DEVELOPMENT_BUILD', gnome_todo_minor_version.is_odd() or profile == 'Devel')
+config_h.set('DEVELOPMENT_BUILD', profile == 'Devel')
 
 # debug options
 config_h.set('GNOME_TODO_ENABLE_DEBUG', gnome_todo_debug)

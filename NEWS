@@ -1,4 +1,13 @@
 ==============
+Version 40
+==============
+
+* Improvements to the sidebar-based layout, including a single headerbar
+* Port to GTK4
+* Asynchronous providers
+* Many translation updates
+
+==============
 Version 3.91.1
 ==============
 

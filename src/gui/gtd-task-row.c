@@ -173,7 +173,7 @@ create_transient_row (GtdTaskRow *self)
   gtk_revealer_set_reveal_child (GTK_REVEALER (new_row->edit_panel_revealer), self->active);
 
   gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET (new_row)), "background");
-  gtk_widget_set_opacity (GTK_WIDGET (new_row), 0.5);
+  gtk_widget_set_opacity (GTK_WIDGET (new_row), 0.66);
 
   return GTK_WIDGET (new_row);
 }

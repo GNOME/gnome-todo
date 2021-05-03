@@ -898,12 +898,7 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
   drop_row = get_drop_row_at_y (self, y);
   hovered_row = task_row_from_row (drop_row);
   hovered_task = gtd_task_row_get_task (hovered_row);
-
-  /*
-   * FIXME: via DnD, we only support moving the task to below another
-   * task, thus the "+ 1"
-   */
-  new_position = gtd_task_get_position (hovered_task) + 1;
+  new_position = gtd_task_get_position (hovered_task);
   current_position = gtd_task_get_position (source_task);
 
   GTD_TRACE_MSG ("Dropping task %p at %ld", source_task, new_position);

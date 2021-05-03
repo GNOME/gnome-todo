@@ -901,32 +901,13 @@ gtd_task_list_move_task_to_position (GtdTaskList *self,
 {
 
   GtdTaskListPrivate *priv = gtd_task_list_get_instance_private (self);
-  g_autoptr (GtdTask) task_at_position = NULL;
-  GSequenceIter *block_start_iter;
-  GSequenceIter *block_end_iter;
   GSequenceIter *new_position_iter;
   GSequenceIter *iter;
-  gboolean moving_up;
-  guint block1_start;
-  guint block1_new_start;
-  guint block2_start;
-  guint block2_length;
-  guint block2_new_start;
+  guint old_position;
+  guint length;
+  guint start;
   guint i;
 
-  /*
-   * The algorithm divides it in 2 blocks:
-   *
-   *  * Block 1: @task position
-   *  * Block 2: the tasks between Block 1 and @new_position
-   *
-   * And there are 2 cases we need to deal with:
-   *
-   *  * Case 1: moving @task to above (@new_position is above the
-   *            current position)
-   *  * Case 2: moving @task to below (@new_position is below the
-   *            current position)
-   */
 
   g_return_if_fail (GTD_IS_TASK_LIST (self));
   g_return_if_fail (GTD_IS_TASK (task));
@@ -934,84 +915,45 @@ gtd_task_list_move_task_to_position (GtdTaskList *self,
   g_return_if_fail (g_list_model_get_n_items (G_LIST_MODEL (self)) >= new_position);
 
   iter = g_hash_table_lookup (priv->tasks, gtd_object_get_uid (GTD_OBJECT (task)));
-  block1_start = g_sequence_iter_get_position (iter);
+  old_position = g_sequence_iter_get_position (iter);
 
-  g_return_if_fail (new_position < block1_start || new_position >= block1_start + 1);
+  if (old_position == new_position)
+    return;
 
-  moving_up = block1_start > new_position;
-
-  if (moving_up)
-    {
-      /*
-       * Case 1: Moving up
-       */
-      block2_start = new_position;
-      block2_length = block1_start - new_position;
-
-      block1_new_start = new_position;
-      block2_new_start = new_position + 1;
-    }
-  else
-    {
-      /*
-       * Case 2: Moving down
-       */
-      block2_start = block1_start + 1;
-      block2_length = new_position - block2_start;
-
-      block1_new_start = new_position - 1;
-      block2_new_start = block2_start - 1;
-    }
-
-  GTD_TRACE_MSG ("Moving task %u to %u, and adjusting [%u, %u] to %u",
-                 block1_start,
-                 block1_new_start,
-                 block2_start,
-                 block2_start + block2_length - 1,
-                 block2_new_start);
-
-  priv->freeze_counter++;
-
-  /* Update Block 1 */
-  task_at_position = g_list_model_get_item (G_LIST_MODEL (self), block1_start);
-
-  g_signal_handlers_block_by_func (task_at_position, task_changed_cb, self);
-  gtd_task_set_position (task_at_position, block1_new_start);
-  g_signal_handlers_unblock_by_func (task_at_position, task_changed_cb, self);
-
-  gtd_provider_update_task (priv->provider,
-                            task_at_position,
-                            NULL,
-                            on_task_updated_cb,
-                            self);
-
-  /* Update Block 2 */
-  for (i = 0; i < block2_length; i++)
-    {
-      g_autoptr (GtdTask) task_at_i = NULL;
-
-      task_at_i = g_list_model_get_item (G_LIST_MODEL (self), block2_start + i);
-
-      g_signal_handlers_block_by_func (task_at_i, task_changed_cb, self);
-      gtd_task_set_position (task_at_i, block2_new_start + i);
-      g_signal_handlers_unblock_by_func (task_at_i, task_changed_cb, self);
-
-      gtd_provider_update_task (priv->provider,
-                                task_at_i,
-                                NULL,
-                                on_task_updated_cb,
-                                self);
-    }
+  GTD_TRACE_MSG ("Moving task '%s' (%s) from %u to %u",
+                 gtd_task_get_title (task),
+                 gtd_object_get_uid (GTD_OBJECT (task)),
+                 old_position,
+                 new_position);
 
   /* Update the GSequence */
-  block_start_iter = g_sequence_get_iter_at_pos (priv->sorted_tasks, block1_start);
-  block_end_iter = g_sequence_get_iter_at_pos (priv->sorted_tasks, block1_start + 1);
-  new_position_iter = g_sequence_get_iter_at_pos (priv->sorted_tasks, new_position);
+  new_position_iter = new_position < old_position ?
+                      g_sequence_get_iter_at_pos (priv->sorted_tasks, new_position) :
+                      g_sequence_get_iter_at_pos (priv->sorted_tasks, new_position + 1);
+  g_sequence_move (iter, new_position_iter);
 
-  g_sequence_move_range (new_position_iter, block_start_iter, block_end_iter);
+  /* Update the 'position' property of all tasks in between */
+  priv->freeze_counter++;
 
-  g_list_model_items_changed (G_LIST_MODEL (self), block1_start, 1, 0);
-  g_list_model_items_changed (G_LIST_MODEL (self), block1_new_start, 0, 1);
+  length = ABS ((gint) new_position - (gint64) old_position) + 1;
+  start = MIN (old_position, new_position);
+  iter = g_sequence_get_iter_at_pos (priv->sorted_tasks, start);
+
+  for (i = 0; i < length; i++)
+    {
+      GtdTask *aux = g_sequence_get (iter);
+
+      g_signal_handlers_block_by_func (aux, task_changed_cb, self);
+      gtd_task_set_position (aux, start + i);
+      g_signal_handlers_unblock_by_func (aux, task_changed_cb, self);
+
+      gtd_provider_update_task (priv->provider, aux, NULL, on_task_updated_cb, self);
+
+      iter = g_sequence_iter_next (iter);
+    }
+
+  g_list_model_items_changed (G_LIST_MODEL (self), old_position, 1, 0);
+  g_list_model_items_changed (G_LIST_MODEL (self), new_position, 0, 1);
 
   priv->freeze_counter--;
 }

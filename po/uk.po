@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2021-04-13 15:00+0000\n"
-"PO-Revision-Date: 2021-04-13 18:22+0300\n"
+"POT-Creation-Date: 2021-05-03 22:30+0000\n"
+"PO-Revision-Date: 2021-05-05 20:42+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -22,7 +22,7 @@ msgstr ""
 "X-Project-Style: gnome\n"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:7
-#: data/org.gnome.Todo.desktop.in.in:3 src/gui/gtd-application.c:142
+#: data/org.gnome.Todo.desktop.in.in:3 src/gui/gtd-application.c:125
 #: src/gui/gtd-omni-area.ui:44 src/main.c:38
 msgid "To Do"
 msgstr "Треба зробити"
@@ -44,28 +44,19 @@ msgstr ""
 "службами. Розширюйте можливості через додатки."
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:25
-msgid "GNOME To Do with the dark theme variant"
-msgstr "«Треба зробити GNOME» з темною темою"
+#| msgid "Welcome"
+msgid "Welcome screen"
+msgstr "Вікно вітання"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:29
-msgid "Editing a tasklist with GNOME To Do"
-msgstr "Редагування переліку завдань"
+msgid "Empty state"
+msgstr ""
+"Порожній стан"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:33
-msgid "Task lists displayed on grid mode"
-msgstr "Завдання можна переглядати ґратками"
-
-#: data/appdata/org.gnome.Todo.appdata.xml.in.in:37
-msgid "Task lists displayed on list mode"
-msgstr "Завдання можна переглядати списком"
-
-#: data/appdata/org.gnome.Todo.appdata.xml.in.in:41
-msgid "Available plugins for GNOME To Do"
-msgstr "Доступні додатки для GNOME To Do"
-
-#: data/appdata/org.gnome.Todo.appdata.xml.in.in:45
-msgid "Visualizing tasks for today on GNOME To Do’s Today panel"
-msgstr "Візуалізація завдань на сьогодні для сьогоднішньої панелі"
+#| msgid "Task Lists"
+msgid "Task lists"
+msgstr "Списки завдань"
 
 #: data/org.gnome.Todo.desktop.in.in:4
 msgid "Manage your personal tasks"
@@ -126,19 +117,19 @@ msgstr "Показано бічну панель"
 msgid "Whether the sidebar is revealed or not"
 msgstr "Чи буде показано бічну панель"
 
-#: src/gui/gtd-application.c:75
+#: src/gui/gtd-application.c:69
 msgid "Quit GNOME To Do"
 msgstr "Закрити GNOME To Do"
 
-#: src/gui/gtd-application.c:76
+#: src/gui/gtd-application.c:70
 msgid "Enable debug messages"
 msgstr "Увімкнути зневаджувальні повідомлення"
 
-#: src/gui/gtd-application.c:146
+#: src/gui/gtd-application.c:129
 msgid "Copyright © 2015–2020 The To Do authors"
 msgstr "© Автори «Треба зробити», 2015–2020"
 
-#: src/gui/gtd-application.c:151
+#: src/gui/gtd-application.c:134
 msgid "translator-credits"
 msgstr "Daniel Korostil <ted.korostiled@gmail.com>"
 
@@ -217,18 +208,15 @@ msgstr "Важка праця завжди винагороджується"
 
 #: src/gui/gtd-empty-list-widget.c:72
 msgid "Tasks Will Appear Here"
-msgstr ""
-"Тут буде показано завдання"
+msgstr "Тут буде показано завдання"
 
 #: src/gui/gtd-empty-list-widget.c:74
 msgid "Add Tasks…"
-msgstr ""
-"Додати завдання…"
+msgstr "Додати завдання…"
 
 #: src/gui/gtd-empty-list-widget.c:85
 msgid "Add More Tasks…"
-msgstr ""
-"Додати ще завдання…"
+msgstr "Додати ще завдання…"
 
 #: src/gui/gtd-initial-setup-window.ui:20
 msgid "Welcome"
@@ -263,22 +251,6 @@ msgstr "Під час створення завдання сталася пом�
 #: src/gui/gtd-new-task-row.ui:13
 msgid "New task…"
 msgstr "Створити завдання…"
-
-#: src/gui/gtd-plugin-dialog-row.c:97
-msgid "Error loading extension"
-msgstr "Помилка завантаження додатка"
-
-#: src/gui/gtd-plugin-dialog-row.c:97
-msgid "Error unloading extension"
-msgstr "Помилка під час розвантаження розширення"
-
-#: src/gui/gtd-plugin-dialog.ui:58
-msgid "Extensions"
-msgstr "Розширення"
-
-#: src/gui/gtd-plugin-dialog.ui:96
-msgid "No extensions found"
-msgstr "Не знайдено жодного розширення"
 
 #: src/gui/gtd-provider-popover.c:97
 msgid "An error occurred while creating a task list"
@@ -328,17 +300,17 @@ msgstr "Microsoft Exchange"
 msgid "Or you can just store your tasks on this computer"
 msgstr "Або можете просто зберігати завдання на цьому комп'ютері"
 
-#: src/gui/gtd-task-list-view.c:550
+#: src/gui/gtd-task-list-view.c:472
 #, c-format
 msgid "Task <b>%s</b> removed"
 msgstr "Завдання <b>%s</b> вилучено"
 
-#: src/gui/gtd-task-list-view.c:569
+#: src/gui/gtd-task-list-view.c:491
 #: src/plugins/task-lists-workspace/gtd-sidebar.c:422
 msgid "Undo"
 msgstr "Повернути"
 
-#: src/gui/gtd-task-row.c:131
+#: src/gui/gtd-task-row.c:127
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:133
 #: src/plugins/next-week-panel/gtd-next-week-panel.c:152
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:124
@@ -348,14 +320,14 @@ msgstr "Повернути"
 msgid "Today"
 msgstr "Сьогодні"
 
-#: src/gui/gtd-task-row.c:135
+#: src/gui/gtd-task-row.c:131
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:137
 #: src/plugins/next-week-panel/gtd-next-week-panel.c:156
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:128
 msgid "Tomorrow"
 msgstr "Завтра"
 
-#: src/gui/gtd-task-row.c:139
+#: src/gui/gtd-task-row.c:135
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:129
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:120
 msgid "Yesterday"
@@ -373,7 +345,7 @@ msgstr ""
 msgid "Details"
 msgstr "Подробиці"
 
-#: src/gui/gtd-window.ui:151
+#: src/gui/gtd-window.ui:141
 msgid "_About To Do"
 msgstr "_Про програму"
 
@@ -462,13 +434,13 @@ msgstr "На цьому комп'ютері"
 msgid "Local"
 msgstr "Локально"
 
-#: src/plugins/eds/gtd-task-list-eds.c:499
-#: src/plugins/eds/gtd-task-list-eds.c:526
-#: src/plugins/eds/gtd-task-list-eds.c:550
+#: src/plugins/eds/gtd-task-list-eds.c:407
+#: src/plugins/eds/gtd-task-list-eds.c:434
+#: src/plugins/eds/gtd-task-list-eds.c:458
 msgid "Error fetching tasks from list"
 msgstr "Помилка одержання завдань зі списку"
 
-#: src/plugins/eds/gtd-task-list-eds.c:932
+#: src/plugins/eds/gtd-task-list-eds.c:828
 #: src/plugins/inbox-panel/gtd-inbox-panel.c:111
 #: src/plugins/welcome/gtd-welcome-workspace.ui:48
 msgid "Inbox"
@@ -757,9 +729,39 @@ msgstr "Доброго вечора, %s"
 msgid "Good Evening, %s"
 msgstr "Доброї ночі, %s"
 
-#: src/plugins/welcome/gtd-welcome-workspace.c:198
+#: src/plugins/welcome/gtd-welcome-workspace.c:206
 msgid "Home"
 msgstr "Домівка"
+
+#~ msgid "GNOME To Do with the dark theme variant"
+#~ msgstr "«Треба зробити GNOME» з темною темою"
+
+#~ msgid "Editing a tasklist with GNOME To Do"
+#~ msgstr "Редагування переліку завдань"
+
+#~ msgid "Task lists displayed on grid mode"
+#~ msgstr "Завдання можна переглядати ґратками"
+
+#~ msgid "Task lists displayed on list mode"
+#~ msgstr "Завдання можна переглядати списком"
+
+#~ msgid "Available plugins for GNOME To Do"
+#~ msgstr "Доступні додатки для GNOME To Do"
+
+#~ msgid "Visualizing tasks for today on GNOME To Do’s Today panel"
+#~ msgstr "Візуалізація завдань на сьогодні для сьогоднішньої панелі"
+
+#~ msgid "Error loading extension"
+#~ msgstr "Помилка завантаження додатка"
+
+#~ msgid "Error unloading extension"
+#~ msgstr "Помилка під час розвантаження розширення"
+
+#~ msgid "Extensions"
+#~ msgstr "Розширення"
+
+#~ msgid "No extensions found"
+#~ msgstr "Не знайдено жодного розширення"
 
 #~ msgid "No tasks found"
 #~ msgstr "Не знайдено жодного завдання"

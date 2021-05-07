@@ -110,6 +110,17 @@
                 <property name="column_spacing">12</property>
                 <property name="row_spacing">12</property>
                 <child>
+                  <object class="GtkLabel" id="title_label">
+                    <property name="hexpand">1</property>
+                    <property name="label" translatable="yes">Select a storage location</property>
+                    <layout>
+                      <property name="column">0</property>
+                      <property name="row">0</property>
+                      <property name="column-span">1</property>
+                    </layout>
+                  </object>
+                </child>
+                <child>
                   <object class="GtkButton" id="back_button">
                     <property name="halign">start</property>
                     <signal name="clicked" handler="gtd_provider_popover__change_location_clicked" object="GtdProviderPopover" swapped="yes"/>
@@ -119,17 +130,6 @@
                         <property name="pixel-size">16</property>
                       </object>
                     </child>
-                    <layout>
-                      <property name="column">0</property>
-                      <property name="row">0</property>
-                      <property name="column-span">1</property>
-                    </layout>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="title_label">
-                    <property name="hexpand">1</property>
-                    <property name="label" translatable="yes">Select a storage location</property>
                     <layout>
                       <property name="column">0</property>
                       <property name="row">0</property>

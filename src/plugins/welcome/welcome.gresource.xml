@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/gnome/todo/plugins/welcome">
+    <file>assets/welcome.svg</file>
     <file>themes/shared.css</file>
     <file>gtd-welcome-action-card.ui</file>
     <file>gtd-welcome-workspace.ui</file>

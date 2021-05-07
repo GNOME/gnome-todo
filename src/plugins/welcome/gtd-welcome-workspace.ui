@@ -25,6 +25,16 @@
           <object class="GtkBox">
             <property name="hexpand">true</property>
             <property name="halign">center</property>
+            <property name="spacing">18</property>
+            <property name="orientation">vertical</property>
+
+            <child>
+              <object class="GtkPicture">
+                <property name="can-shrink">true</property>
+                <property name="keep-aspect-ratio">true</property>
+                <property name="file">resource:///org/gnome/todo/plugins/welcome/assets/welcome.svg</property>
+              </object>
+            </child>
 
             <child>
               <object class="GtkBox">

@@ -26,15 +26,7 @@
 G_BEGIN_DECLS
 
 #define GTD_TYPE_TASK_LIST_VIEW (gtd_task_list_view_get_type())
-
 G_DECLARE_FINAL_TYPE (GtdTaskListView, gtd_task_list_view, GTD, TASK_LIST_VIEW, GtkBox)
-
-typedef enum
-{
-  GTD_TASK_LIST_SELECTOR_BEHAVIOR_AUTOMATIC,
-  GTD_TASK_LIST_SELECTOR_BEHAVIOR_ALWAYS_SHOW,
-  GTD_TASK_LIST_SELECTOR_BEHAVIOR_ALWAYS_HIDE,
-} GtdTaskListSelectorBehavior;
 
 /**
  * GtdTaskListViewHeaderFunc:
@@ -80,11 +72,6 @@ GDateTime*                gtd_task_list_view_get_default_date   (GtdTaskListView
 
 void                      gtd_task_list_view_set_default_date   (GtdTaskListView        *self,
                                                                  GDateTime              *default_date);
-
-GtdTaskListSelectorBehavior gtd_task_list_view_get_task_list_selector_behavior (GtdTaskListView             *self);
-
-void                        gtd_task_list_view_set_task_list_selector_behavior (GtdTaskListView             *self,
-                                                                                GtdTaskListSelectorBehavior  behavior);
 
 G_END_DECLS
 

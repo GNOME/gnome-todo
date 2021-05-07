@@ -253,8 +253,6 @@ gtd_inbox_panel_init (GtdInboxPanel *self)
   gtd_task_list_view_set_model (GTD_TASK_LIST_VIEW (self->view), G_LIST_MODEL (self->filter_model));
   gtd_task_list_view_set_show_list_name (GTD_TASK_LIST_VIEW (self->view), FALSE);
   gtd_task_list_view_set_show_due_date (GTD_TASK_LIST_VIEW (self->view), FALSE);
-  gtd_task_list_view_set_task_list_selector_behavior (GTD_TASK_LIST_VIEW (self->view),
-                                                      GTD_TASK_LIST_SELECTOR_BEHAVIOR_ALWAYS_HIDE);
 
   gtk_widget_set_hexpand (GTK_WIDGET (self->view), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (self->view), TRUE);

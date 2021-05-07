@@ -21,17 +21,6 @@
         <property name="halign">center</property>
         <property name="orientation">vertical</property>
 
-        <child type="start">
-          <object class="GtkLabel" id="welcome_label">
-            <property name="vexpand">true</property>
-            <property name="wrap">true</property>
-            <property name="justify">center</property>
-            <style>
-              <class name="welcome-title" />
-            </style>
-          </object>
-        </child>
-
         <child type="center">
           <object class="GtkBox">
             <property name="hexpand">true</property>
@@ -63,6 +52,20 @@
               </object>
             </child>
 
+          </object>
+        </child>
+
+        <!-- Welcome label -->
+        <child type="end">
+          <object class="GtkLabel" id="welcome_label">
+            <property name="vexpand">true</property>
+            <property name="valign">start</property>
+            <property name="wrap">true</property>
+            <property name="justify">center</property>
+            <property name="margin-top">24</property>
+            <style>
+              <class name="welcome-title" />
+            </style>
           </object>
         </child>
 

@@ -63,8 +63,10 @@
  *
  */
 
-typedef struct
+struct _GtdTaskListView
 {
+  GtkBox                  parent;
+
   GtdEmptyListWidget    *empty_list_widget;
   GtkListBox            *listbox;
   GtkStack              *main_stack;
@@ -107,14 +109,6 @@ typedef struct
   GtdTaskRow             *active_row;
   GtkSizeGroup           *due_date_sizegroup;
   GtkSizeGroup           *tasklist_name_sizegroup;
-} GtdTaskListViewPrivate;
-
-struct _GtdTaskListView
-{
-  GtkBox                  parent;
-
-  /*<private>*/
-  GtdTaskListViewPrivate *priv;
 };
 
 #define DND_SCROLL_OFFSET            24 //px
@@ -146,7 +140,7 @@ static void          on_task_row_exited_cb                       (GtdTaskListVie
 static gboolean      scroll_to_bottom_cb                         (gpointer            data);
 
 
-G_DEFINE_TYPE_WITH_PRIVATE (GtdTaskListView, gtd_task_list_view, GTK_TYPE_BOX)
+G_DEFINE_TYPE (GtdTaskListView, gtd_task_list_view, GTK_TYPE_BOX)
 
 static const GActionEntry gtd_task_list_view_entries[] = {
   { "clear-completed-tasks", on_clear_completed_tasks_activated_cb },
@@ -180,15 +174,13 @@ static void
 set_active_row (GtdTaskListView *self,
                 GtdTaskRow      *row)
 {
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
-
-  if (priv->active_row == row)
+  if (self->active_row == row)
     return;
 
-  if (priv->active_row)
-    gtd_task_row_set_active (priv->active_row, FALSE);
+  if (self->active_row)
+    gtd_task_row_set_active (self->active_row, FALSE);
 
-  priv->active_row = row;
+  self->active_row = row;
 
   if (row)
     {
@@ -200,41 +192,36 @@ set_active_row (GtdTaskListView *self,
 static void
 schedule_scroll_to_bottom (GtdTaskListView *self)
 {
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
-
-  if (priv->scroll_to_bottom_handler_id > 0)
+  if (self->scroll_to_bottom_handler_id > 0)
     return;
 
-  priv->scroll_to_bottom_handler_id = g_timeout_add (250, scroll_to_bottom_cb, self);
+  self->scroll_to_bottom_handler_id = g_timeout_add (250, scroll_to_bottom_cb, self);
 }
 
 static void
 update_empty_state (GtdTaskListView *self)
 {
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
   gboolean show_empty_list_widget;
   gboolean is_empty;
 
   g_assert (GTD_IS_TASK_LIST_VIEW (self));
 
-  if (!priv->model)
+  if (!self->model)
     return;
 
-  is_empty = g_list_model_get_n_items (priv->model) == 0;
-  gtd_empty_list_widget_set_is_empty (priv->empty_list_widget, is_empty);
+  is_empty = g_list_model_get_n_items (self->model) == 0;
+  gtd_empty_list_widget_set_is_empty (self->empty_list_widget, is_empty);
 
-  show_empty_list_widget = !GTD_IS_TASK_LIST (priv->model) &&
-                           (is_empty || priv->n_incomplete_tasks == 0);
-  gtk_stack_set_visible_child_name (priv->main_stack,
+  show_empty_list_widget = !GTD_IS_TASK_LIST (self->model) &&
+                           (is_empty || self->n_incomplete_tasks == 0);
+  gtk_stack_set_visible_child_name (self->main_stack,
                                     show_empty_list_widget ? "empty-list" : "task-list");
 }
 
 static void
 update_incomplete_tasks_model (GtdTaskListView *self)
 {
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
-
-  if (!priv->incomplete_tasks_model)
+  if (!self->incomplete_tasks_model)
     {
       g_autoptr (GtkFilterListModel) filter_model = NULL;
       GtkCustomFilter *filter;
@@ -243,14 +230,14 @@ update_incomplete_tasks_model (GtdTaskListView *self)
       filter_model = gtk_filter_list_model_new (NULL, GTK_FILTER (filter));
       gtk_filter_list_model_set_incremental (filter_model, TRUE);
 
-      priv->incomplete_tasks_model = G_LIST_MODEL (g_steal_pointer (&filter_model));
+      self->incomplete_tasks_model = G_LIST_MODEL (g_steal_pointer (&filter_model));
     }
 
-  gtk_filter_list_model_set_model (GTK_FILTER_LIST_MODEL (priv->incomplete_tasks_model),
-                                   priv->model);
-  priv->n_incomplete_tasks = g_list_model_get_n_items (priv->incomplete_tasks_model);
+  gtk_filter_list_model_set_model (GTK_FILTER_LIST_MODEL (self->incomplete_tasks_model),
+                                   self->model);
+  self->n_incomplete_tasks = g_list_model_get_n_items (self->incomplete_tasks_model);
 
-  g_signal_connect (priv->incomplete_tasks_model,
+  g_signal_connect (self->incomplete_tasks_model,
                     "items-changed",
                     G_CALLBACK (on_incomplete_tasks_items_changed_cb),
                     self);
@@ -276,10 +263,8 @@ on_incomplete_tasks_items_changed_cb (GListModel      *model,
                                       guint            n_added,
                                       GtdTaskListView *self)
 {
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
-
-  priv->n_incomplete_tasks -= n_removed;
-  priv->n_incomplete_tasks += n_added;
+  self->n_incomplete_tasks -= n_removed;
+  self->n_incomplete_tasks += n_added;
 
   update_empty_state (self);
 }
@@ -288,27 +273,23 @@ static void
 on_empty_list_widget_add_tasks_cb (GtdEmptyListWidget *empty_list_widget,
                                    GtdTaskListView    *self)
 {
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
-
-  gtk_stack_set_visible_child_name (priv->main_stack, "task-list");
+  gtk_stack_set_visible_child_name (self->main_stack, "task-list");
 }
 
 static GtkWidget*
 create_row_for_task_cb (gpointer item,
                         gpointer user_data)
 {
-  GtdTaskListViewPrivate *priv;
   GtdTaskListView *self;
   GtkWidget *listbox_row;
   GtkWidget *row;
 
   self = GTD_TASK_LIST_VIEW (user_data);
-  priv = gtd_task_list_view_get_instance_private (self);
 
-  row = gtd_task_row_new (item, priv->renderer);
+  row = gtd_task_row_new (item, self->renderer);
 
-  gtd_task_row_set_list_name_visible (GTD_TASK_ROW (row), priv->show_list_name);
-  gtd_task_row_set_due_date_visible (GTD_TASK_ROW (row), priv->show_due_date);
+  gtd_task_row_set_list_name_visible (GTD_TASK_ROW (row), self->show_list_name);
+  gtd_task_row_set_due_date_visible (GTD_TASK_ROW (row), self->show_due_date);
 
   g_signal_connect_swapped (row, "enter", G_CALLBACK (on_task_row_entered_cb), self);
   g_signal_connect_swapped (row, "exit", G_CALLBACK (on_task_row_exited_cb), self);
@@ -320,7 +301,7 @@ create_row_for_task_cb (gpointer item,
 
   g_object_bind_property (row, "visible", listbox_row, "visible", G_BINDING_BIDIRECTIONAL);
 
-  g_hash_table_insert (priv->task_to_row, item, row);
+  g_hash_table_insert (self->task_to_row, item, row);
 
   return listbox_row;
 }
@@ -328,18 +309,17 @@ create_row_for_task_cb (gpointer item,
 static gboolean
 scroll_to_bottom_cb (gpointer data)
 {
-  GtdTaskListViewPrivate *priv;
+  GtdTaskListView *self = GTD_TASK_LIST_VIEW (data);
   GtkWidget *widget;
   GtkRoot *root;
 
-  priv = gtd_task_list_view_get_instance_private (data);
-  widget = GTK_WIDGET (data);
+  widget = GTK_WIDGET (self);
   root = gtk_widget_get_root (widget);
 
   if (!root)
     return G_SOURCE_CONTINUE;
 
-  priv->scroll_to_bottom_handler_id = 0;
+  self->scroll_to_bottom_handler_id = 0;
 
   /*
    * Only focus the new task row if the current list is visible,
@@ -352,8 +332,8 @@ scroll_to_bottom_cb (gpointer data)
     {
       gboolean ignored;
 
-      gtk_widget_grab_focus (GTK_WIDGET (priv->new_task_row));
-      g_signal_emit_by_name (priv->scrolled_window, "scroll-child", GTK_SCROLL_END, FALSE, &ignored);
+      gtk_widget_grab_focus (GTK_WIDGET (self->new_task_row));
+      g_signal_emit_by_name (self->scrolled_window, "scroll-child", GTK_SCROLL_END, FALSE, &ignored);
     }
 
   return G_SOURCE_REMOVE;
@@ -382,7 +362,7 @@ on_clear_completed_tasks_activated_cb (GSimpleAction *simple,
   guint i;
 
   self = GTD_TASK_LIST_VIEW (user_data);
-  model = self->priv->model;
+  model = self->model;
 
   for (i = 0; i < g_list_model_get_n_items (model); i++)
     {
@@ -501,9 +481,7 @@ static void
 on_task_row_exited_cb (GtdTaskListView *self,
                        GtdTaskRow      *row)
 {
-  GtdTaskListViewPrivate *priv = self->priv;
-
-  if (row == priv->active_row)
+  if (row == self->active_row)
     set_active_row (self, NULL);
 }
 
@@ -535,13 +513,13 @@ on_listbox_row_activated_cb (GtkListBox      *listbox,
 static void
 internal_header_func (GtkListBoxRow   *row,
                       GtkListBoxRow   *before,
-                      GtdTaskListView *view)
+                      GtdTaskListView *self)
 {
   GtkWidget *header;
   GtdTask *row_task;
   GtdTask *before_task;
 
-  if (!view->priv->header_func)
+  if (!self->header_func)
     return;
 
   row_task = before_task = NULL;
@@ -552,7 +530,7 @@ internal_header_func (GtkListBoxRow   *row,
   if (before)
       before_task = gtd_task_row_get_task (task_row_from_row (before));
 
-  header = view->priv->header_func (row_task, before_task, view->priv->header_user_data);
+  header = self->header_func (row_task, before_task, self->header_user_data);
 
   if (header)
     {
@@ -573,18 +551,16 @@ internal_header_func (GtkListBoxRow   *row,
 static void
 clear_drag_highlights (GtdTaskListView *self)
 {
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
-
-  if (priv->drag_highlight.top)
+  if (self->drag_highlight.top)
     {
-      gtk_widget_remove_css_class (priv->drag_highlight.top, "top-highlight");
-      priv->drag_highlight.top = NULL;
+      gtk_widget_remove_css_class (self->drag_highlight.top, "top-highlight");
+      self->drag_highlight.top = NULL;
     }
 
-  if (priv->drag_highlight.bottom)
+  if (self->drag_highlight.bottom)
     {
-      gtk_widget_remove_css_class (priv->drag_highlight.bottom, "bottom-highlight");
-      priv->drag_highlight.bottom = NULL;
+      gtk_widget_remove_css_class (self->drag_highlight.bottom, "bottom-highlight");
+      self->drag_highlight.bottom = NULL;
     }
 }
 
@@ -592,14 +568,12 @@ static void
 update_row_drag_highlight (GtdTaskListView *self,
                            gdouble          y)
 {
-  GtdTaskListViewPrivate *priv;
   GtkAllocation row_allocation;
   GtkListBoxRow *hovered_row;
   GtkListBoxRow *bottom_highlight;
   GtkListBoxRow *top_highlight;
 
-  priv = gtd_task_list_view_get_instance_private (self);
-  hovered_row = gtk_list_box_get_row_at_y (priv->listbox, y);
+  hovered_row = gtk_list_box_get_row_at_y (self->listbox, y);
   bottom_highlight = NULL;
   top_highlight = NULL;
 
@@ -651,29 +625,26 @@ update_row_drag_highlight (GtdTaskListView *self,
   /* Unhighlight previously highlighted rows */
   clear_drag_highlights (self);
 
-  priv->drag_highlight.top = GTK_WIDGET (top_highlight);
-  priv->drag_highlight.bottom = GTK_WIDGET (bottom_highlight);
+  self->drag_highlight.top = GTK_WIDGET (top_highlight);
+  self->drag_highlight.bottom = GTK_WIDGET (bottom_highlight);
 
   /* Highlight new rows */
-  if (priv->drag_highlight.top)
-    gtk_widget_add_css_class (priv->drag_highlight.top, "top-highlight");
-  if (priv->drag_highlight.bottom)
-    gtk_widget_add_css_class (priv->drag_highlight.bottom, "bottom-highlight");
+  if (self->drag_highlight.top)
+    gtk_widget_add_css_class (self->drag_highlight.top, "top-highlight");
+  if (self->drag_highlight.bottom)
+    gtk_widget_add_css_class (self->drag_highlight.bottom, "bottom-highlight");
 }
 
 static GtkListBoxRow*
 get_drop_row_at_y (GtdTaskListView *self,
                    gdouble          y)
 {
-  GtdTaskListViewPrivate *priv;
   GtkAllocation row_allocation;
   GtkListBoxRow *hovered_row;
   GtkListBoxRow *task_row;
   GtkListBoxRow *drop_row;
 
-  priv = gtd_task_list_view_get_instance_private (self);
-
-  hovered_row = gtk_list_box_get_row_at_y (priv->listbox, y);
+  hovered_row = gtk_list_box_get_row_at_y (self->listbox, y);
 
   /* Small optimization when hovering the first row */
   if (gtk_list_box_row_get_index (hovered_row) == 0)
@@ -716,13 +687,12 @@ get_drop_row_at_y (GtdTaskListView *self,
 static inline gboolean
 scroll_to_dnd (gpointer user_data)
 {
-  GtdTaskListViewPrivate *priv;
+  GtdTaskListView *self = GTD_TASK_LIST_VIEW (user_data);
   GtkAdjustment *vadjustment;
   gint value;
 
-  priv = gtd_task_list_view_get_instance_private (user_data);
-  vadjustment = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (priv->scrolled_window));
-  value = gtk_adjustment_get_value (vadjustment) + (priv->scroll_up ? -6 : 6);
+  vadjustment = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (self->scrolled_window));
+  value = gtk_adjustment_get_value (vadjustment) + (self->scroll_up ? -6 : 6);
 
   gtk_adjustment_set_value (vadjustment,
                             CLAMP (value, 0, gtk_adjustment_get_upper (vadjustment)));
@@ -735,45 +705,44 @@ check_dnd_scroll (GtdTaskListView *self,
                   gboolean         should_cancel,
                   gdouble          y)
 {
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
   gdouble current_y, height;
 
   if (should_cancel)
     {
-      if (priv->scroll_timeout_id > 0)
+      if (self->scroll_timeout_id > 0)
         {
-          g_source_remove (priv->scroll_timeout_id);
-          priv->scroll_timeout_id = 0;
+          g_source_remove (self->scroll_timeout_id);
+          self->scroll_timeout_id = 0;
         }
 
       return;
     }
 
-  height = gtk_widget_get_allocated_height (priv->scrolled_window);
-  gtk_widget_translate_coordinates (GTK_WIDGET (priv->listbox),
-                                    priv->scrolled_window,
+  height = gtk_widget_get_allocated_height (self->scrolled_window);
+  gtk_widget_translate_coordinates (GTK_WIDGET (self->listbox),
+                                    self->scrolled_window,
                                     0, y,
                                     NULL, &current_y);
 
   if (current_y < DND_SCROLL_OFFSET || current_y > height - DND_SCROLL_OFFSET)
     {
-      if (priv->scroll_timeout_id > 0)
+      if (self->scroll_timeout_id > 0)
         return;
 
       /* Start the autoscroll */
-      priv->scroll_up = current_y < DND_SCROLL_OFFSET;
-      priv->scroll_timeout_id = g_timeout_add (25,
+      self->scroll_up = current_y < DND_SCROLL_OFFSET;
+      self->scroll_timeout_id = g_timeout_add (25,
                                                scroll_to_dnd,
                                                self);
     }
   else
     {
-      if (priv->scroll_timeout_id == 0)
+      if (self->scroll_timeout_id == 0)
         return;
 
       /* Cancel the autoscroll */
-      g_source_remove (priv->scroll_timeout_id);
-      priv->scroll_timeout_id = 0;
+      g_source_remove (self->scroll_timeout_id);
+      self->scroll_timeout_id = 0;
     }
 }
 
@@ -837,7 +806,6 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
                              gdouble          y,
                              GtdTaskListView *self)
 {
-  GtdTaskListViewPrivate *priv;
   GtkListBoxRow *drop_row;
   GtdTaskRow *hovered_row;
   GtkWidget *row;
@@ -850,7 +818,6 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
 
   GTD_ENTRY;
 
-  priv = gtd_task_list_view_get_instance_private (self);
   drop = gtk_drop_target_get_drop (drop_target);
   drag = gdk_drop_get_drag (drop);
 
@@ -869,7 +836,7 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
    * When the drag operation began, the source row was hidden. Now is the time
    * to show it again.
    */
-  row = g_hash_table_lookup (priv->task_to_row, source_task);
+  row = g_hash_table_lookup (self->task_to_row, source_task);
   gtk_widget_show (row);
 
   drop_row = get_drop_row_at_y (self, y);
@@ -882,7 +849,7 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
 
   if (new_position != current_position)
     {
-      gtd_task_list_move_task_to_position (GTD_TASK_LIST (priv->model),
+      gtd_task_list_move_task_to_position (GTD_TASK_LIST (self->model),
                                            source_task,
                                            new_position);
     }
@@ -900,14 +867,14 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
 static void
 gtd_task_list_view_finalize (GObject *object)
 {
-  GtdTaskListViewPrivate *priv = GTD_TASK_LIST_VIEW (object)->priv;
+  GtdTaskListView *self = GTD_TASK_LIST_VIEW (object);
 
-  g_clear_handle_id (&priv->scroll_to_bottom_handler_id, g_source_remove);
-  g_clear_pointer (&priv->task_to_row, g_hash_table_destroy);
-  g_clear_pointer (&priv->default_date, g_date_time_unref);
-  g_clear_object (&priv->incomplete_tasks_model);
-  g_clear_object (&priv->renderer);
-  g_clear_object (&priv->model);
+  g_clear_handle_id (&self->scroll_to_bottom_handler_id, g_source_remove);
+  g_clear_pointer (&self->task_to_row, g_hash_table_destroy);
+  g_clear_pointer (&self->default_date, g_date_time_unref);
+  g_clear_object (&self->incomplete_tasks_model);
+  g_clear_object (&self->renderer);
+  g_clear_object (&self->model);
 
   G_OBJECT_CLASS (gtd_task_list_view_parent_class)->finalize (object);
 }
@@ -923,11 +890,11 @@ gtd_task_list_view_get_property (GObject    *object,
   switch (prop_id)
     {
     case PROP_SHOW_DUE_DATE:
-      g_value_set_boolean (value, self->priv->show_due_date);
+      g_value_set_boolean (value, self->show_due_date);
       break;
 
     case PROP_SHOW_LIST_NAME:
-      g_value_set_boolean (value, self->priv->show_list_name);
+      g_value_set_boolean (value, self->show_list_name);
       break;
 
     default:
@@ -962,13 +929,12 @@ static void
 gtd_task_list_view_constructed (GObject *object)
 {
   GtdTaskListView *self = GTD_TASK_LIST_VIEW (object);
-
   G_OBJECT_CLASS (gtd_task_list_view_parent_class)->constructed (object);
 
   /* action_group */
-  self->priv->action_group = G_ACTION_GROUP (g_simple_action_group_new ());
+  self->action_group = G_ACTION_GROUP (g_simple_action_group_new ());
 
-  g_action_map_add_action_entries (G_ACTION_MAP (self->priv->action_group),
+  g_action_map_add_action_entries (G_ACTION_MAP (self->action_group),
                                    gtd_task_list_view_entries,
                                    G_N_ELEMENTS (gtd_task_list_view_entries),
                                    object);
@@ -983,7 +949,6 @@ static void
 gtd_task_list_view_map (GtkWidget *widget)
 {
   GtdTaskListView *self = GTD_TASK_LIST_VIEW (widget);
-  GtdTaskListViewPrivate *priv = gtd_task_list_view_get_instance_private (self);
   GtkRoot *root;
 
 
@@ -997,7 +962,7 @@ gtd_task_list_view_map (GtkWidget *widget)
   gtk_widget_insert_action_group (GTK_WIDGET (root), "list", NULL);
 
   /* Add this instance's action group */
-  gtk_widget_insert_action_group (GTK_WIDGET (root), "list", priv->action_group);
+  gtk_widget_insert_action_group (GTK_WIDGET (root), "list", self->action_group);
 }
 
 static void
@@ -1048,13 +1013,13 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
 
   gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/todo/ui/gtd-task-list-view.ui");
 
-  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, due_date_sizegroup);
-  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, empty_list_widget);
-  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, listbox);
-  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, main_stack);
-  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, new_task_row);
-  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, tasklist_name_sizegroup);
-  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, scrolled_window);
+  gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, due_date_sizegroup);
+  gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, empty_list_widget);
+  gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, listbox);
+  gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, main_stack);
+  gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, new_task_row);
+  gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, tasklist_name_sizegroup);
+  gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, scrolled_window);
 
   gtk_widget_class_bind_template_callback (widget_class, on_empty_list_widget_add_tasks_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_listbox_row_activated_cb);
@@ -1069,17 +1034,13 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
 static void
 gtd_task_list_view_init (GtdTaskListView *self)
 {
-  GtdTaskListViewPrivate *priv;
   GtkDropTarget *target;
 
-  priv = gtd_task_list_view_get_instance_private (self);
+  self->task_to_row = g_hash_table_new (NULL, NULL);
 
-  self->priv = priv;
-  priv->task_to_row = g_hash_table_new (NULL, NULL);
-
-  priv->can_toggle = TRUE;
-  priv->show_due_date = TRUE;
-  priv->show_due_date = TRUE;
+  self->can_toggle = TRUE;
+  self->show_due_date = TRUE;
+  self->show_due_date = TRUE;
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
@@ -1090,9 +1051,9 @@ gtd_task_list_view_init (GtdTaskListView *self)
   g_signal_connect (target, "leave", G_CALLBACK (on_drop_target_drag_leave_cb), self);
   g_signal_connect (target, "motion", G_CALLBACK (on_drop_target_drag_motion_cb), self);
 
-  gtk_widget_add_controller (GTK_WIDGET (priv->listbox), GTK_EVENT_CONTROLLER (target));
+  gtk_widget_add_controller (GTK_WIDGET (self->listbox), GTK_EVENT_CONTROLLER (target));
 
-  priv->renderer = gtd_markdown_renderer_new ();
+  self->renderer = gtd_markdown_renderer_new ();
 }
 
 /**
@@ -1122,7 +1083,7 @@ gtd_task_list_view_get_model (GtdTaskListView *view)
 {
   g_return_val_if_fail (GTD_IS_TASK_LIST_VIEW (view), NULL);
 
-  return view->priv->model;
+  return view->model;
 }
 
 /**
@@ -1137,17 +1098,13 @@ void
 gtd_task_list_view_set_model (GtdTaskListView *view,
                               GListModel      *model)
 {
-  GtdTaskListViewPrivate *priv;
-
   g_return_if_fail (GTD_IS_TASK_LIST_VIEW (view));
   g_return_if_fail (G_IS_LIST_MODEL (model));
 
-  priv = gtd_task_list_view_get_instance_private (view);
-
-  if (!g_set_object (&priv->model, model))
+  if (!g_set_object (&view->model, model))
     return;
 
-  gtk_list_box_bind_model (priv->listbox,
+  gtk_list_box_bind_model (view->listbox,
                            model,
                            create_row_for_task_cb,
                            view,
@@ -1171,7 +1128,7 @@ gtd_task_list_view_get_show_list_name (GtdTaskListView *view)
 {
   g_return_val_if_fail (GTD_IS_TASK_LIST_VIEW (view), FALSE);
 
-  return view->priv->show_list_name;
+  return view->show_list_name;
 }
 
 /**
@@ -1187,13 +1144,13 @@ gtd_task_list_view_set_show_list_name (GtdTaskListView *view,
 {
   g_return_if_fail (GTD_IS_TASK_LIST_VIEW (view));
 
-  if (view->priv->show_list_name != show_list_name)
+  if (view->show_list_name != show_list_name)
     {
       GtkWidget *child;
 
-      view->priv->show_list_name = show_list_name;
+      view->show_list_name = show_list_name;
 
-      for (child = gtk_widget_get_first_child (GTK_WIDGET (view->priv->listbox));
+      for (child = gtk_widget_get_first_child (GTK_WIDGET (view->listbox));
            child;
            child = gtk_widget_get_next_sibling (child))
         {
@@ -1223,7 +1180,7 @@ gtd_task_list_view_get_show_due_date (GtdTaskListView *self)
 {
   g_return_val_if_fail (GTD_IS_TASK_LIST_VIEW (self), FALSE);
 
-  return self->priv->show_due_date;
+  return self->show_due_date;
 }
 
 /**
@@ -1237,19 +1194,16 @@ void
 gtd_task_list_view_set_show_due_date (GtdTaskListView *self,
                                       gboolean         show_due_date)
 {
-  GtdTaskListViewPrivate *priv;
   GtkWidget *child;
 
   g_return_if_fail (GTD_IS_TASK_LIST_VIEW (self));
 
-  priv = gtd_task_list_view_get_instance_private (self);
-
-  if (priv->show_due_date == show_due_date)
+  if (self->show_due_date == show_due_date)
     return;
 
-  priv->show_due_date = show_due_date;
+  self->show_due_date = show_due_date;
 
-  for (child = gtk_widget_get_first_child (GTK_WIDGET (priv->listbox));
+  for (child = gtk_widget_get_first_child (GTK_WIDGET (self->listbox));
        child;
        child = gtk_widget_get_next_sibling (child))
     {
@@ -1280,28 +1234,24 @@ gtd_task_list_view_set_header_func (GtdTaskListView           *view,
                                     GtdTaskListViewHeaderFunc  func,
                                     gpointer                   user_data)
 {
-  GtdTaskListViewPrivate *priv;
-
   g_return_if_fail (GTD_IS_TASK_LIST_VIEW (view));
-
-  priv = view->priv;
 
   if (func)
     {
-      priv->header_func = func;
-      priv->header_user_data = user_data;
+      view->header_func = func;
+      view->header_user_data = user_data;
 
-      gtk_list_box_set_header_func (priv->listbox,
+      gtk_list_box_set_header_func (view->listbox,
                                     (GtkListBoxUpdateHeaderFunc) internal_header_func,
                                     view,
                                     NULL);
     }
   else
     {
-      priv->header_func = NULL;
-      priv->header_user_data = NULL;
+      view->header_func = NULL;
+      view->header_user_data = NULL;
 
-      gtk_list_box_set_header_func (priv->listbox,
+      gtk_list_box_set_header_func (view->listbox,
                                     NULL,
                                     NULL,
                                     NULL);
@@ -1319,13 +1269,9 @@ gtd_task_list_view_set_header_func (GtdTaskListView           *view,
 GDateTime*
 gtd_task_list_view_get_default_date (GtdTaskListView *self)
 {
-  GtdTaskListViewPrivate *priv;
-
   g_return_val_if_fail (GTD_IS_TASK_LIST_VIEW (self), NULL);
 
-  priv = gtd_task_list_view_get_instance_private (self);
-
-  return priv->default_date;
+  return self->default_date;
 }
 
 /**
@@ -1339,15 +1285,11 @@ void
 gtd_task_list_view_set_default_date   (GtdTaskListView *self,
                                        GDateTime       *default_date)
 {
-  GtdTaskListViewPrivate *priv;
-
   g_return_if_fail (GTD_IS_TASK_LIST_VIEW (self));
 
-  priv = gtd_task_list_view_get_instance_private (self);
-
-  if (priv->default_date == default_date)
+  if (self->default_date == default_date)
     return;
 
-  g_clear_pointer (&priv->default_date, g_date_time_unref);
-  priv->default_date = default_date ? g_date_time_ref (default_date) : NULL;
+  g_clear_pointer (&self->default_date, g_date_time_unref);
+  self->default_date = default_date ? g_date_time_ref (default_date) : NULL;
 }

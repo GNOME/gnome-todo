@@ -118,23 +118,6 @@ struct _GtdTaskListView
   GtdTaskListViewPrivate *priv;
 };
 
-typedef enum
-{
-  GTD_IDLE_STATE_STARTED,
-  GTD_IDLE_STATE_LOADING,
-  GTD_IDLE_STATE_COMPLETE,
-  GTD_IDLE_STATE_FINISHED,
-} GtdIdleState;
-
-typedef struct
-{
-  GtdTaskListView      *self;
-  GtdIdleState          state;
-  GPtrArray            *added;
-  GPtrArray            *removed;
-  guint32               current_item;
-} GtdIdleData;
-
 #define DND_SCROLL_OFFSET            24 //px
 #define TASK_REMOVED_NOTIFICATION_ID "task-removed-id"
 

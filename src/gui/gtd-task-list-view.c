@@ -70,7 +70,6 @@ typedef struct
   GtkStack              *main_stack;
   GtkListBoxRow         *new_task_row;
   GtkWidget             *scrolled_window;
-  GtkStack              *stack;
 
   /* internal */
   gboolean               can_toggle;
@@ -1056,7 +1055,6 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, new_task_row);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, tasklist_name_sizegroup);
   gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, scrolled_window);
-  gtk_widget_class_bind_template_child_private (widget_class, GtdTaskListView, stack);
 
   gtk_widget_class_bind_template_callback (widget_class, on_empty_list_widget_add_tasks_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_listbox_row_activated_cb);

@@ -26,67 +26,43 @@
                 <property name="min-content-height">320</property>
                 <property name="hscrollbar-policy">never</property>
                 <child>
-                  <object class="GtkStack" id="stack">
-                    <property name="hexpand">true</property>
-                    <property name="vexpand">true</property>
-                    <property name="transition-type">crossfade</property>
-                    <child>
-                      <object class="GtkStackPage">
-                        <property name="name">listbox</property>
-                        <property name="child">
-                          <object class="GtdWidget">
-                            <property name="hexpand">1</property>
-                            <property name="vexpand">1</property>
-                            <property name="halign">center</property>
-                            <property name="layout-manager">
-                              <object class="GtdMaxSizeLayout">
-                                <property name="max-width">700</property>
-                              </object>
-                            </property>
-                            <child>
-                              <object class="GtkBox">
-                                <property name="margin-top">6</property>
-                                <property name="margin-bottom">64</property>
-                                <property name="margin-start">18</property>
-                                <property name="margin-end">18</property>
-                                <property name="orientation">vertical</property>
-                                <child>
-                                  <object class="GtkListBox" id="listbox">
-                                    <property name="hexpand">1</property>
-                                    <property name="selection_mode">none</property>
-                                    <signal name="row-activated" handler="on_listbox_row_activated_cb" object="GtdTaskListView" swapped="no"/>
-                                    <style>
-                                      <class name="transparent"/>
-                                    </style>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtdNewTaskRow" id="new_task_row">
-                                    <property name="margin-bottom">24</property>
-                                    <signal name="enter" handler="on_new_task_row_entered_cb" object="GtdTaskListView" swapped="yes"/>
-                                    <signal name="exit" handler="on_new_task_row_exited_cb" object="GtdTaskListView" swapped="yes"/>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-
-                        </property>
+                  <object class="GtdWidget">
+                    <property name="hexpand">1</property>
+                    <property name="vexpand">1</property>
+                    <property name="halign">center</property>
+                    <property name="layout-manager">
+                      <object class="GtdMaxSizeLayout">
+                        <property name="max-width">700</property>
                       </object>
-                    </child>
+                    </property>
                     <child>
-                      <object class="GtkStackPage">
-                        <property name="name">loading</property>
-                        <property name="child">
-                          <object class="GtkSpinner">
-                            <property name="spinning">true</property>
-                            <property name="width-request">96</property>
-                            <property name="height-request">96</property>
+                      <object class="GtkBox">
+                        <property name="margin-top">6</property>
+                        <property name="margin-bottom">64</property>
+                        <property name="margin-start">18</property>
+                        <property name="margin-end">18</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkListBox" id="listbox">
+                            <property name="hexpand">1</property>
+                            <property name="selection_mode">none</property>
+                            <signal name="row-activated" handler="on_listbox_row_activated_cb" object="GtdTaskListView" swapped="no"/>
+                            <style>
+                              <class name="transparent"/>
+                            </style>
                           </object>
-                        </property>
+                        </child>
+                        <child>
+                          <object class="GtdNewTaskRow" id="new_task_row">
+                            <property name="margin-bottom">24</property>
+                            <signal name="enter" handler="on_new_task_row_entered_cb" object="GtdTaskListView" swapped="yes"/>
+                            <signal name="exit" handler="on_new_task_row_exited_cb" object="GtdTaskListView" swapped="yes"/>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
+
                 </child>
               </object>
 

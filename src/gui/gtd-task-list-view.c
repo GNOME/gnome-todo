@@ -57,9 +57,6 @@
  *
  * gtd_task_list_view_set_model (view, model);
  *
- * // Hide the '+ New task' row
- * gtd_task_list_view_set_show_new_task_row (view, FALSE);
- *
  * // Date which tasks will be automatically assigned
  * gtd_task_list_view_set_default_date (view, now);
  * ]|
@@ -183,7 +180,6 @@ enum {
   PROP_0,
   PROP_SHOW_LIST_NAME,
   PROP_SHOW_DUE_DATE,
-  PROP_SHOW_NEW_TASK_ROW,
   LAST_PROP
 };
 
@@ -952,10 +948,6 @@ gtd_task_list_view_get_property (GObject    *object,
       g_value_set_boolean (value, self->priv->show_list_name);
       break;
 
-    case PROP_SHOW_NEW_TASK_ROW:
-      g_value_set_boolean (value, gtk_widget_get_visible (GTK_WIDGET (self->priv->new_task_row)));
-      break;
-
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -977,10 +969,6 @@ gtd_task_list_view_set_property (GObject      *object,
 
     case PROP_SHOW_LIST_NAME:
       gtd_task_list_view_set_show_list_name (self, g_value_get_boolean (value));
-      break;
-
-    case PROP_SHOW_NEW_TASK_ROW:
-      gtd_task_list_view_set_show_new_task_row (self, g_value_get_boolean (value));
       break;
 
     default:
@@ -1047,20 +1035,6 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
   g_type_ensure (GTD_TYPE_NEW_TASK_ROW);
   g_type_ensure (GTD_TYPE_TASK_ROW);
   g_type_ensure (GTD_TYPE_EMPTY_LIST_WIDGET);
-
-  /**
-   * GtdTaskListView::show-new-task-row:
-   *
-   * Whether the list shows the "New Task" row or not.
-   */
-  g_object_class_install_property (
-        object_class,
-        PROP_SHOW_NEW_TASK_ROW,
-        g_param_spec_boolean ("show-new-task-row",
-                              "Whether it shows the New Task row",
-                              "Whether the list shows the New Task row, or not",
-                              TRUE,
-                              G_PARAM_READWRITE));
 
   /**
    * GtdTaskListView::show-list-name:
@@ -1151,38 +1125,6 @@ GtkWidget*
 gtd_task_list_view_new (void)
 {
   return g_object_new (GTD_TYPE_TASK_LIST_VIEW, NULL);
-}
-
-/**
- * gtd_task_list_view_get_show_new_task_row:
- * @view: a #GtdTaskListView
- *
- * Gets whether @view shows the new task row or not.
- *
- * Returns: %TRUE if @view is shows the new task row, %FALSE otherwise
- */
-gboolean
-gtd_task_list_view_get_show_new_task_row (GtdTaskListView *self)
-{
-  g_return_val_if_fail (GTD_IS_TASK_LIST_VIEW (self), FALSE);
-
-  return gtk_widget_get_visible (GTK_WIDGET (self->priv->new_task_row));
-}
-
-/**
- * gtd_task_list_view_set_show_new_task_row:
- * @view: a #GtdTaskListView
- *
- * Sets the #GtdTaskListView:show-new-task-mode property of @view.
- */
-void
-gtd_task_list_view_set_show_new_task_row (GtdTaskListView *view,
-                                          gboolean         show_new_task_row)
-{
-  g_return_if_fail (GTD_IS_TASK_LIST_VIEW (view));
-
-  gtk_widget_set_visible (GTK_WIDGET (view->priv->new_task_row), show_new_task_row);
-  g_object_notify (G_OBJECT (view), "show-new-task-row");
 }
 
 /**

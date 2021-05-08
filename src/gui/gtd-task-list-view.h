@@ -63,11 +63,6 @@ void                      gtd_task_list_view_set_header_func    (GtdTaskListView
                                                                  GtdTaskListViewHeaderFunc  func,
                                                                  gpointer                   user_data);
 
-gboolean                  gtd_task_list_view_get_show_new_task_row (GtdTaskListView        *view);
-
-void                      gtd_task_list_view_set_show_new_task_row (GtdTaskListView        *view,
-                                                                    gboolean                show_new_task_row);
-
 GDateTime*                gtd_task_list_view_get_default_date   (GtdTaskListView        *self);
 
 void                      gtd_task_list_view_set_default_date   (GtdTaskListView        *self,

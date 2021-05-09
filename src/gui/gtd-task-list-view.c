@@ -276,6 +276,19 @@ on_empty_list_widget_add_tasks_cb (GtdEmptyListWidget *empty_list_widget,
   gtk_stack_set_visible_child_name (self->main_stack, "task-list");
 }
 
+static void
+on_new_task_row_entered_cb (GtdTaskListView *self,
+                            GtdNewTaskRow   *row)
+{
+  set_active_row (self, NULL);
+}
+
+static void
+on_new_task_row_exited_cb (GtdTaskListView *self,
+                           GtdNewTaskRow   *row)
+{
+}
+
 static GtkWidget*
 create_row_for_task_cb (gpointer item,
                         gpointer user_data)
@@ -454,20 +467,6 @@ on_remove_task_row_cb (GtdTaskRow      *row,
 
   /* Clear the active row */
   set_active_row (self, NULL);
-}
-
-static void
-on_new_task_row_entered_cb (GtdTaskListView *self,
-                            GtdNewTaskRow   *row)
-{
-  set_active_row (self, NULL);
-}
-
-static void
-on_new_task_row_exited_cb (GtdTaskListView *self,
-                           GtdNewTaskRow   *row)
-{
-
 }
 
 static void

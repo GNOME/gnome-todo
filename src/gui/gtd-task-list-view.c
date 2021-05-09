@@ -22,6 +22,7 @@
 #include "gtd-edit-pane.h"
 #include "gtd-empty-list-widget.h"
 #include "gtd-task-list-view.h"
+#include "gtd-task-list-view-model.h"
 #include "gtd-manager.h"
 #include "gtd-markdown-renderer.h"
 #include "gtd-new-task-row.h"
@@ -70,13 +71,13 @@ struct _GtdTaskListView
   GtdEmptyListWidget    *empty_list_widget;
   GtkListBox            *listbox;
   GtkStack              *main_stack;
-  GtkListBoxRow         *new_task_row;
   GtkWidget             *scrolled_window;
 
   /* internal */
   gboolean               can_toggle;
   gboolean               show_due_date;
   gboolean               show_list_name;
+  GtdTaskListViewModel  *view_model;
   GListModel            *model;
   GDateTime             *default_date;
 
@@ -167,7 +168,12 @@ enum {
 static inline GtdTaskRow*
 task_row_from_row (GtkListBoxRow *row)
 {
-  return GTD_TASK_ROW (gtk_list_box_row_get_child (row));
+  GtkWidget *child = gtk_list_box_row_get_child (row);
+
+  if (!GTD_IS_TASK_ROW (child))
+    return NULL;
+
+  return GTD_TASK_ROW (child);
 }
 
 static void
@@ -299,17 +305,30 @@ create_row_for_task_cb (gpointer item,
 
   self = GTD_TASK_LIST_VIEW (user_data);
 
-  row = gtd_task_row_new (item, self->renderer);
-
-  gtd_task_row_set_list_name_visible (GTD_TASK_ROW (row), self->show_list_name);
-  gtd_task_row_set_due_date_visible (GTD_TASK_ROW (row), self->show_due_date);
-
-  g_signal_connect_swapped (row, "enter", G_CALLBACK (on_task_row_entered_cb), self);
-  g_signal_connect_swapped (row, "exit", G_CALLBACK (on_task_row_exited_cb), self);
-
-  g_signal_connect (row, "remove-task", G_CALLBACK (on_remove_task_row_cb), self);
-
   listbox_row = gtk_list_box_row_new ();
+
+  if (GTD_IS_TASK (item))
+    {
+      row = gtd_task_row_new (item, self->renderer);
+
+      gtd_task_row_set_list_name_visible (GTD_TASK_ROW (row), self->show_list_name);
+      gtd_task_row_set_due_date_visible (GTD_TASK_ROW (row), self->show_due_date);
+
+      g_signal_connect_swapped (row, "enter", G_CALLBACK (on_task_row_entered_cb), self);
+      g_signal_connect_swapped (row, "exit", G_CALLBACK (on_task_row_exited_cb), self);
+
+      g_signal_connect (row, "remove-task", G_CALLBACK (on_remove_task_row_cb), self);
+    }
+  else
+    {
+      row = gtd_new_task_row_new ();
+
+      g_signal_connect_swapped (row, "enter", G_CALLBACK (on_new_task_row_entered_cb), self);
+      g_signal_connect_swapped (row, "exit", G_CALLBACK (on_new_task_row_exited_cb), self);
+
+      gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (listbox_row), FALSE);
+    }
+
   gtk_list_box_row_set_child (GTK_LIST_BOX_ROW (listbox_row), row);
 
   g_object_bind_property (row, "visible", listbox_row, "visible", G_BINDING_BIDIRECTIONAL);
@@ -343,9 +362,11 @@ scroll_to_bottom_cb (gpointer data)
       gtk_widget_get_mapped (widget) &&
       !gtk_widget_is_ancestor (gtk_window_get_focus (GTK_WINDOW (root)), widget))
     {
+      GtkWidget *new_task_row;
       gboolean ignored;
 
-      gtk_widget_grab_focus (GTK_WIDGET (self->new_task_row));
+      new_task_row = gtk_widget_get_last_child (GTK_WIDGET (self->listbox));
+      gtk_widget_grab_focus (new_task_row);
       g_signal_emit_by_name (self->scrolled_window, "scroll-child", GTK_SCROLL_END, FALSE, &ignored);
     }
 
@@ -495,6 +516,9 @@ on_listbox_row_activated_cb (GtkListBox      *listbox,
 
   task_row = task_row_from_row (row);
 
+  if (!task_row)
+    GTD_RETURN ();
+
   /* Toggle the row */
   if (gtd_task_row_get_active (task_row))
     set_active_row (self, NULL);
@@ -522,6 +546,9 @@ internal_header_func (GtkListBoxRow   *row,
     return;
 
   row_task = before_task = NULL;
+
+  if (!task_row_from_row (row))
+    return;
 
   if (row)
     row_task = gtd_task_row_get_task (task_row_from_row (row));
@@ -621,6 +648,12 @@ update_row_drag_highlight (GtdTaskListView *self,
         }
     }
 
+  /* Don't add drag highlights to the new task row */
+  if (top_highlight && !GTD_IS_TASK_ROW (task_row_from_row (top_highlight)))
+    top_highlight = NULL;
+  if (bottom_highlight && !GTD_IS_TASK_ROW (task_row_from_row (bottom_highlight)))
+    bottom_highlight = NULL;
+
   /* Unhighlight previously highlighted rows */
   clear_drag_highlights (self);
 
@@ -680,7 +713,7 @@ get_drop_row_at_y (GtdTaskListView *self,
       drop_row = task_row;
     }
 
-  return drop_row ? drop_row : NULL;
+  return task_row_from_row (drop_row) ? drop_row : NULL;
 }
 
 static inline gboolean
@@ -839,6 +872,12 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
   gtk_widget_show (row);
 
   drop_row = get_drop_row_at_y (self, y);
+  if (!drop_row)
+    {
+      check_dnd_scroll (self, TRUE, -1);
+      GTD_RETURN (FALSE);
+    }
+
   hovered_row = task_row_from_row (drop_row);
   hovered_task = gtd_task_row_get_task (hovered_row);
   new_position = gtd_task_get_position (hovered_task);
@@ -1016,7 +1055,6 @@ gtd_task_list_view_class_init (GtdTaskListViewClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, empty_list_widget);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, listbox);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, main_stack);
-  gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, new_task_row);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, tasklist_name_sizegroup);
   gtk_widget_class_bind_template_child (widget_class, GtdTaskListView, scrolled_window);
 
@@ -1053,6 +1091,13 @@ gtd_task_list_view_init (GtdTaskListView *self)
   gtk_widget_add_controller (GTK_WIDGET (self->listbox), GTK_EVENT_CONTROLLER (target));
 
   self->renderer = gtd_markdown_renderer_new ();
+
+  self->view_model = gtd_task_list_view_model_new ();
+  gtk_list_box_bind_model (self->listbox,
+                           G_LIST_MODEL (self->view_model),
+                           create_row_for_task_cb,
+                           self,
+                           NULL);
 }
 
 /**
@@ -1100,15 +1145,12 @@ gtd_task_list_view_set_model (GtdTaskListView *view,
   g_return_if_fail (GTD_IS_TASK_LIST_VIEW (view));
   g_return_if_fail (G_IS_LIST_MODEL (model));
 
-  if (!g_set_object (&view->model, model))
+  if (view->model == model)
     return;
 
-  gtk_list_box_bind_model (view->listbox,
-                           model,
-                           create_row_for_task_cb,
-                           view,
-                           NULL);
+  view->model = model;
 
+  gtd_task_list_view_model_set_model (view->view_model, model);
   schedule_scroll_to_bottom (view);
   update_incomplete_tasks_model (view);
   update_empty_state (view);

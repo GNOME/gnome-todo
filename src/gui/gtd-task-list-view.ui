@@ -52,13 +52,6 @@
                             </style>
                           </object>
                         </child>
-                        <child>
-                          <object class="GtdNewTaskRow" id="new_task_row">
-                            <property name="margin-bottom">24</property>
-                            <signal name="enter" handler="on_new_task_row_entered_cb" object="GtdTaskListView" swapped="yes"/>
-                            <signal name="exit" handler="on_new_task_row_exited_cb" object="GtdTaskListView" swapped="yes"/>
-                          </object>
-                        </child>
                       </object>
                     </child>
                   </object>

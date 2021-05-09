@@ -140,6 +140,7 @@ sources += files(
   'gui/gtd-new-task-row.c',
   'gui/gtd-task-list-popover.c',
   'gui/gtd-task-list-view.c',
+  'gui/gtd-task-list-view-model.c',
   'gui/gtd-task-row.c',
   'gui/gtd-color-button.c',
   'gui/gtd-empty-list-widget.c',

@@ -1,4 +1,3 @@
-
 sources = []
 
 #######
@@ -318,7 +317,7 @@ if get_option('introspection')
   gir_incs = [
     'Gio-2.0',
     'GObject-2.0',
-    'Gtk-3.0'
+    'Gtk-4.0'
   ]
 
   gir_extra_args = '--warn-all'

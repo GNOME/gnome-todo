@@ -146,11 +146,12 @@ add_project_arguments(common_flags + compiler_flags, language: 'c')
 
 glib_dep = dependency('glib-2.0', version: '>= 2.58.0')
 gtk_dep = dependency('gtk4', version: '>= 3.92.0')
+libadwaita_dep = dependency('libadwaita-1', fallback: ['libadwaita', 'libadwaita_dep'])
 
 gnome_todo_deps = [
   glib_dep,
   gtk_dep,
-  dependency('libadwaita-1'),
+  libadwaita_dep,
   dependency('gio-2.0', version: '>= 2.43.4'),
   dependency('gmodule-export-2.0'),
   dependency('goa-1.0', version: '>= 3.2.0'),

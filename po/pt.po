@@ -6,13 +6,14 @@
 # Sérgio Cardeira <cardeira dot sergio at gmail dot com>, 2016.
 # Tiago Santos <tiagofsantos81@sapo.pt>, 2016.
 # Juliano de Souza Camargo <julianosc@protonmail.com>, 2020.
+# Hugo Carvalho <hugokarvalho@hotmail.com>, 2021.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2020-09-12 12:53+0000\n"
-"PO-Revision-Date: 2021-01-04 14:05+0000\n"
+"POT-Creation-Date: 2021-05-03 22:30+0000\n"
+"PO-Revision-Date: 2021-06-07 21:14+0100\n"
 "Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
 "Language-Team: Portuguese (https://l10n.gnome.org/teams/pt/)\n"
 "Language: pt\n"
@@ -20,10 +21,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.4.1\n"
+"X-Generator: Poedit 3.0\n"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:7
-#: data/org.gnome.Todo.desktop.in.in:3 src/gui/gtd-application.c:142
+#: data/org.gnome.Todo.desktop.in.in:3 src/gui/gtd-application.c:125
 #: src/gui/gtd-omni-area.ui:44 src/main.c:38
 msgid "To Do"
 msgstr "A fazer"
@@ -45,28 +46,16 @@ msgstr ""
 "com os fornecedores de cloud. Personalize a sua experiência com plugins."
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:25
-msgid "GNOME To Do with the dark theme variant"
-msgstr "A fazer do GNOME com a variante escura do tema"
+msgid "Welcome screen"
+msgstr "Ecrã de boas vindas"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:29
-msgid "Editing a tasklist with GNOME To Do"
-msgstr "Editando uma lista de tarefas com o A fazer do GNOME"
+msgid "Empty state"
+msgstr "Estado vazio"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:33
-msgid "Task lists displayed on grid mode"
-msgstr "Listas de tarefas apresentadas em modo grelha"
-
-#: data/appdata/org.gnome.Todo.appdata.xml.in.in:37
-msgid "Task lists displayed on list mode"
-msgstr "Listas de tarefas apresentadas em modo lista"
-
-#: data/appdata/org.gnome.Todo.appdata.xml.in.in:41
-msgid "Available plugins for GNOME To Do"
-msgstr "Extensões disponíveis para o A fazer do GNOME"
-
-#: data/appdata/org.gnome.Todo.appdata.xml.in.in:45
-msgid "Visualizing tasks for today on GNOME To Do’s Today panel"
-msgstr "Vendo as tarefas de hoje com o painel do A fazer do GNOME Hoje"
+msgid "Task lists"
+msgstr "Listas de tarefas"
 
 #: data/org.gnome.Todo.desktop.in.in:4
 msgid "Manage your personal tasks"
@@ -128,19 +117,19 @@ msgstr "A barra lateral revelada"
 msgid "Whether the sidebar is revealed or not"
 msgstr "Se a barra lateral é revelada ou não"
 
-#: src/gui/gtd-application.c:75
+#: src/gui/gtd-application.c:69
 msgid "Quit GNOME To Do"
 msgstr "Sair do A fazer GNOME"
 
-#: src/gui/gtd-application.c:76
+#: src/gui/gtd-application.c:70
 msgid "Enable debug messages"
 msgstr "Ativar mensagens de depuração"
 
-#: src/gui/gtd-application.c:146
+#: src/gui/gtd-application.c:129
 msgid "Copyright © 2015–2020 The To Do authors"
 msgstr "Direitos de autor © 2015-2020 Os autores do A fazer"
 
-#: src/gui/gtd-application.c:151
+#: src/gui/gtd-application.c:134
 msgid "translator-credits"
 msgstr ""
 "Pedro Albuquerque <palbuquerque73@gmail.com>\n"
@@ -182,54 +171,58 @@ msgctxt "taskdate"
 msgid "None"
 msgstr "Nenhuma"
 
-#: src/gui/gtd-empty-list-widget.c:51
+#: src/gui/gtd-empty-list-widget.c:50
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:53
 msgid "No more tasks left"
 msgstr "Não há mais tarefas"
 
-#: src/gui/gtd-empty-list-widget.c:52
+#: src/gui/gtd-empty-list-widget.c:51
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:54
 msgid "Nothing else to do here"
 msgstr "Não há mais nada a fazer por aqui"
 
-#: src/gui/gtd-empty-list-widget.c:53
+#: src/gui/gtd-empty-list-widget.c:52
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:55
 msgid "You made it!"
 msgstr "Está feito!"
 
-#: src/gui/gtd-empty-list-widget.c:54
+#: src/gui/gtd-empty-list-widget.c:53
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:56
 msgid "Looks like there’s nothing else left here"
 msgstr "Parece que já não há mais nada aqui"
 
-#: src/gui/gtd-empty-list-widget.c:59
+#: src/gui/gtd-empty-list-widget.c:58
 msgid "Get some rest now"
 msgstr "Já pode ir descansar"
 
-#: src/gui/gtd-empty-list-widget.c:60
+#: src/gui/gtd-empty-list-widget.c:59
 msgid "Enjoy the rest of your day"
 msgstr "Aproveite o resto do dia"
 
-#: src/gui/gtd-empty-list-widget.c:61
+#: src/gui/gtd-empty-list-widget.c:60
 msgid "Good job!"
 msgstr "Bom trabalho!"
 
-#: src/gui/gtd-empty-list-widget.c:62
+#: src/gui/gtd-empty-list-widget.c:61
 msgid "Meanwhile, spread the love"
 msgstr "Entretanto, espalhe amor"
 
-#: src/gui/gtd-empty-list-widget.c:63
+#: src/gui/gtd-empty-list-widget.c:62
 #: src/plugins/peace/gtd-peace-omni-area-addin.c:78
 msgid "Working hard is always rewarded"
 msgstr "Trabalhar arduamente traz sempre recompensas"
 
-#: src/gui/gtd-empty-list-widget.c:74
-msgid "No tasks found"
-msgstr "Sem tarefas"
+#: src/gui/gtd-empty-list-widget.c:72
+msgid "Tasks Will Appear Here"
+msgstr "As tarefas aparecerão aqui"
 
-#: src/gui/gtd-empty-list-widget.c:75
-msgid "You can add tasks using the <b>+</b> above"
-msgstr "Pode adicionar tarefas ao usar o <b>+</b> acima"
+#: src/gui/gtd-empty-list-widget.c:74
+msgid "Add Tasks…"
+msgstr "Adicionar tarefas…"
+
+#: src/gui/gtd-empty-list-widget.c:85
+msgid "Add More Tasks…"
+msgstr "Adicionar mais tarefas…"
 
 #: src/gui/gtd-initial-setup-window.ui:20
 msgid "Welcome"
@@ -243,7 +236,7 @@ msgstr "Inicie sessão nas suas contas online para aceder às suas tarefas"
 msgid "To Do Setup"
 msgstr "Configuração do A fazer"
 
-#: src/gui/gtd-initial-setup-window.ui:56 src/gui/gtd-provider-popover.ui:43
+#: src/gui/gtd-initial-setup-window.ui:56 src/gui/gtd-provider-popover.ui:42
 msgid "_Cancel"
 msgstr "_Cancelar"
 
@@ -265,35 +258,19 @@ msgstr "Erro ao criar tarefa"
 msgid "New task…"
 msgstr "Nova tarefa…"
 
-#: src/gui/gtd-plugin-dialog-row.c:97
-msgid "Error loading extension"
-msgstr "Erro ao carregar extensão"
-
-#: src/gui/gtd-plugin-dialog-row.c:97
-msgid "Error unloading extension"
-msgstr "Erro ao descarregar extensão"
-
-#: src/gui/gtd-plugin-dialog.ui:58
-msgid "Extensions"
-msgstr "Extensões"
-
-#: src/gui/gtd-plugin-dialog.ui:96
-msgid "No extensions found"
-msgstr "Não foram encontradas extenções"
-
 #: src/gui/gtd-provider-popover.c:97
 msgid "An error occurred while creating a task list"
 msgstr "Erro ao criar uma lista de tarefas"
 
-#: src/gui/gtd-provider-popover.ui:26
+#: src/gui/gtd-provider-popover.ui:25
 msgid "Create _List"
 msgstr "Criar _Lista"
 
-#: src/gui/gtd-provider-popover.ui:56
+#: src/gui/gtd-provider-popover.ui:55
 msgid "List Name"
 msgstr "Nome da lista"
 
-#: src/gui/gtd-provider-popover.ui:133
+#: src/gui/gtd-provider-popover.ui:132
 msgid "Select a storage location"
 msgstr "Selecione um local de armazenamento"
 
@@ -329,17 +306,17 @@ msgstr "Microsoft Exchange"
 msgid "Or you can just store your tasks on this computer"
 msgstr "Ou pode só armazenar as tarefas neste computador"
 
-#: src/gui/gtd-task-list-view.c:459
+#: src/gui/gtd-task-list-view.c:472
 #, c-format
 msgid "Task <b>%s</b> removed"
 msgstr "Tarefa <b>%s</b> removida"
 
-#: src/gui/gtd-task-list-view.c:478
+#: src/gui/gtd-task-list-view.c:491
 #: src/plugins/task-lists-workspace/gtd-sidebar.c:422
 msgid "Undo"
 msgstr "Desfazer"
 
-#: src/gui/gtd-task-row.c:130
+#: src/gui/gtd-task-row.c:127
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:133
 #: src/plugins/next-week-panel/gtd-next-week-panel.c:152
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:124
@@ -349,20 +326,20 @@ msgstr "Desfazer"
 msgid "Today"
 msgstr "Hoje"
 
-#: src/gui/gtd-task-row.c:134
+#: src/gui/gtd-task-row.c:131
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:137
 #: src/plugins/next-week-panel/gtd-next-week-panel.c:156
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:128
 msgid "Tomorrow"
 msgstr "Amanhã"
 
-#: src/gui/gtd-task-row.c:138
+#: src/gui/gtd-task-row.c:135
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:129
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:120
 msgid "Yesterday"
 msgstr "Ontem"
 
-#: src/gui/gtd-window.c:112
+#: src/gui/gtd-window.c:109
 msgid ""
 "This is a development build of To Do. You may experience errors, wrong "
 "behaviors, and data loss."
@@ -370,11 +347,11 @@ msgstr ""
 "Esta é uma compilação de desenvolvimento do A fazer. Pode experimentar "
 "erros, comportamentos errados, e perda de dados."
 
-#: src/gui/gtd-window.c:424
+#: src/gui/gtd-window.c:338
 msgid "Details"
 msgstr "Detalhes"
 
-#: src/gui/gtd-window.ui:158
+#: src/gui/gtd-window.ui:141
 msgid "_About To Do"
 msgstr "_Acerca do A fazer"
 
@@ -457,13 +434,13 @@ msgstr "Neste computador"
 msgid "Local"
 msgstr "Local"
 
-#: src/plugins/eds/gtd-task-list-eds.c:499
-#: src/plugins/eds/gtd-task-list-eds.c:526
-#: src/plugins/eds/gtd-task-list-eds.c:550
+#: src/plugins/eds/gtd-task-list-eds.c:407
+#: src/plugins/eds/gtd-task-list-eds.c:434
+#: src/plugins/eds/gtd-task-list-eds.c:458
 msgid "Error fetching tasks from list"
 msgstr "Erro ao obter tarefas da lista"
 
-#: src/plugins/eds/gtd-task-list-eds.c:932
+#: src/plugins/eds/gtd-task-list-eds.c:828
 #: src/plugins/inbox-panel/gtd-inbox-panel.c:111
 #: src/plugins/welcome/gtd-welcome-workspace.ui:48
 msgid "Inbox"
@@ -543,7 +520,6 @@ msgid "You can do it"
 msgstr "Pode fazê-lo"
 
 #: src/plugins/peace/gtd-peace-omni-area-addin.c:81
-#| msgid "Meanwhile, spread the love"
 msgid "Meanwhile, spread the love ♥️"
 msgstr "Entretanto, espalhe amor ♥️"
 
@@ -601,7 +577,7 @@ msgstr "Eliminar"
 msgid "Task Lists"
 msgstr "Listas de tarefas"
 
-#: src/plugins/task-lists-workspace/gtd-task-lists-workspace.ui:43
+#: src/plugins/task-lists-workspace/gtd-task-lists-workspace.ui:48
 msgid "New List"
 msgstr "Nova lista"
 
@@ -758,9 +734,45 @@ msgstr "Boa tarde, %s"
 msgid "Good Evening, %s"
 msgstr "Boa noite, %s"
 
-#: src/plugins/welcome/gtd-welcome-workspace.c:198
+#: src/plugins/welcome/gtd-welcome-workspace.c:206
 msgid "Home"
 msgstr "Início"
+
+#~ msgid "GNOME To Do with the dark theme variant"
+#~ msgstr "A fazer do GNOME com a variante escura do tema"
+
+#~ msgid "Editing a tasklist with GNOME To Do"
+#~ msgstr "Editando uma lista de tarefas com o A fazer do GNOME"
+
+#~ msgid "Task lists displayed on grid mode"
+#~ msgstr "Listas de tarefas apresentadas em modo grelha"
+
+#~ msgid "Task lists displayed on list mode"
+#~ msgstr "Listas de tarefas apresentadas em modo lista"
+
+#~ msgid "Available plugins for GNOME To Do"
+#~ msgstr "Extensões disponíveis para o A fazer do GNOME"
+
+#~ msgid "Visualizing tasks for today on GNOME To Do’s Today panel"
+#~ msgstr "Vendo as tarefas de hoje com o painel do A fazer do GNOME Hoje"
+
+#~ msgid "No tasks found"
+#~ msgstr "Sem tarefas"
+
+#~ msgid "You can add tasks using the <b>+</b> above"
+#~ msgstr "Pode adicionar tarefas ao usar o <b>+</b> acima"
+
+#~ msgid "Error loading extension"
+#~ msgstr "Erro ao carregar extensão"
+
+#~ msgid "Error unloading extension"
+#~ msgstr "Erro ao descarregar extensão"
+
+#~ msgid "Extensions"
+#~ msgstr "Extensões"
+
+#~ msgid "No extensions found"
+#~ msgstr "Não foram encontradas extenções"
 
 #~ msgid "_Quit"
 #~ msgstr "_Sair"

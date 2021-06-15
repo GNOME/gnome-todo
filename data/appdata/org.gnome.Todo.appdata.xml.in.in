@@ -40,6 +40,15 @@
   </kudos>
 
   <releases>
+    <release date="2021-06-15" version="40.1">
+      <description>
+        <p>
+          GNOME To Do 40.1 comes with a selection of fixes to bugs and packaging issues,
+          cleanups, and many updated translations.
+        </p>
+      </description>
+    </release>
+
     <release date="2021-05-03" version="40.0">
       <description>
         <p>

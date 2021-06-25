@@ -1,98 +1,73 @@
 # Russian translation for gnome-todo.
 # Copyright (C) 2015 gnome-todo's COPYRIGHT HOLDER
 # This file is distributed under the same license as the gnome-todo package.
+#
 # Stas Solovey <whats_up@tut.by>, 2015.
 # Yuri Myasoedov <ymyasoedov@yandex.ru>, 2017.
 # Ivan Komaritsyn <vantu5z@mail.ru>, 2015, 2017.
-#
+# Дронова Ю <juliette.tux@gmail.com>, 2021.
 msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo gnome-3-18\n"
-"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product=gnome-"
-"todo&keywords=I18N+L10N&component=General\n"
-"POT-Creation-Date: 2017-09-28 11:49+0000\n"
-"PO-Revision-Date: 2017-09-30 13:23+0400\n"
-"Last-Translator: Yuri Myasoedov <ymyasoedov@yandex.ru>\n"
-"Language-Team: русский <gnome-cyr@gnome.org>\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
+"POT-Creation-Date: 2021-06-08 15:54+0000\n"
+"PO-Revision-Date: 2021-06-25 17:12+0300\n"
+"Last-Translator: Дронова Ю <juliette.tux@gmail.com>\n"
+"Language-Team: Russian <kde-i18n-doc@kde.org>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 2.0.2\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<"
+"=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Lokalize 19.12.3\n"
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:7
-#: data/org.gnome.Todo.desktop.in:3 src/gtd-application.c:152
-#: src/gtd-application.c:178 src/gtd-window.c:952 src/gtd-window.c:987
+#: data/appdata/org.gnome.Todo.appdata.xml.in.in:7
+#: data/org.gnome.Todo.desktop.in.in:3 src/gui/gtd-application.c:125
+#: src/gui/gtd-omni-area.ui:44 src/main.c:38
 msgid "To Do"
 msgstr "To Do"
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:8
+#: data/appdata/org.gnome.Todo.appdata.xml.in.in:8
 msgid "Task manager for GNOME"
 msgstr "Менеджер задач для GNOME"
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:11
+#: data/appdata/org.gnome.Todo.appdata.xml.in.in:11
+#| msgid ""
+#| "GNOME To Do is a task management application designed to integrate with "
+#| "GNOME. It is extensible through plugins and supports custom task "
+#| "providers."
 msgid ""
 "GNOME To Do is a task management application designed to integrate with "
-"GNOME. It is extensible through plugins and supports custom task providers."
+"GNOME. Save and order your todos. Manage multiple todo lists. Keep your "
+"todos on your computer or sync them with cloud providers. Customize your "
+"experience with plugins."
 msgstr ""
 "GNOME To Do — приложение для управления задачами, разработанное для "
-"использования в GNOME. Оно может расширяться с помощью модулей и "
-"поддерживает внешние службы задач."
+"использования в GNOME. Сохраняйте и сортируйте свои задачи. Управляйте "
+"несколькими списками задач. Храните задачи на компьютере или синхронизируйте "
+"их с облаком. Расширяйте возможности с помощью модулей расширения."
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:24
-msgid "GNOME To Do with the dark theme variant"
-msgstr "GNOME To Do — вариант с тёмной темой"
+#: data/appdata/org.gnome.Todo.appdata.xml.in.in:25
+#| msgid "Welcome"
+msgid "Welcome screen"
+msgstr "Экран приветствия"
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:28
-msgid "Editing a tasklist with GNOME To Do"
-msgstr "Правка списка задач с помощью GNOME To Do"
+#: data/appdata/org.gnome.Todo.appdata.xml.in.in:29
+msgid "Empty state"
+msgstr "Пустое состояние"
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:32
-msgid "Task lists displayed on grid mode"
-msgstr "Списки задач отображаются таблицей"
+#: data/appdata/org.gnome.Todo.appdata.xml.in.in:33
+#| msgid "Remove task lists"
+msgid "Task lists"
+msgstr "Списки задач"
 
-#: data/appdata/org.gnome.Todo.appdata.xml.in:36
-msgid "Task lists displayed on list mode"
-msgstr "Списки задач отображаются списком"
-
-#: data/appdata/org.gnome.Todo.appdata.xml.in:40
-msgid "Available plugins for GNOME To Do"
-msgstr "Доступные модули для GNOME To Do"
-
-#: data/appdata/org.gnome.Todo.appdata.xml.in:44
-msgid "Visualizing tasks for today on GNOME To Do’s Today panel"
-msgstr ""
-"Визуализация сегодняшних задач в панели GNOME To Do для сегодняшних дел"
-
-#: data/gtk/menus.ui:7
-msgid "New List…"
-msgstr "Создать список…"
-
-#: data/gtk/menus.ui:20 data/ui/plugin-dialog.ui:75
-msgid "Extensions"
-msgstr "Расширения"
-
-#: data/gtk/menus.ui:27
-msgid "_About"
-msgstr "_О приложении"
-
-#: data/gtk/menus.ui:31
-msgid "_Quit"
-msgstr "_Завершить"
-
-#: data/org.gnome.Todo.desktop.in:4
+#: data/org.gnome.Todo.desktop.in.in:4
 msgid "Manage your personal tasks"
 msgstr "Управляйте своими персональными задачами"
 
-#. Translators: Do NOT translate or transliterate this text (this is an icon file name)!
-#: data/org.gnome.Todo.desktop.in:7
-msgid "org.gnome.Todo"
-msgstr "org.gnome.Todo"
-
 #. Translators: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
-#: data/org.gnome.Todo.desktop.in:13
+#: data/org.gnome.Todo.desktop.in.in:13
 msgid "Task;Productivity;Todo;"
 msgstr "Задачи;Продуктивность;Todo;"
 
@@ -113,206 +88,301 @@ msgid "Window size (width and height)."
 msgstr "Размер окна (ширина и высота)."
 
 #: data/org.gnome.todo.gschema.xml:16
-msgid "Window position"
-msgstr "Положение окна"
-
-#: data/org.gnome.todo.gschema.xml:17
-msgid "Window position (x and y)."
-msgstr "Положение окна (x и y)."
-
-#: data/org.gnome.todo.gschema.xml:21
 msgid "First run of GNOME To Do"
 msgstr "Первый запуск GNOME To Do"
 
-#: data/org.gnome.todo.gschema.xml:22
+#: data/org.gnome.todo.gschema.xml:17
 msgid ""
 "Whether it’s the first run of GNOME To Do (to run the initial setup) or not"
 msgstr ""
 "Является ли это первым запуском GNOME To Do (запускать начальную настройку) "
 "или нет"
 
-#: data/org.gnome.todo.gschema.xml:26
+#: data/org.gnome.todo.gschema.xml:21
 msgid "Default provider to add new lists to"
 msgstr "Служба по умолчанию, в которую добавляются списки"
 
-#: data/org.gnome.todo.gschema.xml:27
+#: data/org.gnome.todo.gschema.xml:22
 msgid "The identifier of the default provider to add new lists to"
 msgstr "Идентификатор службы по умолчанию, в которую добавляются новые списки"
 
-#: data/org.gnome.todo.gschema.xml:31
+#: data/org.gnome.todo.gschema.xml:26
 msgid "List of active extensions"
 msgstr "Список активных расширений"
 
-#: data/org.gnome.todo.gschema.xml:32
+#: data/org.gnome.todo.gschema.xml:27
 msgid "The list of active extensions"
 msgstr "Список активных расширений"
 
-#: data/org.gnome.todo.gschema.xml:36
-msgid "The current list selector"
-msgstr "Текущий селектор списка"
+#: data/org.gnome.todo.gschema.xml:31
+msgid "Sidebar revealed"
+msgstr "Показывать боковую панель"
 
-#: data/org.gnome.todo.gschema.xml:37
-msgid "The current list selector. Can be “grid” or “list”."
+#: data/org.gnome.todo.gschema.xml:32
+msgid "Whether the sidebar is revealed or not"
+msgstr "Определяет отображается боковая панель или нет"
+
+#: src/gui/gtd-application.c:69
+#| msgid "First run of GNOME To Do"
+msgid "Quit GNOME To Do"
+msgstr "Выйти из GNOME To Do"
+
+#: src/gui/gtd-application.c:70
+msgid "Enable debug messages"
+msgstr "Включить отладочные сообщения"
+
+#: src/gui/gtd-application.c:129
+#| msgid "Copyright © %d–%d The To Do authors"
+msgid "Copyright © 2015–2020 The To Do authors"
+msgstr "Copyright © 2015–2020 Авторы приложения To Do"
+
+#: src/gui/gtd-application.c:134
+msgid "translator-credits"
 msgstr ""
-"Текущий селектор списка. Может быть «grid» (сетка) или «list» (список)."
+"Stas Solovey <whats_up@tut.by>, 2015\n"
+"Ivan Komaritsyn <vantu5z@mail.ru>, 2015\n"
+"Yuri Myasoedov <ymyasoedov@yandex.ru>, 2017"
 
-#: data/ui/edit-pane.ui:24 plugins/eds/edit-pane.ui:259
+#: src/gui/gtd-edit-pane.c:93
+#: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:112
+#: src/plugins/next-week-panel/gtd-next-week-panel.c:140
+#: src/plugins/scheduled-panel/gtd-panel-scheduled.c:103
+msgid "No date set"
+msgstr "Дата не установлена"
+
+#: src/gui/gtd-edit-pane.ui:16
+msgid "D_ue Date"
+msgstr "_Дата выполнения"
+
+#: src/gui/gtd-edit-pane.ui:30
+msgid "_Today"
+msgstr "_Сегодня"
+
+#: src/gui/gtd-edit-pane.ui:39
+msgid "To_morrow"
+msgstr "_Завтра"
+
+#: src/gui/gtd-edit-pane.ui:75
+msgid "_Notes"
+msgstr "_Заметки"
+
+#: src/gui/gtd-edit-pane.ui:121
+msgid "_Delete"
+msgstr "_Удалить"
+
+#: src/gui/gtd-edit-pane.ui:158
 msgctxt "taskdate"
 msgid "None"
 msgstr "Нет"
 
-#: data/ui/edit-pane.ui:94 plugins/eds/edit-pane.ui:43 src/gtd-window.c:546
-msgid "Details"
-msgstr "Подробности"
+#: src/gui/gtd-empty-list-widget.c:50
+#: src/plugins/today-panel/gtd-today-omni-area-addin.c:53
+msgid "No more tasks left"
+msgstr "Задач больше нет"
 
-#: data/ui/edit-pane.ui:125
-msgid "_Notes"
-msgstr "_Заметки"
+#: src/gui/gtd-empty-list-widget.c:51
+#: src/plugins/today-panel/gtd-today-omni-area-addin.c:54
+msgid "Nothing else to do here"
+msgstr "Здесь больше нечего делать"
 
-#: data/ui/edit-pane.ui:168
-msgid "D_ue Date"
-msgstr "_Дата выполнения"
+#: src/gui/gtd-empty-list-widget.c:52
+#: src/plugins/today-panel/gtd-today-omni-area-addin.c:55
+msgid "You made it!"
+msgstr "Вы сделали это!"
 
-#: data/ui/edit-pane.ui:188
-msgid "_Priority"
-msgstr "_Приоритет"
+#: src/gui/gtd-empty-list-widget.c:53
+#: src/plugins/today-panel/gtd-today-omni-area-addin.c:56
+msgid "Looks like there’s nothing else left here"
+msgstr "Кажется, здесь больше ничего не осталось"
 
-#: data/ui/edit-pane.ui:208 plugins/eds/edit-pane.ui:195
-msgctxt "taskpriority"
-msgid "None"
-msgstr "Нет"
+#: src/gui/gtd-empty-list-widget.c:58
+msgid "Get some rest now"
+msgstr "Передохните немного"
 
-#: data/ui/edit-pane.ui:209 plugins/eds/edit-pane.ui:196
-msgid "Low"
-msgstr "Низкий"
+#: src/gui/gtd-empty-list-widget.c:59
+msgid "Enjoy the rest of your day"
+msgstr "Наслаждайтесь остатком дня"
 
-#: data/ui/edit-pane.ui:210 plugins/eds/edit-pane.ui:197
-msgid "Medium"
-msgstr "Средний"
+#: src/gui/gtd-empty-list-widget.c:60
+msgid "Good job!"
+msgstr "Хорошая работа!"
 
-#: data/ui/edit-pane.ui:211 plugins/eds/edit-pane.ui:198
-msgid "High"
-msgstr "Высокий"
+#: src/gui/gtd-empty-list-widget.c:61
+msgid "Meanwhile, spread the love"
+msgstr "А пока дарите любовь"
 
-#: data/ui/edit-pane.ui:222 data/ui/list-selector-panel.ui:93
-msgid "_Delete"
-msgstr "_Удалить"
+#: src/gui/gtd-empty-list-widget.c:62
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:78
+msgid "Working hard is always rewarded"
+msgstr "Тяжкие труды всегда вознаграждаются"
 
-#: data/ui/edit-pane.ui:246
-msgid "_Today"
-msgstr "_Сегодня"
+#: src/gui/gtd-empty-list-widget.c:72
+msgid "Tasks Will Appear Here"
+msgstr "Задачи появятся здесь"
 
-#: data/ui/edit-pane.ui:257
-msgid "To_morrow"
-msgstr "_Завтра"
+#: src/gui/gtd-empty-list-widget.c:74
+msgid "Add Tasks…"
+msgstr "Добавить задачи…"
 
-#: data/ui/edit-pane.ui:268
-msgid "Next _Week"
-msgstr "На с_ледующей неделе"
+#: src/gui/gtd-empty-list-widget.c:85
+msgid "Add More Tasks…"
+msgstr "Добавить больше задач…"
 
-#: data/ui/initial-setup.ui:25
+#: src/gui/gtd-initial-setup-window.ui:20
 msgid "Welcome"
 msgstr "Добро пожаловать"
 
-#: data/ui/initial-setup.ui:40
+#: src/gui/gtd-initial-setup-window.ui:31
 msgid "Log in to online accounts to access your tasks"
 msgstr "Войдите в сетевые учётные записи, чтобы получить доступ к задачам"
 
-#: data/ui/initial-setup.ui:67
+#: src/gui/gtd-initial-setup-window.ui:53
 msgid "To Do Setup"
 msgstr "Настройка To Do"
 
-#: data/ui/initial-setup.ui:70 data/ui/provider-popover.ui:43
-#: data/ui/window.ui:71
+#: src/gui/gtd-initial-setup-window.ui:56 src/gui/gtd-provider-popover.ui:42
 msgid "_Cancel"
 msgstr "_Отменить"
 
-#: data/ui/initial-setup.ui:80
+#: src/gui/gtd-initial-setup-window.ui:65
 msgid "_Done"
 msgstr "_Готово"
 
-#: data/ui/list-selector-panel.ui:79 data/ui/list-selector-panel.ui:173
-msgid "_Rename"
-msgstr "_Переименовать"
+#. Translators: %1$s is the task list name, %2$s is the provider name
+#: src/gui/gtd-new-task-row.c:90
+#, c-format
+msgid "%1$s \t <small>%2$s</small>"
+msgstr "%1$s \t <small>%2$s</small>"
 
-#: data/ui/list-selector-panel.ui:119 src/views/gtd-list-selector-panel.c:471
-msgid "Lists"
-msgstr "Списки"
+#: src/gui/gtd-new-task-row.c:127
+#| msgid "Error creating task"
+msgid "An error occurred while creating a task"
+msgstr "Ошибка при создании задачи"
 
-#: data/ui/list-selector-panel.ui:129
-msgid "Tasks"
-msgstr "Задачи"
-
-#: data/ui/list-selector-panel.ui:147
-msgid "Name of the task list"
-msgstr "Имя списка задач"
-
-#: data/ui/list-selector-panel.ui:263
-msgid "_New List"
-msgstr "_Создать список"
-
-#: data/ui/list-view.ui:111
-msgid "Show or hide completed tasks"
-msgstr "Показывать или скрывать завершённые задачи"
-
-#: data/ui/list-view.ui:137 src/gtd-task-list-view.c:784
-#: src/gtd-task-list-view.c:789
-msgid "Done"
-msgstr "Готово"
-
-#: data/ui/new-task-row.ui:39
+#: src/gui/gtd-new-task-row.ui:13
 msgid "New task…"
 msgstr "Создать задачу…"
 
-#: data/ui/plugin-dialog.ui:118
-msgid "No extensions found"
-msgstr "Расширения не найдены"
+#: src/gui/gtd-provider-popover.c:97
+#| msgid "Error creating task list"
+msgid "An error occurred while creating a task list"
+msgstr "Ошибка при создании списка задач"
 
-#: data/ui/provider-popover.ui:25
+#: src/gui/gtd-provider-popover.ui:25
 msgid "Create _List"
 msgstr "_Создать список"
 
-#: data/ui/provider-popover.ui:59
+#: src/gui/gtd-provider-popover.ui:55
 msgid "List Name"
 msgstr "Имя списка"
 
-#: data/ui/provider-popover.ui:155
+#: src/gui/gtd-provider-popover.ui:115
 msgid "Select a storage location"
 msgstr "Выберите место хранения"
 
-#: data/ui/provider-row.ui:70
+#: src/gui/gtd-provider-row.ui:60
 msgid "Off"
 msgstr "Выключено"
 
-#: data/ui/provider-selector.ui:27
+#: src/gui/gtd-provider-selector.ui:19
 msgid "Click to add a new Google account"
 msgstr "Нажмите для добавления новой учётной записи Google"
 
-#: data/ui/provider-selector.ui:51
+#: src/gui/gtd-provider-selector.ui:35
 msgid "Google"
 msgstr "Google"
 
-#: data/ui/provider-selector.ui:67
+#: src/gui/gtd-provider-selector.ui:45
 msgid "Click to add a new ownCloud account"
 msgstr "Нажмите для добавления новой учётной записи ownCloud"
 
-#: data/ui/provider-selector.ui:91
+#: src/gui/gtd-provider-selector.ui:61
 msgid "ownCloud"
 msgstr "ownCloud"
 
-#: data/ui/provider-selector.ui:107
+#: src/gui/gtd-provider-selector.ui:71
 msgid "Click to add a new Microsoft Exchange account"
 msgstr "Нажмите для добавления новой учётной записи Microsoft Exchange"
 
-#: data/ui/provider-selector.ui:131
+#: src/gui/gtd-provider-selector.ui:87
 msgid "Microsoft Exchange"
 msgstr "Microsoft Exchange"
 
-#: data/ui/provider-selector.ui:154
+#: src/gui/gtd-provider-selector.ui:100
 msgid "Or you can just store your tasks on this computer"
 msgstr "Также можно хранить задания на компьютере"
 
-#: plugins/background/gtd-plugin-background.c:148
+#: src/gui/gtd-task-list-view.c:463
+#, c-format
+msgid "Task <b>%s</b> removed"
+msgstr "Задача <b>%s</b> удалена"
+
+#: src/gui/gtd-task-list-view.c:482
+#: src/plugins/task-lists-workspace/gtd-sidebar.c:422
+msgid "Undo"
+msgstr "Отменить"
+
+#: src/gui/gtd-task-row.c:127
+#: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:133
+#: src/plugins/next-week-panel/gtd-next-week-panel.c:152
+#: src/plugins/scheduled-panel/gtd-panel-scheduled.c:124
+#: src/plugins/today-panel/gtd-panel-today.c:177
+#: src/plugins/today-panel/gtd-panel-today.c:295
+#: src/plugins/welcome/gtd-welcome-workspace.ui:56
+msgid "Today"
+msgstr "Сегодня"
+
+#: src/gui/gtd-task-row.c:131
+#: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:137
+#: src/plugins/next-week-panel/gtd-next-week-panel.c:156
+#: src/plugins/scheduled-panel/gtd-panel-scheduled.c:128
+msgid "Tomorrow"
+msgstr "Завтра"
+
+#: src/gui/gtd-task-row.c:135
+#: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:129
+#: src/plugins/scheduled-panel/gtd-panel-scheduled.c:120
+#| msgid "Yesterday"
+#| msgid_plural "%d days ago"
+msgid "Yesterday"
+msgstr "Вчера"
+
+#: src/gui/gtd-window.c:109
+msgid ""
+"This is a development build of To Do. You may experience errors, wrong "
+"behaviors, and data loss."
+msgstr ""
+"Это разрабатываемая версия программы. Могут встречаться ошибки, нелогичное "
+"поведение, а также потеря данных."
+
+#: src/gui/gtd-window.c:338
+msgid "Details"
+msgstr "Подробности"
+
+#: src/gui/gtd-window.ui:141
+#| msgid "_About"
+msgid "_About To Do"
+msgstr "_О приложении"
+
+#. Translators: This message will never be used with '1 day ago'
+#. * but the singular form is required because some languages do not
+#. * have plurals, some languages reuse the singular form for numbers
+#. * like 21, 31, 41, etc.
+#.
+#: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:125
+#: src/plugins/scheduled-panel/gtd-panel-scheduled.c:116
+#, c-format
+msgid "%d day ago"
+msgid_plural "%d days ago"
+msgstr[0] "%d день назад"
+msgstr[1] "%d дня назад"
+msgstr[2] "%d дней назад"
+
+#: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:335
+msgid "All"
+msgstr "Все"
+
+#: src/plugins/background/gtd-plugin-background.c:238
 #, c-format
 msgid "%1$s and one more task"
 msgid_plural "%1$s and %2$d other tasks"
@@ -320,7 +390,7 @@ msgstr[0] "%1$s и ещё %2$d задача"
 msgstr[1] "%1$s и %2$d других задачи"
 msgstr[2] "%1$s и %2$d других задач"
 
-#: plugins/background/gtd-plugin-background.c:247
+#: src/plugins/background/gtd-plugin-background.c:342
 #, c-format
 msgid "You have %d task for today"
 msgid_plural "You have %d tasks for today"
@@ -328,412 +398,560 @@ msgstr[0] "Имеется %d задача на сегодня"
 msgstr[1] "Имеется %d задачи на сегодня"
 msgstr[2] "Имеется %d задач на сегодня"
 
-#: plugins/background/org.gnome.todo.background.gschema.xml:6
+#: src/plugins/background/org.gnome.todo.background.gschema.xml:6
 msgid "Run To Do on startup"
 msgstr "Запускать To Do при загрузке системы"
 
-#: plugins/background/org.gnome.todo.background.gschema.xml:7
+#: src/plugins/background/org.gnome.todo.background.gschema.xml:7
 msgid "Whether GNOME To Do should run on startup"
 msgstr "Должен ли GNOME To Do запускаться при загрузке системы"
 
-#: plugins/background/org.gnome.todo.background.gschema.xml:11
+#: src/plugins/background/org.gnome.todo.background.gschema.xml:11
 msgid "Show notifications on startup"
 msgstr "Показывать уведомления при загрузке"
 
-#: plugins/background/org.gnome.todo.background.gschema.xml:12
+#: src/plugins/background/org.gnome.todo.background.gschema.xml:12
 msgid "Whether GNOME To Do should show notifications or not"
 msgstr "Должен ли GNOME To Do показывать уведомления или нет"
 
-#: plugins/background/ui/preferences.ui:53
+#: src/plugins/background/ui/preferences.ui:41
 msgid "Run on Startup"
 msgstr "Запуск при загрузке системы"
 
-#: plugins/background/ui/preferences.ui:66
+#: src/plugins/background/ui/preferences.ui:52
 msgid "Run To Do automatically when you log in"
 msgstr "Запускать To Do автоматически при входе в систему"
 
-#: plugins/background/ui/preferences.ui:122
+#: src/plugins/background/ui/preferences.ui:101
 msgid "Show Notifications"
 msgstr "Показывать уведомления"
 
-#: plugins/background/ui/preferences.ui:135
+#: src/plugins/background/ui/preferences.ui:112
 msgid "When To Do runs, show a startup notification"
 msgstr "При запуске To Do показать уведомление о загрузке"
 
-#: plugins/eds/edit-pane.ui:76
-msgid "Notes"
-msgstr "Заметки"
-
-#: plugins/eds/edit-pane.ui:117
-msgid "Due Date"
-msgstr "Дата выполнения"
-
-#: plugins/eds/edit-pane.ui:177
-msgid "Priority"
-msgstr "Приоритет"
-
-#: plugins/eds/edit-pane.ui:209
-msgid "Delete"
-msgstr "Удалить"
-
-#: plugins/eds/gtd-plugin-eds.c:243 plugins/eds/gtd-plugin-eds.c:247
+#: src/plugins/eds/gtd-plugin-eds.c:181
 msgid "Error loading GNOME Online Accounts"
 msgstr "Ошибка загрузки сетевых учётных записей GNOME"
 
-#: plugins/eds/gtd-plugin-eds.c:274
-msgid "Error loading Evolution-Data-Server backend"
-msgstr "Ошибка загрузки движка Evolution-Data-Server"
-
-#: plugins/eds/gtd-provider-eds.c:136 plugins/eds/gtd-provider-eds.c:140
-msgid "Error fetching tasks from list"
-msgstr "Ошибка получения задач из списка"
-
-#: plugins/eds/gtd-provider-eds.c:174 plugins/eds/gtd-provider-eds.c:179
+#: src/plugins/eds/gtd-provider-eds.c:190
 msgid "Failed to connect to task list"
 msgstr "Ошибка подключения к списку задач"
 
-#: plugins/eds/gtd-provider-eds.c:227
-msgid "Task list source successfully connected"
-msgstr "Источник списка задач успешно подключён"
-
-#: plugins/eds/gtd-provider-eds.c:336
-msgid "Failed to prompt for credentials"
-msgstr "Не удалось запросить учётные данные"
-
-#: plugins/eds/gtd-provider-eds.c:359
-msgid "Failed to prompt for credentials for"
-msgstr "Не удалось запросить учётные данные для"
-
-#: plugins/eds/gtd-provider-eds.c:413
-msgid "Authentication failure"
-msgstr "Ошибка аутентификации"
-
-#: plugins/eds/gtd-provider-eds.c:487
-msgid "Error loading task manager"
-msgstr "Ошибка загрузки менеджера задач"
-
-#: plugins/eds/gtd-provider-eds.c:573 plugins/eds/gtd-provider-eds.c:581
-msgid "Error creating task"
-msgstr "Ошибка создания задачи"
-
-#: plugins/eds/gtd-provider-eds.c:623 plugins/eds/gtd-provider-eds.c:627
-msgid "Error updating task"
-msgstr "Ошибка обновления задачи"
-
-#: plugins/eds/gtd-provider-eds.c:661 plugins/eds/gtd-provider-eds.c:665
-msgid "Error removing task"
-msgstr "Ошибка удаления задачи"
-
-#: plugins/eds/gtd-provider-eds.c:691 plugins/eds/gtd-provider-eds.c:695
-msgid "Error creating task list"
-msgstr "Ошибка создания списка задач"
-
-#: plugins/eds/gtd-provider-eds.c:716 plugins/eds/gtd-provider-eds.c:720
-msgid "Error removing task list"
-msgstr "Ошибка удаления списка задач"
-
-#: plugins/eds/gtd-provider-eds.c:779 plugins/eds/gtd-provider-eds.c:783
-#: plugins/eds/gtd-task-list-eds.c:69
-msgid "Error saving task list"
-msgstr "Ошибка сохранения списка задач"
-
-#: plugins/eds/gtd-provider-local.c:61
-msgid "Local"
-msgstr "Локальные"
-
-#: plugins/eds/gtd-provider-local.c:67
+#: src/plugins/eds/gtd-provider-local.c:50
 msgid "On This Computer"
 msgstr "На этом компьютере"
 
-#: plugins/eds/gtd-provider-local.c:134 plugins/eds/gtd-provider-local.c:138
-msgid "Error creating new task list"
-msgstr "Ошибка создания нового списка задач"
+#: src/plugins/eds/gtd-provider-local.c:62
+msgid "Local"
+msgstr "Локальные"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:94 src/gtd-edit-pane.c:217
-#: src/gtd-task-row.c:374
-msgid "No date set"
-msgstr "Дата не установлена"
+#: src/plugins/eds/gtd-task-list-eds.c:407
+#: src/plugins/eds/gtd-task-list-eds.c:434
+#: src/plugins/eds/gtd-task-list-eds.c:458
+msgid "Error fetching tasks from list"
+msgstr "Ошибка получения задач из списка"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:102 src/gtd-task-row.c:352
-#, c-format
-msgid "Yesterday"
-msgid_plural "%d days ago"
-msgstr[0] "%d день назад"
-msgstr[1] "%d дня назад"
-msgstr[2] "%d дней назад"
+#: src/plugins/eds/gtd-task-list-eds.c:828
+#: src/plugins/inbox-panel/gtd-inbox-panel.c:111
+#: src/plugins/welcome/gtd-welcome-workspace.ui:47
+msgid "Inbox"
+msgstr "Входящие"
 
-#. Setup a title
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:106
-#: plugins/score/score/__init__.py:95 plugins/today-panel/gtd-panel-today.c:132
-#: plugins/today-panel/gtd-panel-today.c:137
-#: plugins/today-panel/gtd-panel-today.c:271 src/gtd-task-row.c:344
-msgid "Today"
-msgstr "Сегодня"
+#: src/plugins/next-week-panel/gtd-next-week-panel.c:148
+#: src/plugins/today-panel/gtd-panel-today.c:168
+msgid "Overdue"
+msgstr "Просроченные"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:110 src/gtd-task-row.c:348
-msgid "Tomorrow"
-msgstr "Завтра"
+#: src/plugins/next-week-panel/gtd-next-week-panel.c:388
+msgid "Next 7 Days"
+msgstr "Следующие 7 дней"
 
-#. Setup a title
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:366
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:371
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:508
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:56
+msgid "Did you drink some water today?"
+msgstr "Вы сегодня пили хотя бы немного воды?"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:57
+#| msgid "You have %d task for today"
+#| msgid_plural "You have %d tasks for today"
+msgid "What are your goals for today?"
+msgstr "Какие планы на сегодня?"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:58
+msgid "Can you let your creativity flow?"
+msgstr "Может добавить немного креатива?"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:59
+msgid "How are you feeling right now?"
+msgstr "Как Вы себя чувствуете?"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:60
+msgid "At what point is it good enough?"
+msgstr "Когда это будет достаточно хорошо?"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:65
+msgid "Remember to breathe. Good. Don't stop."
+msgstr "Не забывайте дышать. Вот так, хорошо. Не останавливайтесь."
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:66
+msgid "Don't forget to drink some water"
+msgstr "Не забывайте пить воду"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:67
+msgid "Remember to take some time off"
+msgstr "Не забывайте отдыхать время от времени"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:68
+msgid "Eat fruits if you can 🍐️"
+msgstr "Съешьте фруктик, если можете 🍐️"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:69
+msgid "Take care of yourself"
+msgstr "Займитесь собой"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:70
+msgid "Remember to have some fun"
+msgstr "Получать удовольствие тоже важно"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:71
+msgid "You're doing great"
+msgstr "Похоже всё идёт отлично"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:76
+msgid "Smile, breathe and go slowly"
+msgstr "Улыбнитесь, отдышитесь и не спеша продолжайте"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:77
+msgid "Wherever you go, there you are"
+msgstr "От себя не убежишь"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:79
+msgid "Keep calm"
+msgstr "Сохраняйте спокойствие"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:80
+#| msgid "You made it!"
+msgid "You can do it"
+msgstr "Вы можете это сделать"
+
+#: src/plugins/peace/gtd-peace-omni-area-addin.c:81
+#| msgid "Meanwhile, spread the love"
+msgid "Meanwhile, spread the love ♥️"
+msgstr "А пока дарите любовь ♥️"
+
+#: src/plugins/scheduled-panel/gtd-panel-scheduled.c:345
 msgid "Scheduled"
 msgstr "Запланировано"
 
-#: plugins/scheduled-panel/gtd-panel-scheduled.c:513
-#: plugins/today-panel/gtd-panel-today.c:276
-#: plugins/unscheduled-panel/unscheduled-panel/__init__.py:52
-#: src/views/gtd-list-selector-panel.c:712
+#: src/plugins/task-lists-workspace/gtd-sidebar.c:419
+#, c-format
+#| msgid "Task <b>%s</b> removed"
+msgid "Task list <b>%s</b> removed"
+msgstr "Список задач <b>%s</b> удалён"
+
+#: src/plugins/task-lists-workspace/gtd-sidebar-provider-row.ui:69
+msgid "Loading…"
+msgstr "Загрузка…"
+
+#. Translators: 'archived' as in 'archived task lists'
+#: src/plugins/task-lists-workspace/gtd-sidebar.ui:94
+msgid "Archived"
+msgstr "Архивировано"
+
+#: src/plugins/task-lists-workspace/gtd-sidebar.ui:146
+msgid "No archived lists"
+msgstr "Нет списков в архиве"
+
+#: src/plugins/task-lists-workspace/gtd-task-list-panel.c:208
+msgid "Unarchive"
+msgstr "Разархивировать"
+
+#: src/plugins/task-lists-workspace/gtd-task-list-panel.c:208
+#: src/plugins/task-lists-workspace/gtd-task-list-panel.ui:48
+msgid "Archive"
+msgstr "Архивировать"
+
+#: src/plugins/task-lists-workspace/gtd-task-list-panel.c:233
+#| msgid "Error updating task"
+msgid "An error occurred while updating a task"
+msgstr "Ошибка при обновлении задачи"
+
+#: src/plugins/task-lists-workspace/gtd-task-list-panel.ui:33
+#: src/plugins/task-lists-workspace/gtd-task-list-panel.ui:77
+#: src/plugins/task-lists-workspace/gtd-task-list-panel.ui:92
+#| msgid "_Rename"
+msgid "Rename"
+msgstr "Переименовать"
+
+#: src/plugins/task-lists-workspace/gtd-task-list-panel.ui:39
+#: src/plugins/unscheduled-panel/unscheduled-panel/__init__.py:62
 msgid "Clear completed tasks…"
 msgstr "Очистить завершённые задачи…"
 
-#: plugins/score/score/__init__.py:84
-msgid "No task completed today"
-msgstr "Сегодня не выполнено ни одной задачи"
+#: src/plugins/task-lists-workspace/gtd-task-list-panel.ui:54
+msgid "Delete"
+msgstr "Удалить"
 
-#: plugins/todoist/gtd-provider-todoist.c:118
-msgid "Todoist"
-msgstr "Todoist"
+#: src/plugins/task-lists-workspace/gtd-task-lists-workspace.c:303
+#| msgid "Lists"
+msgid "Task Lists"
+msgstr "Списки задач"
 
-#: plugins/todoist/gtd-provider-todoist.c:198
-#: plugins/todoist/gtd-provider-todoist.c:430
-msgid "Error loading Todoist tasks"
-msgstr "Ошибка загрузки задач Todoist"
+#: src/plugins/task-lists-workspace/gtd-task-lists-workspace.ui:48
+#| msgid "_New List"
+msgid "New List"
+msgstr "Создать список"
 
-#: plugins/todoist/gtd-provider-todoist.c:213
+#: src/plugins/today-panel/gtd-today-omni-area-addin.c:94
+#, c-format
+#| msgid "You have %d task for today"
+#| msgid_plural "You have %d tasks for today"
+msgid "%d task for today"
+msgid_plural "%d tasks for today"
+msgstr[0] "%d задача на сегодня"
+msgstr[1] "%d задачи на сегодня"
+msgstr[2] "%d задач на сегодня"
+
+#: src/plugins/today-panel/gtd-today-omni-area-addin.c:109
+#| msgid "No task completed today"
+msgid "No tasks scheduled for today"
+msgstr "На сегодня не запланировано ни одной задачи"
+
+#: src/plugins/todoist/gtd-plugin-todoist.c:109
+msgid "GNOME To Do cannot connect to Todoist due to network issue"
+msgstr "Не удалось подключиться к Todoist из-за проблем с сетью"
+
+#: src/plugins/todoist/gtd-plugin-todoist.c:110
+msgid ""
+"Not able to communicate with Todoist. Please check your internet "
+"connectivity."
+msgstr "Отсутствует связь с Todoist. Проверьте интернет соединение."
+
+#: src/plugins/todoist/gtd-provider-todoist.c:213
 msgid "Error fetching Todoist account key"
 msgstr "Ошибка получения ключа учётной записи Todoist"
 
-#: plugins/todoist/gtd-provider-todoist.c:214
+#: src/plugins/todoist/gtd-provider-todoist.c:214
 msgid "Please ensure that Todoist account is correctly configured."
 msgstr "Проверьте правильность настройки учётной записи Todoist."
 
-#: plugins/todoist/gtd-provider-todoist.c:427
+#: src/plugins/todoist/gtd-provider-todoist.c:555
 #, c-format
-msgid "Bad status code (%d) received. Please check your connection."
-msgstr "Получен код состояния (%d). Проверьте ваше подключение."
+msgid ""
+"GNOME To Do doesn’t have the necessary permissions to perform this action: %s"
+msgstr "Отсутствуют необходимые разрешения для выполнения этого действия: %s"
 
-#: plugins/todoist/gtd-provider-todoist.c:962
+#: src/plugins/todoist/gtd-provider-todoist.c:563
+#, c-format
+msgid ""
+"Invalid response received from Todoist servers. Please reload GNOME To Do."
+msgstr ""
+"От сервера Todoist получен неверный ответ. Необходимо перезапустить "
+"приложение."
+
+#: src/plugins/todoist/gtd-provider-todoist.c:850
+#| msgid "Error loading Todoist tasks"
+msgid "An error occurred while updating a Todoist task"
+msgstr "Ошибка при обновлении задачи Todoist"
+
+#: src/plugins/todoist/gtd-provider-todoist.c:965
+msgid "An error occurred while retrieving Todoist data"
+msgstr "Ошибка при получении данных от Todoist"
+
+#: src/plugins/todoist/gtd-provider-todoist.c:1040
+#| msgid "Error while opening Todo.txt"
+msgid "An error occurred while updating Todoist"
+msgstr "Ошибка при обновлении Todoist"
+
+#: src/plugins/todoist/gtd-provider-todoist.c:1100
+msgid "Todoist"
+msgstr "Todoist"
+
+#: src/plugins/todoist/gtd-provider-todoist.c:1411
 #, c-format
 msgid "Todoist: %s"
 msgstr "Todoist: %s"
 
-#: plugins/todoist/ui/preferences.ui:80
+#: src/plugins/todoist/ui/preferences.ui:65
 msgid "No Todoist accounts found"
 msgstr "Учётная запись Todoist не найдена"
 
-#: plugins/todoist/ui/preferences.ui:89
+#: src/plugins/todoist/ui/preferences.ui:74
 msgid "Add a Todoist account"
 msgstr "Добавить учётную запись Todoist"
 
-#: plugins/todo-txt/gtd-plugin-todo-txt.c:142
-#: plugins/todo-txt/gtd-plugin-todo-txt.c:183
+#: src/plugins/todo-txt/gtd-plugin-todo-txt.c:87
+#: src/plugins/todo-txt/gtd-plugin-todo-txt.c:124
 msgid "Cannot create Todo.txt file"
 msgstr "Не удалось создать файл Todo.txt"
 
-#: plugins/todo-txt/gtd-plugin-todo-txt.c:307
+#: src/plugins/todo-txt/gtd-plugin-todo-txt.c:161
 msgid "Select a Todo.txt-formatted file:"
 msgstr "Выберите файл в формате Todo.txt:"
 
-#: plugins/todo-txt/gtd-plugin-todo-txt.c:308
+#. Filechooser
+#: src/plugins/todo-txt/gtd-plugin-todo-txt.c:165
 msgid "Select a file"
 msgstr "Выберите файл"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:75
-msgid "Todo.txt"
-msgstr "Todo.txt"
+#: src/plugins/todo-txt/gtd-plugin-todo-txt.c:191
+#| msgid "Error while opening Todo.txt"
+msgid "Error opening Todo.txt file"
+msgstr "Ошибка при открытии файла Todo.txt"
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:81
-msgid "On the Todo.txt file"
-msgstr "В файле Todo.txt"
+#: src/plugins/todo-txt/gtd-plugin-todo-txt.c:201
+msgid ""
+"<b>Warning!</b> Todo.txt support is experimental and unstable. You may "
+"experience instability, errors and eventually data loss. It is not "
+"recommended to use Todo.txt integration on production systems."
+msgstr ""
+"<b>Внимание!</b> Поддержка Todo.txt является экспериментальной и "
+"нестабильной. Могут встречаться ошибки и вероятна потеря данных. Не "
+"рекомендуется использовать Todo.txt на рабочих системах."
 
-#: plugins/todo-txt/gtd-provider-todo-txt.c:112
-#: plugins/todo-txt/gtd-provider-todo-txt.c:116
-msgid "Error while opening Todo.txt"
-msgstr "Ошибка при открытии Todo.txt"
-
-#: plugins/todo-txt/gtd-provider-todo-txt.c:263
-#: plugins/todo-txt/gtd-provider-todo-txt.c:267
-msgid "Error while reading a line from Todo.txt"
-msgstr "Ошибка при чтении строки из Todo.txt"
-
-#: plugins/todo-txt/gtd-provider-todo-txt.c:384
+#: src/plugins/todo-txt/gtd-provider-todo-txt.c:574
 msgid "Error while opening the file monitor. Todo.txt will not be monitored"
 msgstr ""
 "Ошибка при открытии файлового монитора. Todo.txt не будет отслеживаться"
 
-#: plugins/todo-txt/gtd-todo-txt-parser.c:310
-msgid "Incorrect date"
-msgstr "Некорректная дата"
+#: src/plugins/todo-txt/gtd-provider-todo-txt.c:643
+msgid "Todo.txt"
+msgstr "Todo.txt"
 
-#: plugins/todo-txt/gtd-todo-txt-parser.c:311
-msgid "Please make sure the date in Todo.txt is valid."
-msgstr "Проверьте правильность даты в Todo.txt."
+#: src/plugins/todo-txt/gtd-provider-todo-txt.c:655
+msgid "On the Todo.txt file"
+msgstr "В файле Todo.txt"
 
-#: plugins/todo-txt/gtd-todo-txt-parser.c:342
-msgid "Unrecognized token in a Todo.txt line"
-msgstr "Нераспознанный токен в строке Todo.txt"
-
-#: plugins/todo-txt/gtd-todo-txt-parser.c:343
-msgid ""
-"To Do cannot recognize some tags in your Todo.txt file. Some tasks may not "
-"be loaded"
-msgstr ""
-"To Do не удалось распознать некоторые метки в вашем файле Todo.txt. "
-"Некоторые задачи могут не загрузиться."
-
-#: plugins/todo-txt/gtd-todo-txt-parser.c:354
-msgid "No task list found for some tasks"
-msgstr "Для некоторых задач не был найден список задач"
-
-#: plugins/todo-txt/gtd-todo-txt-parser.c:355
-msgid ""
-"Some of the tasks in your Todo.txt file do not have a task list. To Do "
-"supports tasks with a task list. Please add a list to all your tasks"
-msgstr ""
-"У некоторых задач в вашем файле Todo.txt нет списка задач. To Do "
-"поддерживает задачи со списком задач. Добавьте список ко всем задачам"
-
-#: plugins/todo-txt/org.gnome.todo.txt.gschema.xml:6
+#: src/plugins/todo-txt/org.gnome.todo.txt.gschema.xml:6
 msgid "Todo.txt File"
 msgstr "Файл Todo.txt"
 
-#: plugins/todo-txt/org.gnome.todo.txt.gschema.xml:7
+#: src/plugins/todo-txt/org.gnome.todo.txt.gschema.xml:7
 msgid "Source of the Todo.txt file"
 msgstr "Источник файла Todo.txt"
 
 #. Translators: 'Unscheduled' as in 'Unscheduled tasks'
-#: plugins/unscheduled-panel/unscheduled-panel/__init__.py:34
-#: plugins/unscheduled-panel/unscheduled-panel/__init__.py:96
+#: src/plugins/unscheduled-panel/unscheduled-panel/__init__.py:41
+#: src/plugins/unscheduled-panel/unscheduled-panel/__init__.py:112
 msgid "Unscheduled"
 msgstr "Не запланировано"
 
 #. Translators: 'Unscheduled' as in 'Unscheduled tasks'
-#: plugins/unscheduled-panel/unscheduled-panel/__init__.py:99
+#: src/plugins/unscheduled-panel/unscheduled-panel/__init__.py:115
 #, python-format
 msgid "Unscheduled (%d)"
 msgstr "Не запланировано (%d)"
 
-#: src/gtd-application.c:142
+#: src/plugins/welcome/gtd-welcome-workspace.c:68
 #, c-format
-msgid "Copyright © %d The To Do authors"
-msgstr "Copyright © %d Авторы приложения To Do"
+msgid "Good Morning, %s"
+msgstr "Доброе утро, %s"
 
-#: src/gtd-application.c:147
+#: src/plugins/welcome/gtd-welcome-workspace.c:70
 #, c-format
-msgid "Copyright © %d–%d The To Do authors"
-msgstr "Copyright © %d–%d Авторы приложения To Do"
+msgid "Good Afternoon, %s"
+msgstr "Добрый день, %s"
 
-#: src/gtd-application.c:159
-msgid "translator-credits"
-msgstr ""
-"Stas Solovey <whats_up@tut.by>, 2015\n"
-"Ivan Komaritsyn <vantu5z@mail.ru>, 2015\n"
-"Yuri Myasoedov <ymyasoedov@yandex.ru>, 2017"
-
-#: src/gtd-empty-list-widget.c:49
-msgid "No more tasks left"
-msgstr "Задач больше нет"
-
-#: src/gtd-empty-list-widget.c:50
-msgid "Nothing else to do here"
-msgstr "Здесь больше нечего делать"
-
-#: src/gtd-empty-list-widget.c:51
-msgid "You made it!"
-msgstr "Вы сделали это!"
-
-#: src/gtd-empty-list-widget.c:52
-msgid "Looks like there’s nothing else left here"
-msgstr "Кажется, здесь больше ничего не осталось"
-
-#: src/gtd-empty-list-widget.c:57
-msgid "Get some rest now"
-msgstr "Передохните немного"
-
-#: src/gtd-empty-list-widget.c:58
-msgid "Enjoy the rest of your day"
-msgstr "Наслаждайтесь остатком дня"
-
-#: src/gtd-empty-list-widget.c:59
-msgid "Good job!"
-msgstr "Хорошая работа!"
-
-#: src/gtd-empty-list-widget.c:60
-msgid "Meanwhile, spread the love"
-msgstr "А пока дарите любовь"
-
-#: src/gtd-empty-list-widget.c:61
-msgid "Working hard is always rewarded"
-msgstr "Тяжкие труды всегда вознаграждаются"
-
-#: src/gtd-empty-list-widget.c:72
-msgid "No tasks found"
-msgstr "Заданий не найдено"
-
-#: src/gtd-empty-list-widget.c:73
-msgid "You can add tasks using the <b>+</b> above"
-msgstr "Вы можете добавлять задачи с помощью <b>+</b> выше"
-
-#: src/gtd-plugin-dialog-row.c:95
-msgid "Error loading plugin"
-msgstr "Ошибка загрузки модуля"
-
-#: src/gtd-plugin-dialog-row.c:95
-msgid "Error unloading plugin"
-msgstr "Ошибка выгрузки модуля"
-
-#: src/gtd-task-list-view.c:612
-msgid "Removing this task will also remove its subtasks. Remove anyway?"
-msgstr ""
-"Удаление этой задачи приведёт к удалению её подзадач. Всё равно удалить?"
-
-#: src/gtd-task-list-view.c:615
-msgid "Once removed, the tasks cannot be recovered."
-msgstr "После удаления задачи не могут быть восстановлены."
-
-#: src/gtd-task-list-view.c:618 src/views/gtd-list-selector-panel.c:392
-msgid "Cancel"
-msgstr "Отменить"
-
-#: src/gtd-task-list-view.c:620
-msgid "Remove"
-msgstr "Удалить"
-
-#: src/gtd-task-list-view.c:669
+#: src/plugins/welcome/gtd-welcome-workspace.c:72
 #, c-format
-msgid "Task <b>%s</b> removed"
-msgstr "Задача <b>%s</b> удалена"
+msgid "Good Evening, %s"
+msgstr "Добрый вечер, %s"
 
-#: src/gtd-task-list-view.c:699
-msgid "Undo"
-msgstr "Отменить"
+#: src/plugins/welcome/gtd-welcome-workspace.c:206
+msgid "Home"
+msgstr "Домой"
 
-#: src/gtd-window.c:820
-msgid "Loading your task lists…"
-msgstr "Загружаются списки задач…"
+#~ msgid "GNOME To Do with the dark theme variant"
+#~ msgstr "GNOME To Do — вариант с тёмной темой"
 
-#: src/gtd-window.c:946
-msgid "Click a task list to select"
-msgstr "Нажмите на список задач чтобы выбрать"
+#~ msgid "Editing a tasklist with GNOME To Do"
+#~ msgstr "Правка списка задач с помощью GNOME To Do"
 
-#: src/views/gtd-list-selector-grid-item.c:234
-msgid "No tasks"
-msgstr "Нет задач"
+#~ msgid "Task lists displayed on grid mode"
+#~ msgstr "Списки задач отображаются таблицей"
 
-#: src/views/gtd-list-selector-panel.c:186
-msgid "Setting new color for task list"
-msgstr "Установка нового цвета для списка задач"
+#~ msgid "Task lists displayed on list mode"
+#~ msgstr "Списки задач отображаются списком"
 
-#: src/views/gtd-list-selector-panel.c:385
-msgid "Remove the selected task lists?"
-msgstr "Удалить выбранные списки задач?"
+#~ msgid "Available plugins for GNOME To Do"
+#~ msgstr "Доступные модули для GNOME To Do"
 
-#: src/views/gtd-list-selector-panel.c:388
-msgid "Once removed, the task lists cannot be recovered."
-msgstr "После удаления, списки задач не могут быть восстановлены."
+#~ msgid "Visualizing tasks for today on GNOME To Do’s Today panel"
+#~ msgstr ""
+#~ "Визуализация сегодняшних задач в панели GNOME To Do для сегодняшних дел"
 
-#: src/views/gtd-list-selector-panel.c:400
-msgid "Remove task lists"
-msgstr "Удалить списки задач"
+#~ msgid "New List…"
+#~ msgstr "Создать список…"
+
+#~ msgid "Extensions"
+#~ msgstr "Расширения"
+
+#~ msgid "_Quit"
+#~ msgstr "_Завершить"
+
+#~ msgid "org.gnome.Todo"
+#~ msgstr "org.gnome.Todo"
+
+#~ msgid "Window position"
+#~ msgstr "Положение окна"
+
+#~ msgid "Window position (x and y)."
+#~ msgstr "Положение окна (x и y)."
+
+#~ msgid "The current list selector"
+#~ msgstr "Текущий селектор списка"
+
+#~ msgid "The current list selector. Can be “grid” or “list”."
+#~ msgstr ""
+#~ "Текущий селектор списка. Может быть «grid» (сетка) или «list» (список)."
+
+#~ msgid "_Priority"
+#~ msgstr "_Приоритет"
+
+#~ msgctxt "taskpriority"
+#~ msgid "None"
+#~ msgstr "Нет"
+
+#~ msgid "Low"
+#~ msgstr "Низкий"
+
+#~ msgid "Medium"
+#~ msgstr "Средний"
+
+#~ msgid "High"
+#~ msgstr "Высокий"
+
+#~ msgid "Next _Week"
+#~ msgstr "На с_ледующей неделе"
+
+#~ msgid "Tasks"
+#~ msgstr "Задачи"
+
+#~ msgid "Name of the task list"
+#~ msgstr "Имя списка задач"
+
+#~ msgid "Show or hide completed tasks"
+#~ msgstr "Показывать или скрывать завершённые задачи"
+
+#~ msgid "Done"
+#~ msgstr "Готово"
+
+#~ msgid "No extensions found"
+#~ msgstr "Расширения не найдены"
+
+#~ msgid "Notes"
+#~ msgstr "Заметки"
+
+#~ msgid "Due Date"
+#~ msgstr "Дата выполнения"
+
+#~ msgid "Priority"
+#~ msgstr "Приоритет"
+
+#~ msgid "Error loading Evolution-Data-Server backend"
+#~ msgstr "Ошибка загрузки движка Evolution-Data-Server"
+
+#~ msgid "Task list source successfully connected"
+#~ msgstr "Источник списка задач успешно подключён"
+
+#~ msgid "Failed to prompt for credentials"
+#~ msgstr "Не удалось запросить учётные данные"
+
+#~ msgid "Failed to prompt for credentials for"
+#~ msgstr "Не удалось запросить учётные данные для"
+
+#~ msgid "Authentication failure"
+#~ msgstr "Ошибка аутентификации"
+
+#~ msgid "Error loading task manager"
+#~ msgstr "Ошибка загрузки менеджера задач"
+
+#~ msgid "Error removing task"
+#~ msgstr "Ошибка удаления задачи"
+
+#~ msgid "Error removing task list"
+#~ msgstr "Ошибка удаления списка задач"
+
+#~ msgid "Error saving task list"
+#~ msgstr "Ошибка сохранения списка задач"
+
+#~ msgid "Error creating new task list"
+#~ msgstr "Ошибка создания нового списка задач"
+
+#~ msgid "Bad status code (%d) received. Please check your connection."
+#~ msgstr "Получен код состояния (%d). Проверьте ваше подключение."
+
+#~ msgid "Error while reading a line from Todo.txt"
+#~ msgstr "Ошибка при чтении строки из Todo.txt"
+
+#~ msgid "Incorrect date"
+#~ msgstr "Некорректная дата"
+
+#~ msgid "Please make sure the date in Todo.txt is valid."
+#~ msgstr "Проверьте правильность даты в Todo.txt."
+
+#~ msgid "Unrecognized token in a Todo.txt line"
+#~ msgstr "Нераспознанный токен в строке Todo.txt"
+
+#~ msgid ""
+#~ "To Do cannot recognize some tags in your Todo.txt file. Some tasks may "
+#~ "not be loaded"
+#~ msgstr ""
+#~ "To Do не удалось распознать некоторые метки в вашем файле Todo.txt. "
+#~ "Некоторые задачи могут не загрузиться."
+
+#~ msgid "No task list found for some tasks"
+#~ msgstr "Для некоторых задач не был найден список задач"
+
+#~ msgid ""
+#~ "Some of the tasks in your Todo.txt file do not have a task list. To Do "
+#~ "supports tasks with a task list. Please add a list to all your tasks"
+#~ msgstr ""
+#~ "У некоторых задач в вашем файле Todo.txt нет списка задач. To Do "
+#~ "поддерживает задачи со списком задач. Добавьте список ко всем задачам"
+
+#~ msgid "Copyright © %d The To Do authors"
+#~ msgstr "Copyright © %d Авторы приложения To Do"
+
+#~ msgid "No tasks found"
+#~ msgstr "Заданий не найдено"
+
+#~ msgid "You can add tasks using the <b>+</b> above"
+#~ msgstr "Вы можете добавлять задачи с помощью <b>+</b> выше"
+
+#~ msgid "Error loading plugin"
+#~ msgstr "Ошибка загрузки модуля"
+
+#~ msgid "Error unloading plugin"
+#~ msgstr "Ошибка выгрузки модуля"
+
+#~ msgid "Removing this task will also remove its subtasks. Remove anyway?"
+#~ msgstr ""
+#~ "Удаление этой задачи приведёт к удалению её подзадач. Всё равно удалить?"
+
+#~ msgid "Once removed, the tasks cannot be recovered."
+#~ msgstr "После удаления задачи не могут быть восстановлены."
+
+#~ msgid "Cancel"
+#~ msgstr "Отменить"
+
+#~ msgid "Remove"
+#~ msgstr "Удалить"
+
+#~ msgid "Loading your task lists…"
+#~ msgstr "Загружаются списки задач…"
+
+#~ msgid "Click a task list to select"
+#~ msgstr "Нажмите на список задач чтобы выбрать"
+
+#~ msgid "No tasks"
+#~ msgstr "Нет задач"
+
+#~ msgid "Setting new color for task list"
+#~ msgstr "Установка нового цвета для списка задач"
+
+#~ msgid "Remove the selected task lists?"
+#~ msgstr "Удалить выбранные списки задач?"
+
+#~ msgid "Once removed, the task lists cannot be recovered."
+#~ msgstr "После удаления, списки задач не могут быть восстановлены."

@@ -47,10 +47,13 @@ enum
 static guint signals[NUM_SIGNALS] = { 0, };
 
 static const gchar * const default_plugins[] = {
+  "all-tasks-panel",
   "eds",
   "welcome",
   "task-lists-workspace",
+  "today-panel",
   "inbox-panel",
+  "next-week-panel",
   "night-light",
   "peace",
 };

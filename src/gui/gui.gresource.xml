@@ -18,4 +18,9 @@
     <!-- Assets -->
     <file>assets/all-done.svg</file>
   </gresource>
+
+  <!-- GTK -->
+  <gresource prefix="/org/gnome/todo/gtk">
+    <file compressed="true" preprocess="xml-stripblanks">menus.ui</file>
+  </gresource>
 </gresources>

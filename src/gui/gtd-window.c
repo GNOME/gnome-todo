@@ -61,6 +61,7 @@ struct _GtdWindow
   AdwHeaderBar       *headerbar;
   GtkBox             *headerbar_box;
   GtkStack           *stack;
+  GtkMenuButton      *primary_menu_button;
   GtkBox             *workspace_box_end;
   GtkBox             *workspace_box_start;
   GtkListBox         *workspaces_listbox;
@@ -561,6 +562,7 @@ gtd_window_class_init (GtdWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, headerbar);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, headerbar_box);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, notification_widget);
+  gtk_widget_class_bind_template_child (widget_class, GtdWindow, primary_menu_button);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, stack);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, workspace_box_end);
   gtk_widget_class_bind_template_child (widget_class, GtdWindow, workspace_box_start);
@@ -574,6 +576,9 @@ gtd_window_class_init (GtdWindowClass *klass)
 static void
 gtd_window_init (GtdWindow *self)
 {
+  GtkApplication *application;
+  GMenu *primary_menu;
+
   static const GActionEntry entries[] = {
     { "activate-workspace", on_action_activate_workspace_activated_cb, "(sv)" },
   };
@@ -593,6 +598,11 @@ gtd_window_init (GtdWindow *self)
                            create_workspace_row_func,
                            self,
                            NULL);
+
+  /* Fancy primary menu */
+  application = GTK_APPLICATION (g_application_get_default ());
+  primary_menu = gtk_application_get_menu_by_id (application, "primary-menu");
+  gtk_menu_button_set_menu_model (self->primary_menu_button, G_MENU_MODEL (primary_menu));
 
   /* Development build */
   if (is_development_build ())

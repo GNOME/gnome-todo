@@ -58,9 +58,8 @@
 
 
                       <child type="end">
-                        <object class="GtkMenuButton">
-                          <property name="menu-model">app-menu</property>
-                          <property name="direction">none</property>
+                        <object class="GtkMenuButton" id="primary_menu_button">
+                          <property name="icon-name">open-menu-symbolic</property>
                         </object>
                       </child>
 
@@ -134,13 +133,4 @@
       </object>
     </child>
   </object>
-
-  <menu id="app-menu">
-    <section>
-      <item>
-        <attribute name="label" translatable="yes">_About To Do</attribute>
-        <attribute name="action">app.about</attribute>
-      </item>
-    </section>
-  </menu>
 </interface>

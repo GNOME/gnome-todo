@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="primary-menu">
+
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_About To Do</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+
+  </menu>
+</interface>

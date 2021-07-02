@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2021-05-03 22:30+0000\n"
-"PO-Revision-Date: 2021-05-05 20:42+0300\n"
+"POT-Creation-Date: 2021-07-02 17:08+0000\n"
+"PO-Revision-Date: 2021-07-02 21:19+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -44,17 +44,14 @@ msgstr ""
 "службами. Розширюйте можливості через додатки."
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:25
-#| msgid "Welcome"
 msgid "Welcome screen"
 msgstr "Вікно вітання"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:29
 msgid "Empty state"
-msgstr ""
-"Порожній стан"
+msgstr "Порожній стан"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:33
-#| msgid "Task Lists"
 msgid "Task lists"
 msgstr "Списки завдань"
 
@@ -116,6 +113,18 @@ msgstr "Показано бічну панель"
 #: data/org.gnome.todo.gschema.xml:32
 msgid "Whether the sidebar is revealed or not"
 msgstr "Чи буде показано бічну панель"
+
+#: data/org.gnome.todo.gschema.xml:40
+msgid "Style Variant"
+msgstr ""
+"Варіант стилю"
+
+#: data/org.gnome.todo.gschema.xml:41
+msgid ""
+"Use the light or dark variant of the GTK theme and/or GtkSourceView style "
+"scheme."
+msgstr ""
+"Скористатися світлим або темним варіантом теми GTK і/або схемою стилю GtkSourceView."
 
 #: src/gui/gtd-application.c:69
 msgid "Quit GNOME To Do"
@@ -264,7 +273,7 @@ msgstr "Створити _список"
 msgid "List Name"
 msgstr "Назва списку"
 
-#: src/gui/gtd-provider-popover.ui:132
+#: src/gui/gtd-provider-popover.ui:115
 msgid "Select a storage location"
 msgstr "Виберіть місце зберігання"
 
@@ -300,12 +309,12 @@ msgstr "Microsoft Exchange"
 msgid "Or you can just store your tasks on this computer"
 msgstr "Або можете просто зберігати завдання на цьому комп'ютері"
 
-#: src/gui/gtd-task-list-view.c:472
+#: src/gui/gtd-task-list-view.c:463
 #, c-format
 msgid "Task <b>%s</b> removed"
 msgstr "Завдання <b>%s</b> вилучено"
 
-#: src/gui/gtd-task-list-view.c:491
+#: src/gui/gtd-task-list-view.c:482
 #: src/plugins/task-lists-workspace/gtd-sidebar.c:422
 msgid "Undo"
 msgstr "Повернути"
@@ -316,7 +325,7 @@ msgstr "Повернути"
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:124
 #: src/plugins/today-panel/gtd-panel-today.c:177
 #: src/plugins/today-panel/gtd-panel-today.c:295
-#: src/plugins/welcome/gtd-welcome-workspace.ui:57
+#: src/plugins/welcome/gtd-welcome-workspace.ui:56
 msgid "Today"
 msgstr "Сьогодні"
 
@@ -333,7 +342,7 @@ msgstr "Завтра"
 msgid "Yesterday"
 msgstr "Вчора (%d день тому)"
 
-#: src/gui/gtd-window.c:109
+#: src/gui/gtd-window.c:111
 msgid ""
 "This is a development build of To Do. You may experience errors, wrong "
 "behaviors, and data loss."
@@ -341,13 +350,9 @@ msgstr ""
 "Це розробницька збірка To Do. Можливі помилки, неочікувана поведінка і "
 "втрати даних."
 
-#: src/gui/gtd-window.c:338
+#: src/gui/gtd-window.c:340
 msgid "Details"
 msgstr "Подробиці"
-
-#: src/gui/gtd-window.ui:141
-msgid "_About To Do"
-msgstr "_Про програму"
 
 #. Translators: This message will never be used with '1 day ago'
 #. * but the singular form is required because some languages do not
@@ -442,7 +447,7 @@ msgstr "Помилка одержання завдань зі списку"
 
 #: src/plugins/eds/gtd-task-list-eds.c:828
 #: src/plugins/inbox-panel/gtd-inbox-panel.c:111
-#: src/plugins/welcome/gtd-welcome-workspace.ui:48
+#: src/plugins/welcome/gtd-welcome-workspace.ui:47
 msgid "Inbox"
 msgstr "Вхідні"
 
@@ -732,6 +737,9 @@ msgstr "Доброї ночі, %s"
 #: src/plugins/welcome/gtd-welcome-workspace.c:206
 msgid "Home"
 msgstr "Домівка"
+
+#~ msgid "_About To Do"
+#~ msgstr "_Про програму"
 
 #~ msgid "GNOME To Do with the dark theme variant"
 #~ msgstr "«Треба зробити GNOME» з темною темою"

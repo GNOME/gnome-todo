@@ -814,7 +814,7 @@ on_drop_target_drag_motion_cb (GtkDropTarget   *drop_target,
 
   GTD_ENTRY;
 
-  drop = gtk_drop_target_get_drop (drop_target);
+  drop = gtk_drop_target_get_current_drop (drop_target);
   drag = gdk_drop_get_drag (drop);
 
   if (!drag)
@@ -850,7 +850,7 @@ on_drop_target_drag_drop_cb (GtkDropTarget   *drop_target,
 
   GTD_ENTRY;
 
-  drop = gtk_drop_target_get_drop (drop_target);
+  drop = gtk_drop_target_get_current_drop (drop_target);
   drag = gdk_drop_get_drag (drop);
 
   if (!drag)

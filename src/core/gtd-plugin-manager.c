@@ -54,7 +54,6 @@ static const gchar * const default_plugins[] = {
   "today-panel",
   "inbox-panel",
   "next-week-panel",
-  "night-light",
   "peace",
 };
 

@@ -13,6 +13,7 @@
     <file compressed="true" preprocess="xml-stripblanks">gtd-task-list-popover.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtd-task-list-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtd-task-row.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">gtd-theme-selector.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtd-window.ui</file>
 
     <!-- Assets -->

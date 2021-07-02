@@ -35,6 +35,7 @@
 #include "gtd-panel.h"
 #include "gtd-task.h"
 #include "gtd-task-list.h"
+#include "gtd-theme-selector.h"
 #include "gtd-window.h"
 #include "gtd-workspace.h"
 
@@ -577,6 +578,7 @@ static void
 gtd_window_init (GtdWindow *self)
 {
   GtkApplication *application;
+  GtkPopover *popover;
   GMenu *primary_menu;
 
   static const GActionEntry entries[] = {
@@ -604,6 +606,10 @@ gtd_window_init (GtdWindow *self)
   primary_menu = gtk_application_get_menu_by_id (application, "primary-menu");
   gtk_menu_button_set_menu_model (self->primary_menu_button, G_MENU_MODEL (primary_menu));
 
+  popover = gtk_menu_button_get_popover (self->primary_menu_button);
+  gtk_popover_menu_add_child (GTK_POPOVER_MENU (popover),
+                              gtd_theme_selector_new (),
+                              "theme");
   /* Development build */
   if (is_development_build ())
     setup_development_build (self);

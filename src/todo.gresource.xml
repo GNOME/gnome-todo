@@ -6,6 +6,7 @@
     <file compressed="true">themes/Adwaita-omniarea.css</file>
     <file compressed="true">themes/Adwaita-tasklistview.css</file>
     <file compressed="true">themes/Adwaita-taskrow.css</file>
+    <file compressed="true">themes/Adwaita-themeselector.css</file>
     <file compressed="true">themes/Adwaita-widgets.css</file>
   </gresource>
 </gresources>

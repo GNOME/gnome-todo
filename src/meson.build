@@ -152,6 +152,7 @@ sources += files(
   'gui/gtd-omni-area.c',
   'gui/gtd-omni-area-addin.c',
   'gui/gtd-theme-manager.c',
+  'gui/gtd-theme-selector.c',
   'gui/gtd-widget.c',
   'gui/gtd-window.c',
   'models/gtd-list-model-filter.c',

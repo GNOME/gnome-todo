@@ -31,5 +31,14 @@
             <summary>Sidebar revealed</summary>
             <description>Whether the sidebar is revealed or not</description>
         </key>
+        <key name="style-variant" type="s">
+          <choices>
+            <choice value="light"/>
+            <choice value="dark"/>
+          </choices>
+          <default>'light'</default>
+          <summary>Style Variant</summary>
+          <description>Use the light or dark variant of the GTK theme and/or GtkSourceView style scheme.</description>
+        </key>
     </schema>
 </schemalist>

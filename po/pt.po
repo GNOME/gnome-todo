@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2021-05-03 22:30+0000\n"
-"PO-Revision-Date: 2021-06-07 21:14+0100\n"
+"POT-Creation-Date: 2021-07-02 17:08+0000\n"
+"PO-Revision-Date: 2021-07-02 21:20+0100\n"
 "Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
 "Language-Team: Portuguese (https://l10n.gnome.org/teams/pt/)\n"
 "Language: pt\n"
@@ -116,6 +116,18 @@ msgstr "A barra lateral revelada"
 #: data/org.gnome.todo.gschema.xml:32
 msgid "Whether the sidebar is revealed or not"
 msgstr "Se a barra lateral é revelada ou não"
+
+#: data/org.gnome.todo.gschema.xml:40
+msgid "Style Variant"
+msgstr "Variante de estilo"
+
+#: data/org.gnome.todo.gschema.xml:41
+msgid ""
+"Use the light or dark variant of the GTK theme and/or GtkSourceView style "
+"scheme."
+msgstr ""
+"Use a variante clara ou escura do esquema de estilo do tema GTK e/ou "
+"GtkSourceView."
 
 #: src/gui/gtd-application.c:69
 msgid "Quit GNOME To Do"
@@ -270,7 +282,7 @@ msgstr "Criar _Lista"
 msgid "List Name"
 msgstr "Nome da lista"
 
-#: src/gui/gtd-provider-popover.ui:132
+#: src/gui/gtd-provider-popover.ui:115
 msgid "Select a storage location"
 msgstr "Selecione um local de armazenamento"
 
@@ -306,12 +318,12 @@ msgstr "Microsoft Exchange"
 msgid "Or you can just store your tasks on this computer"
 msgstr "Ou pode só armazenar as tarefas neste computador"
 
-#: src/gui/gtd-task-list-view.c:472
+#: src/gui/gtd-task-list-view.c:463
 #, c-format
 msgid "Task <b>%s</b> removed"
 msgstr "Tarefa <b>%s</b> removida"
 
-#: src/gui/gtd-task-list-view.c:491
+#: src/gui/gtd-task-list-view.c:482
 #: src/plugins/task-lists-workspace/gtd-sidebar.c:422
 msgid "Undo"
 msgstr "Desfazer"
@@ -322,7 +334,7 @@ msgstr "Desfazer"
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:124
 #: src/plugins/today-panel/gtd-panel-today.c:177
 #: src/plugins/today-panel/gtd-panel-today.c:295
-#: src/plugins/welcome/gtd-welcome-workspace.ui:57
+#: src/plugins/welcome/gtd-welcome-workspace.ui:56
 msgid "Today"
 msgstr "Hoje"
 
@@ -339,7 +351,7 @@ msgstr "Amanhã"
 msgid "Yesterday"
 msgstr "Ontem"
 
-#: src/gui/gtd-window.c:109
+#: src/gui/gtd-window.c:111
 msgid ""
 "This is a development build of To Do. You may experience errors, wrong "
 "behaviors, and data loss."
@@ -347,13 +359,9 @@ msgstr ""
 "Esta é uma compilação de desenvolvimento do A fazer. Pode experimentar "
 "erros, comportamentos errados, e perda de dados."
 
-#: src/gui/gtd-window.c:338
+#: src/gui/gtd-window.c:340
 msgid "Details"
 msgstr "Detalhes"
-
-#: src/gui/gtd-window.ui:141
-msgid "_About To Do"
-msgstr "_Acerca do A fazer"
 
 #. Translators: This message will never be used with '1 day ago'
 #. * but the singular form is required because some languages do not
@@ -442,7 +450,7 @@ msgstr "Erro ao obter tarefas da lista"
 
 #: src/plugins/eds/gtd-task-list-eds.c:828
 #: src/plugins/inbox-panel/gtd-inbox-panel.c:111
-#: src/plugins/welcome/gtd-welcome-workspace.ui:48
+#: src/plugins/welcome/gtd-welcome-workspace.ui:47
 msgid "Inbox"
 msgstr "Caixa de entrada"
 
@@ -737,6 +745,9 @@ msgstr "Boa noite, %s"
 #: src/plugins/welcome/gtd-welcome-workspace.c:206
 msgid "Home"
 msgstr "Início"
+
+#~ msgid "_About To Do"
+#~ msgstr "_Acerca do A fazer"
 
 #~ msgid "GNOME To Do with the dark theme variant"
 #~ msgstr "A fazer do GNOME com a variante escura do tema"

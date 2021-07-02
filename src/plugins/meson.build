@@ -14,7 +14,6 @@ plugins_conf.set('VERSION', gnome_todo_version)
 
 subdir('all-tasks-panel')
 subdir('background')
-subdir('dark-theme')
 subdir('eds')
 subdir('inbox-panel')
 subdir('next-week-panel')

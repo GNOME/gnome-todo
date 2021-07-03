@@ -328,6 +328,7 @@ on_popover_hidden_cb (GtkPopover       *popover,
                       GtdTaskListPanel *self)
 {
   gtk_editable_set_text (self->rename_entry, "");
+  gtk_stack_set_visible_child_name (self->popover_stack, "main");
 }
 
 static void

@@ -18,8 +18,10 @@ src/gui/gtd-task-list-view.c
 src/gui/gtd-task-list-view.ui
 src/gui/gtd-task-row.c
 src/gui/gtd-task-row.ui
+src/gui/gtd-theme-selector.ui
 src/gui/gtd-window.c
 src/gui/gtd-window.ui
+src/gui/menus.ui
 src/main.c
 src/plugins/all-tasks-panel/gtd-all-tasks-panel.c
 src/plugins/background/gtd-plugin-background.c

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2021-07-02 17:08+0000\n"
-"PO-Revision-Date: 2021-07-02 21:19+0300\n"
+"POT-Creation-Date: 2021-07-04 15:59+0000\n"
+"PO-Revision-Date: 2021-07-04 19:17+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -116,15 +116,15 @@ msgstr "Чи буде показано бічну панель"
 
 #: data/org.gnome.todo.gschema.xml:40
 msgid "Style Variant"
-msgstr ""
-"Варіант стилю"
+msgstr "Варіант стилю"
 
 #: data/org.gnome.todo.gschema.xml:41
 msgid ""
 "Use the light or dark variant of the GTK theme and/or GtkSourceView style "
 "scheme."
 msgstr ""
-"Скористатися світлим або темним варіантом теми GTK і/або схемою стилю GtkSourceView."
+"Скористатися світлим або темним варіантом теми GTK і/або схемою стилю "
+"GtkSourceView."
 
 #: src/gui/gtd-application.c:69
 msgid "Quit GNOME To Do"
@@ -342,6 +342,16 @@ msgstr "Завтра"
 msgid "Yesterday"
 msgstr "Вчора (%d день тому)"
 
+#: src/gui/gtd-theme-selector.ui:21
+msgid "Light style"
+msgstr ""
+"Світлий стиль"
+
+#: src/gui/gtd-theme-selector.ui:34
+msgid "Dark style"
+msgstr ""
+"Темний стиль"
+
 #: src/gui/gtd-window.c:111
 msgid ""
 "This is a development build of To Do. You may experience errors, wrong "
@@ -353,6 +363,10 @@ msgstr ""
 #: src/gui/gtd-window.c:340
 msgid "Details"
 msgstr "Подробиці"
+
+#: src/gui/menus.ui:13
+msgid "_About To Do"
+msgstr "_Про програму"
 
 #. Translators: This message will never be used with '1 day ago'
 #. * but the singular form is required because some languages do not
@@ -737,9 +751,6 @@ msgstr "Доброї ночі, %s"
 #: src/plugins/welcome/gtd-welcome-workspace.c:206
 msgid "Home"
 msgstr "Домівка"
-
-#~ msgid "_About To Do"
-#~ msgstr "_Про програму"
 
 #~ msgid "GNOME To Do with the dark theme variant"
 #~ msgstr "«Треба зробити GNOME» з темною темою"

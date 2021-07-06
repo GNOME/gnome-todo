@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2021-07-02 17:08+0000\n"
-"PO-Revision-Date: 2021-07-03 12:44-0300\n"
+"POT-Creation-Date: 2021-07-04 15:59+0000\n"
+"PO-Revision-Date: 2021-07-06 10:52-0300\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
@@ -351,6 +351,14 @@ msgstr "Amanhã"
 msgid "Yesterday"
 msgstr "Ontem"
 
+#: src/gui/gtd-theme-selector.ui:21
+msgid "Light style"
+msgstr "Estilo claro"
+
+#: src/gui/gtd-theme-selector.ui:34
+msgid "Dark style"
+msgstr "Estilo escuro"
+
 #: src/gui/gtd-window.c:111
 msgid ""
 "This is a development build of To Do. You may experience errors, wrong "
@@ -362,6 +370,10 @@ msgstr ""
 #: src/gui/gtd-window.c:340
 msgid "Details"
 msgstr "Detalhes"
+
+#: src/gui/menus.ui:13
+msgid "_About To Do"
+msgstr "_Sobre o Tarefas"
 
 #. Translators: This message will never be used with '1 day ago'
 #. * but the singular form is required because some languages do not
@@ -744,9 +756,6 @@ msgstr "Boa noite, %s"
 #: src/plugins/welcome/gtd-welcome-workspace.c:206
 msgid "Home"
 msgstr "Início"
-
-#~ msgid "_About To Do"
-#~ msgstr "_Sobre o Tarefas"
 
 #~ msgid "GNOME To Do with the dark theme variant"
 #~ msgstr "GNOME Tarefas com a variação do tema escuro"

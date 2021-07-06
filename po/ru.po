@@ -10,17 +10,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo gnome-3-18\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2021-06-08 15:54+0000\n"
-"PO-Revision-Date: 2021-06-25 17:12+0300\n"
-"Last-Translator: Дронова Ю <juliette.tux@gmail.com>\n"
+"POT-Creation-Date: 2021-07-04 15:59+0000\n"
+"PO-Revision-Date: 2021-07-06 13:00+0300\n"
+"Last-Translator: Alexey Rubtsov <rushills@gmail.com>\n"
 "Language-Team: Russian <kde-i18n-doc@kde.org>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<"
-"=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Lokalize 19.12.3\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 3.0\n"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:7
 #: data/org.gnome.Todo.desktop.in.in:3 src/gui/gtd-application.c:125
@@ -33,10 +33,6 @@ msgid "Task manager for GNOME"
 msgstr "Менеджер задач для GNOME"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:11
-#| msgid ""
-#| "GNOME To Do is a task management application designed to integrate with "
-#| "GNOME. It is extensible through plugins and supports custom task "
-#| "providers."
 msgid ""
 "GNOME To Do is a task management application designed to integrate with "
 "GNOME. Save and order your todos. Manage multiple todo lists. Keep your "
@@ -49,7 +45,6 @@ msgstr ""
 "их с облаком. Расширяйте возможности с помощью модулей расширения."
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:25
-#| msgid "Welcome"
 msgid "Welcome screen"
 msgstr "Экран приветствия"
 
@@ -58,7 +53,6 @@ msgid "Empty state"
 msgstr "Пустое состояние"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:33
-#| msgid "Remove task lists"
 msgid "Task lists"
 msgstr "Списки задач"
 
@@ -122,8 +116,19 @@ msgstr "Показывать боковую панель"
 msgid "Whether the sidebar is revealed or not"
 msgstr "Определяет отображается боковая панель или нет"
 
+#: data/org.gnome.todo.gschema.xml:40
+msgid "Style Variant"
+msgstr "Вариант стиля"
+
+#: data/org.gnome.todo.gschema.xml:41
+msgid ""
+"Use the light or dark variant of the GTK theme and/or GtkSourceView style "
+"scheme."
+msgstr ""
+"Использовать тёмный или светлый вариант темы GTK и/или стиль темы "
+"GtkSourceView."
+
 #: src/gui/gtd-application.c:69
-#| msgid "First run of GNOME To Do"
 msgid "Quit GNOME To Do"
 msgstr "Выйти из GNOME To Do"
 
@@ -132,7 +137,6 @@ msgid "Enable debug messages"
 msgstr "Включить отладочные сообщения"
 
 #: src/gui/gtd-application.c:129
-#| msgid "Copyright © %d–%d The To Do authors"
 msgid "Copyright © 2015–2020 The To Do authors"
 msgstr "Copyright © 2015–2020 Авторы приложения To Do"
 
@@ -141,7 +145,8 @@ msgid "translator-credits"
 msgstr ""
 "Stas Solovey <whats_up@tut.by>, 2015\n"
 "Ivan Komaritsyn <vantu5z@mail.ru>, 2015\n"
-"Yuri Myasoedov <ymyasoedov@yandex.ru>, 2017"
+"Yuri Myasoedov <ymyasoedov@yandex.ru>, 2017\n"
+"Alexey Rubtsov <rushills@gmail.com>, 2021"
 
 #: src/gui/gtd-edit-pane.c:93
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:112
@@ -255,7 +260,6 @@ msgid "%1$s \t <small>%2$s</small>"
 msgstr "%1$s \t <small>%2$s</small>"
 
 #: src/gui/gtd-new-task-row.c:127
-#| msgid "Error creating task"
 msgid "An error occurred while creating a task"
 msgstr "Ошибка при создании задачи"
 
@@ -264,7 +268,6 @@ msgid "New task…"
 msgstr "Создать задачу…"
 
 #: src/gui/gtd-provider-popover.c:97
-#| msgid "Error creating task list"
 msgid "An error occurred while creating a task list"
 msgstr "Ошибка при создании списка задач"
 
@@ -342,12 +345,18 @@ msgstr "Завтра"
 #: src/gui/gtd-task-row.c:135
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:129
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:120
-#| msgid "Yesterday"
-#| msgid_plural "%d days ago"
 msgid "Yesterday"
 msgstr "Вчера"
 
-#: src/gui/gtd-window.c:109
+#: src/gui/gtd-theme-selector.ui:21
+msgid "Light style"
+msgstr "Светлый стиль"
+
+#: src/gui/gtd-theme-selector.ui:34
+msgid "Dark style"
+msgstr "Тёмный стиль"
+
+#: src/gui/gtd-window.c:111
 msgid ""
 "This is a development build of To Do. You may experience errors, wrong "
 "behaviors, and data loss."
@@ -355,12 +364,11 @@ msgstr ""
 "Это разрабатываемая версия программы. Могут встречаться ошибки, нелогичное "
 "поведение, а также потеря данных."
 
-#: src/gui/gtd-window.c:338
+#: src/gui/gtd-window.c:340
 msgid "Details"
 msgstr "Подробности"
 
-#: src/gui/gtd-window.ui:141
-#| msgid "_About"
+#: src/gui/menus.ui:13
 msgid "_About To Do"
 msgstr "_О приложении"
 
@@ -472,8 +480,6 @@ msgid "Did you drink some water today?"
 msgstr "Вы сегодня пили хотя бы немного воды?"
 
 #: src/plugins/peace/gtd-peace-omni-area-addin.c:57
-#| msgid "You have %d task for today"
-#| msgid_plural "You have %d tasks for today"
 msgid "What are your goals for today?"
 msgstr "Какие планы на сегодня?"
 
@@ -530,12 +536,10 @@ msgid "Keep calm"
 msgstr "Сохраняйте спокойствие"
 
 #: src/plugins/peace/gtd-peace-omni-area-addin.c:80
-#| msgid "You made it!"
 msgid "You can do it"
 msgstr "Вы можете это сделать"
 
 #: src/plugins/peace/gtd-peace-omni-area-addin.c:81
-#| msgid "Meanwhile, spread the love"
 msgid "Meanwhile, spread the love ♥️"
 msgstr "А пока дарите любовь ♥️"
 
@@ -545,7 +549,6 @@ msgstr "Запланировано"
 
 #: src/plugins/task-lists-workspace/gtd-sidebar.c:419
 #, c-format
-#| msgid "Task <b>%s</b> removed"
 msgid "Task list <b>%s</b> removed"
 msgstr "Список задач <b>%s</b> удалён"
 
@@ -572,14 +575,12 @@ msgid "Archive"
 msgstr "Архивировать"
 
 #: src/plugins/task-lists-workspace/gtd-task-list-panel.c:233
-#| msgid "Error updating task"
 msgid "An error occurred while updating a task"
 msgstr "Ошибка при обновлении задачи"
 
 #: src/plugins/task-lists-workspace/gtd-task-list-panel.ui:33
 #: src/plugins/task-lists-workspace/gtd-task-list-panel.ui:77
 #: src/plugins/task-lists-workspace/gtd-task-list-panel.ui:92
-#| msgid "_Rename"
 msgid "Rename"
 msgstr "Переименовать"
 
@@ -593,19 +594,15 @@ msgid "Delete"
 msgstr "Удалить"
 
 #: src/plugins/task-lists-workspace/gtd-task-lists-workspace.c:303
-#| msgid "Lists"
 msgid "Task Lists"
 msgstr "Списки задач"
 
 #: src/plugins/task-lists-workspace/gtd-task-lists-workspace.ui:48
-#| msgid "_New List"
 msgid "New List"
 msgstr "Создать список"
 
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:94
 #, c-format
-#| msgid "You have %d task for today"
-#| msgid_plural "You have %d tasks for today"
 msgid "%d task for today"
 msgid_plural "%d tasks for today"
 msgstr[0] "%d задача на сегодня"
@@ -613,7 +610,6 @@ msgstr[1] "%d задачи на сегодня"
 msgstr[2] "%d задач на сегодня"
 
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:109
-#| msgid "No task completed today"
 msgid "No tasks scheduled for today"
 msgstr "На сегодня не запланировано ни одной задачи"
 
@@ -650,7 +646,6 @@ msgstr ""
 "приложение."
 
 #: src/plugins/todoist/gtd-provider-todoist.c:850
-#| msgid "Error loading Todoist tasks"
 msgid "An error occurred while updating a Todoist task"
 msgstr "Ошибка при обновлении задачи Todoist"
 
@@ -659,7 +654,6 @@ msgid "An error occurred while retrieving Todoist data"
 msgstr "Ошибка при получении данных от Todoist"
 
 #: src/plugins/todoist/gtd-provider-todoist.c:1040
-#| msgid "Error while opening Todo.txt"
 msgid "An error occurred while updating Todoist"
 msgstr "Ошибка при обновлении Todoist"
 
@@ -695,7 +689,6 @@ msgid "Select a file"
 msgstr "Выберите файл"
 
 #: src/plugins/todo-txt/gtd-plugin-todo-txt.c:191
-#| msgid "Error while opening Todo.txt"
 msgid "Error opening Todo.txt file"
 msgstr "Ошибка при открытии файла Todo.txt"
 

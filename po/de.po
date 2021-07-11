@@ -1,19 +1,21 @@
 # German translation for gnome-todo.
 # Copyright (C) 2015 gnome-todo's COPYRIGHT HOLDER
 # This file is distributed under the same license as the gnome-todo package.
+#
 # Friedrich Herbst <friedrich-herbst@gmx.de>, 2015.
 # Kristjan SCHMIDT <kristjan.schmidt@googlemail.com>, 2015.
-# Mario Blättermann <mario.blaettermann@gmail.com>, 2016-2018.
 # Bernd Homuth <dev@hmt.im>, 2016.
 # Christian Stadelmann <gnomel10n@genodeftest.de>, 2017.
+# Mario Blättermann <mario.blaettermann@gmail.com>, 2016-2018.
 # Tim Sabsch <tim@sabsch.com>, 2018-2019.
+# Philipp Kiemle <philipp.kiemle@gmail.com>, 2021.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2020-12-02 18:42+0000\n"
-"PO-Revision-Date: 2020-12-10 13:53+0100\n"
+"POT-Creation-Date: 2021-05-03 22:30+0000\n"
+"PO-Revision-Date: 2021-05-17 22:08+0200\n"
 "Last-Translator: Philipp Kiemle <philipp.kiemle@gmail.com>\n"
 "Language-Team: Deutsch <gnome-de@gnome.org>\n"
 "Language: de\n"
@@ -21,11 +23,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.4.1\n"
+"X-Generator: Poedit 2.4.2\n"
 "X-Project-Style: gnome\n"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:7
-#: data/org.gnome.Todo.desktop.in.in:3 src/gui/gtd-application.c:142
+#: data/org.gnome.Todo.desktop.in.in:3 src/gui/gtd-application.c:125
 #: src/gui/gtd-omni-area.ui:44 src/main.c:38
 msgid "To Do"
 msgstr "Aufgaben"
@@ -48,28 +50,16 @@ msgstr ""
 "erweiterbar."
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:25
-msgid "GNOME To Do with the dark theme variant"
-msgstr "GNOME Aufgaben mit dunklem Thema"
+msgid "Welcome screen"
+msgstr "Willkommen-Bildschirm"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:29
-msgid "Editing a tasklist with GNOME To Do"
-msgstr "Bearbeiten einer Aufgabenliste mit GNOME Aufgaben"
+msgid "Empty state"
+msgstr "Leerer Zustand"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:33
-msgid "Task lists displayed on grid mode"
-msgstr "In einer Gitteransicht angezeigte Aufgabenlisten"
-
-#: data/appdata/org.gnome.Todo.appdata.xml.in.in:37
-msgid "Task lists displayed on list mode"
-msgstr "In einer Listenansicht angezeigte Aufgabenlisten"
-
-#: data/appdata/org.gnome.Todo.appdata.xml.in.in:41
-msgid "Available plugins for GNOME To Do"
-msgstr "Für GNOME Aufgaben verfügbare Erweiterungen"
-
-#: data/appdata/org.gnome.Todo.appdata.xml.in.in:45
-msgid "Visualizing tasks for today on GNOME To Do’s Today panel"
-msgstr "Visualisierung der heutigen Aufgaben in der Ansicht von GNOME Aufgaben"
+msgid "Task lists"
+msgstr "Aufgabenlisten"
 
 #: data/org.gnome.Todo.desktop.in.in:4
 msgid "Manage your personal tasks"
@@ -131,25 +121,26 @@ msgstr "Seitenleiste enthüllt"
 msgid "Whether the sidebar is revealed or not"
 msgstr "Ob die Seitenleiste enthüllt ist oder nicht"
 
-#: src/gui/gtd-application.c:75
+#: src/gui/gtd-application.c:69
 msgid "Quit GNOME To Do"
 msgstr "GNOME Aufgaben beenden"
 
-#: src/gui/gtd-application.c:76
+#: src/gui/gtd-application.c:70
 msgid "Enable debug messages"
 msgstr "Diagnosemeldungen aktivieren"
 
-#: src/gui/gtd-application.c:146
+#: src/gui/gtd-application.c:129
 msgid "Copyright © 2015–2020 The To Do authors"
 msgstr "Copyright © 2015–2020 Die Aufgaben-Autoren"
 
-#: src/gui/gtd-application.c:151
+#: src/gui/gtd-application.c:134
 msgid "translator-credits"
 msgstr ""
 "Friedrich Herbst <friedrich-herbst@gmx.de>, 2015\n"
 "Christian Kirbach <Christian.Kirbach@gmail.com>, 2015\n"
 "Bernd Homuth <dev@hmt.im>, 2015, 2016\n"
-"Tim Sabsch <tim@sabsch.com>, 2018-2019"
+"Tim Sabsch <tim@sabsch.com>, 2018-2019\n"
+"Philipp Kiemle <philipp.kiemle@gmail.com>, 2021"
 
 #: src/gui/gtd-edit-pane.c:93
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:112
@@ -183,54 +174,58 @@ msgctxt "taskdate"
 msgid "None"
 msgstr "Keine"
 
-#: src/gui/gtd-empty-list-widget.c:51
+#: src/gui/gtd-empty-list-widget.c:50
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:53
 msgid "No more tasks left"
 msgstr "Keine weiteren Aufgaben"
 
-#: src/gui/gtd-empty-list-widget.c:52
+#: src/gui/gtd-empty-list-widget.c:51
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:54
 msgid "Nothing else to do here"
 msgstr "Nichts mehr zu tun"
 
-#: src/gui/gtd-empty-list-widget.c:53
+#: src/gui/gtd-empty-list-widget.c:52
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:55
 msgid "You made it!"
 msgstr "Erledigt!"
 
-#: src/gui/gtd-empty-list-widget.c:54
+#: src/gui/gtd-empty-list-widget.c:53
 #: src/plugins/today-panel/gtd-today-omni-area-addin.c:56
 msgid "Looks like there’s nothing else left here"
 msgstr "Es scheint, hier gibt es nichts mehr zu tun"
 
-#: src/gui/gtd-empty-list-widget.c:59
+#: src/gui/gtd-empty-list-widget.c:58
 msgid "Get some rest now"
 msgstr "Gönnen Sie sich nun etwas Ruhe"
 
-#: src/gui/gtd-empty-list-widget.c:60
+#: src/gui/gtd-empty-list-widget.c:59
 msgid "Enjoy the rest of your day"
 msgstr "Genießen Sie den Rest Ihres Tages"
 
-#: src/gui/gtd-empty-list-widget.c:61
+#: src/gui/gtd-empty-list-widget.c:60
 msgid "Good job!"
 msgstr "Gute Arbeit!"
 
-#: src/gui/gtd-empty-list-widget.c:62
+#: src/gui/gtd-empty-list-widget.c:61
 msgid "Meanwhile, spread the love"
 msgstr "Tragen Sie in der Zwischenzeit Ihre Begeisterung in die Welt"
 
-#: src/gui/gtd-empty-list-widget.c:63
+#: src/gui/gtd-empty-list-widget.c:62
 #: src/plugins/peace/gtd-peace-omni-area-addin.c:78
 msgid "Working hard is always rewarded"
 msgstr "Harte Arbeit wird immer geschätzt"
 
-#: src/gui/gtd-empty-list-widget.c:74
-msgid "No tasks found"
-msgstr "Keine Aufgaben gefunden"
+#: src/gui/gtd-empty-list-widget.c:72
+msgid "Tasks Will Appear Here"
+msgstr "Hier werden Aufgaben erscheinen"
 
-#: src/gui/gtd-empty-list-widget.c:75
-msgid "You can add tasks using the <b>+</b> above"
-msgstr "Sie können Aufgaben mit dem <b>+</b> oben hinzufügen"
+#: src/gui/gtd-empty-list-widget.c:74
+msgid "Add Tasks…"
+msgstr "Aufgaben hinzufügen …"
+
+#: src/gui/gtd-empty-list-widget.c:85
+msgid "Add More Tasks…"
+msgstr "Weitere Aufgaben hinzugfügen …"
 
 #: src/gui/gtd-initial-setup-window.ui:20
 msgid "Welcome"
@@ -244,7 +239,7 @@ msgstr "Melden Sie sich bei den Online-Konten für Zugriff auf Ihre Aufgaben an"
 msgid "To Do Setup"
 msgstr "Aufgaben einrichten"
 
-#: src/gui/gtd-initial-setup-window.ui:56 src/gui/gtd-provider-popover.ui:43
+#: src/gui/gtd-initial-setup-window.ui:56 src/gui/gtd-provider-popover.ui:42
 msgid "_Cancel"
 msgstr "A_bbrechen"
 
@@ -266,35 +261,19 @@ msgstr "Beim Erstellen einer Aufgabe ist ein Fehler aufgetreten"
 msgid "New task…"
 msgstr "Neue Aufgabe …"
 
-#: src/gui/gtd-plugin-dialog-row.c:97
-msgid "Error loading extension"
-msgstr "Fehler beim Laden der Erweiterung"
-
-#: src/gui/gtd-plugin-dialog-row.c:97
-msgid "Error unloading extension"
-msgstr "Fehler beim Entladen der Erweiterung"
-
-#: src/gui/gtd-plugin-dialog.ui:58
-msgid "Extensions"
-msgstr "Erweiterungen"
-
-#: src/gui/gtd-plugin-dialog.ui:96
-msgid "No extensions found"
-msgstr "Keine Erweiterungen gefunden"
-
 #: src/gui/gtd-provider-popover.c:97
 msgid "An error occurred while creating a task list"
 msgstr "Beim Anlegen einer Aufgabenliste ist ein Fehler aufgetreten"
 
-#: src/gui/gtd-provider-popover.ui:26
+#: src/gui/gtd-provider-popover.ui:25
 msgid "Create _List"
 msgstr "_Liste erstellen"
 
-#: src/gui/gtd-provider-popover.ui:56
+#: src/gui/gtd-provider-popover.ui:55
 msgid "List Name"
 msgstr "Listenname"
 
-#: src/gui/gtd-provider-popover.ui:133
+#: src/gui/gtd-provider-popover.ui:132
 msgid "Select a storage location"
 msgstr "Wählen Sie einen Speicherort"
 
@@ -330,17 +309,17 @@ msgstr "Microsoft Exchange"
 msgid "Or you can just store your tasks on this computer"
 msgstr "Sie können Ihre Aufgaben auch einfach auf diesem Rechner speichern"
 
-#: src/gui/gtd-task-list-view.c:459
+#: src/gui/gtd-task-list-view.c:472
 #, c-format
 msgid "Task <b>%s</b> removed"
 msgstr "Aufgabe <b>%s</b> entfernt"
 
-#: src/gui/gtd-task-list-view.c:478
+#: src/gui/gtd-task-list-view.c:491
 #: src/plugins/task-lists-workspace/gtd-sidebar.c:422
 msgid "Undo"
 msgstr "Rückgängig"
 
-#: src/gui/gtd-task-row.c:131
+#: src/gui/gtd-task-row.c:127
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:133
 #: src/plugins/next-week-panel/gtd-next-week-panel.c:152
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:124
@@ -350,20 +329,20 @@ msgstr "Rückgängig"
 msgid "Today"
 msgstr "Heute"
 
-#: src/gui/gtd-task-row.c:135
+#: src/gui/gtd-task-row.c:131
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:137
 #: src/plugins/next-week-panel/gtd-next-week-panel.c:156
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:128
 msgid "Tomorrow"
 msgstr "Morgen"
 
-#: src/gui/gtd-task-row.c:139
+#: src/gui/gtd-task-row.c:135
 #: src/plugins/all-tasks-panel/gtd-all-tasks-panel.c:129
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:120
 msgid "Yesterday"
 msgstr "Gestern"
 
-#: src/gui/gtd-window.c:112
+#: src/gui/gtd-window.c:109
 msgid ""
 "This is a development build of To Do. You may experience errors, wrong "
 "behaviors, and data loss."
@@ -371,11 +350,11 @@ msgstr ""
 "Dies ist eine Entwicklerversion von GNOME Aufgabe. Es könnte zu Fehler, "
 "unerwünschtem Verhalten und Datenverlust kommen."
 
-#: src/gui/gtd-window.c:424
+#: src/gui/gtd-window.c:338
 msgid "Details"
 msgstr "Details"
 
-#: src/gui/gtd-window.ui:158
+#: src/gui/gtd-window.ui:141
 msgid "_About To Do"
 msgstr "_Info zu Aufgaben"
 
@@ -461,13 +440,13 @@ msgstr "Auf diesem Rechner"
 msgid "Local"
 msgstr "Lokal"
 
-#: src/plugins/eds/gtd-task-list-eds.c:499
-#: src/plugins/eds/gtd-task-list-eds.c:526
-#: src/plugins/eds/gtd-task-list-eds.c:550
+#: src/plugins/eds/gtd-task-list-eds.c:407
+#: src/plugins/eds/gtd-task-list-eds.c:434
+#: src/plugins/eds/gtd-task-list-eds.c:458
 msgid "Error fetching tasks from list"
 msgstr "Fehler beim Abrufen von Aufgaben aus der Liste"
 
-#: src/plugins/eds/gtd-task-list-eds.c:932
+#: src/plugins/eds/gtd-task-list-eds.c:828
 #: src/plugins/inbox-panel/gtd-inbox-panel.c:111
 #: src/plugins/welcome/gtd-welcome-workspace.ui:48
 msgid "Inbox"
@@ -604,7 +583,7 @@ msgstr "Löschen"
 msgid "Task Lists"
 msgstr "Aufgabenliste"
 
-#: src/plugins/task-lists-workspace/gtd-task-lists-workspace.ui:43
+#: src/plugins/task-lists-workspace/gtd-task-lists-workspace.ui:48
 msgid "New List"
 msgstr "Neue Liste"
 
@@ -768,9 +747,46 @@ msgstr "Guten Nachmittag, %s"
 msgid "Good Evening, %s"
 msgstr "Guten Abend, %s"
 
-#: src/plugins/welcome/gtd-welcome-workspace.c:198
+#: src/plugins/welcome/gtd-welcome-workspace.c:206
 msgid "Home"
 msgstr "Startbildschirm"
+
+#~ msgid "GNOME To Do with the dark theme variant"
+#~ msgstr "GNOME Aufgaben mit dunklem Thema"
+
+#~ msgid "Editing a tasklist with GNOME To Do"
+#~ msgstr "Bearbeiten einer Aufgabenliste mit GNOME Aufgaben"
+
+#~ msgid "Task lists displayed on grid mode"
+#~ msgstr "In einer Gitteransicht angezeigte Aufgabenlisten"
+
+#~ msgid "Task lists displayed on list mode"
+#~ msgstr "In einer Listenansicht angezeigte Aufgabenlisten"
+
+#~ msgid "Available plugins for GNOME To Do"
+#~ msgstr "Für GNOME Aufgaben verfügbare Erweiterungen"
+
+#~ msgid "Visualizing tasks for today on GNOME To Do’s Today panel"
+#~ msgstr ""
+#~ "Visualisierung der heutigen Aufgaben in der Ansicht von GNOME Aufgaben"
+
+#~ msgid "No tasks found"
+#~ msgstr "Keine Aufgaben gefunden"
+
+#~ msgid "You can add tasks using the <b>+</b> above"
+#~ msgstr "Sie können Aufgaben mit dem <b>+</b> oben hinzufügen"
+
+#~ msgid "Error loading extension"
+#~ msgstr "Fehler beim Laden der Erweiterung"
+
+#~ msgid "Error unloading extension"
+#~ msgstr "Fehler beim Entladen der Erweiterung"
+
+#~ msgid "Extensions"
+#~ msgstr "Erweiterungen"
+
+#~ msgid "No extensions found"
+#~ msgstr "Keine Erweiterungen gefunden"
 
 #~ msgid "The current list selector"
 #~ msgstr "Die aktuelle Listen-Auswahl"

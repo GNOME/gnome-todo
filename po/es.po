@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo.master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2021-05-03 22:30+0000\n"
-"PO-Revision-Date: 2021-05-20 11:40+0200\n"
+"POT-Creation-Date: 2021-07-04 15:59+0000\n"
+"PO-Revision-Date: 2021-07-13 11:24+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -42,7 +42,6 @@ msgstr ""
 "nube. Personalice su experiencia con complementos."
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:25
-#| msgid "Welcome"
 msgid "Welcome screen"
 msgstr "Pantalla de bienvenida"
 
@@ -51,7 +50,6 @@ msgid "Empty state"
 msgstr "Estado vacío"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:33
-#| msgid "Task Lists"
 msgid "Task lists"
 msgstr "Listas de tareas"
 
@@ -115,6 +113,18 @@ msgstr "Barra lateral mostrada"
 #: data/org.gnome.todo.gschema.xml:32
 msgid "Whether the sidebar is revealed or not"
 msgstr "Indica si la barra lateral se muestra o no"
+
+#: data/org.gnome.todo.gschema.xml:40
+msgid "Style Variant"
+msgstr "Variante de estilo"
+
+#: data/org.gnome.todo.gschema.xml:41
+msgid ""
+"Use the light or dark variant of the GTK theme and/or GtkSourceView style "
+"scheme."
+msgstr ""
+"Usar las variantes clara u oscura del tema de GTK y/o del esquema de estilo "
+"de GtkSourceView."
 
 #: src/gui/gtd-application.c:69
 msgid "Quit GNOME To Do"
@@ -263,7 +273,7 @@ msgstr "Crear _lista"
 msgid "List Name"
 msgstr "Nombre de la lista"
 
-#: src/gui/gtd-provider-popover.ui:132
+#: src/gui/gtd-provider-popover.ui:115
 msgid "Select a storage location"
 msgstr "Seleccionar una ubicación del almacenamiento"
 
@@ -299,12 +309,12 @@ msgstr "Microsoft Exchange"
 msgid "Or you can just store your tasks on this computer"
 msgstr "O simplemente puede guardar las tareas en este equipo"
 
-#: src/gui/gtd-task-list-view.c:472
+#: src/gui/gtd-task-list-view.c:463
 #, c-format
 msgid "Task <b>%s</b> removed"
 msgstr "Tarea <b>%s</b> eliminada"
 
-#: src/gui/gtd-task-list-view.c:491
+#: src/gui/gtd-task-list-view.c:482
 #: src/plugins/task-lists-workspace/gtd-sidebar.c:422
 msgid "Undo"
 msgstr "Deshacer"
@@ -315,7 +325,7 @@ msgstr "Deshacer"
 #: src/plugins/scheduled-panel/gtd-panel-scheduled.c:124
 #: src/plugins/today-panel/gtd-panel-today.c:177
 #: src/plugins/today-panel/gtd-panel-today.c:295
-#: src/plugins/welcome/gtd-welcome-workspace.ui:57
+#: src/plugins/welcome/gtd-welcome-workspace.ui:56
 msgid "Today"
 msgstr "Hoy"
 
@@ -332,7 +342,15 @@ msgstr "Mañana"
 msgid "Yesterday"
 msgstr "Ayer"
 
-#: src/gui/gtd-window.c:109
+#: src/gui/gtd-theme-selector.ui:21
+msgid "Light style"
+msgstr "Estilo claro"
+
+#: src/gui/gtd-theme-selector.ui:34
+msgid "Dark style"
+msgstr "Estilo oscuro"
+
+#: src/gui/gtd-window.c:111
 msgid ""
 "This is a development build of To Do. You may experience errors, wrong "
 "behaviors, and data loss."
@@ -340,11 +358,11 @@ msgstr ""
 "Esta es una versión de desarrollo de Tareas pendientes. Puede que tenga "
 "errores, comportamientos incorrectos y pérdida de datos."
 
-#: src/gui/gtd-window.c:338
+#: src/gui/gtd-window.c:340
 msgid "Details"
 msgstr "Detalles"
 
-#: src/gui/gtd-window.ui:141
+#: src/gui/menus.ui:13
 msgid "_About To Do"
 msgstr "_Acerca de Tareas pendientes"
 
@@ -437,7 +455,7 @@ msgstr "Error al obtener las tareas de la lista"
 
 #: src/plugins/eds/gtd-task-list-eds.c:828
 #: src/plugins/inbox-panel/gtd-inbox-panel.c:111
-#: src/plugins/welcome/gtd-welcome-workspace.ui:48
+#: src/plugins/welcome/gtd-welcome-workspace.ui:47
 msgid "Inbox"
 msgstr "Bandeja de entrada"
 

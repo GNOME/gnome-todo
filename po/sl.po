@@ -2,14 +2,14 @@
 # Copyright (C) 2015 gnome-todo's COPYRIGHT HOLDER
 # This file is distributed under the same license as the gnome-todo package.
 #
-# Matej Urbančič <mateju@src.gnome.org>, + 2015–2019.
+# Matej Urbančič <mateju@src.gnome.org>, + 2015–2021.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gnome-todo master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-todo/issues\n"
-"POT-Creation-Date: 2021-06-29 23:51+0000\n"
-"PO-Revision-Date: 2021-06-30 18:26+0200\n"
+"POT-Creation-Date: 2021-07-13 09:25+0000\n"
+"PO-Revision-Date: 2021-07-13 22:06+0200\n"
 "Last-Translator: Matej Urbančič <mateju@src.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl\n"
@@ -25,7 +25,7 @@ msgstr ""
 #: data/org.gnome.Todo.desktop.in.in:3 src/gui/gtd-application.c:125
 #: src/gui/gtd-omni-area.ui:44 src/main.c:38
 msgid "To Do"
-msgstr "To Do"
+msgstr "Naloge"
 
 #: data/appdata/org.gnome.Todo.appdata.xml.in.in:8
 msgid "Task manager for GNOME"
@@ -114,6 +114,16 @@ msgstr "Stranska vrstica"
 #: data/org.gnome.todo.gschema.xml:32
 msgid "Whether the sidebar is revealed or not"
 msgstr "Ali je stranska vrstica prikazana ali ne"
+
+#: data/org.gnome.todo.gschema.xml:40
+msgid "Style Variant"
+msgstr "Slog"
+
+#: data/org.gnome.todo.gschema.xml:41
+msgid ""
+"Use the light or dark variant of the GTK theme and/or GtkSourceView style "
+"scheme."
+msgstr "Uporabi svetlo ali temno temo GTK in shemo GtkSourceView."
 
 #: src/gui/gtd-application.c:69
 msgid "Quit GNOME To Do"
@@ -331,7 +341,15 @@ msgstr "Jutri"
 msgid "Yesterday"
 msgstr "Včeraj"
 
-#: src/gui/gtd-window.c:109
+#: src/gui/gtd-theme-selector.ui:21
+msgid "Light style"
+msgstr "Svetla tema"
+
+#: src/gui/gtd-theme-selector.ui:34
+msgid "Dark style"
+msgstr "Temna tema"
+
+#: src/gui/gtd-window.c:111
 msgid ""
 "This is a development build of To Do. You may experience errors, wrong "
 "behaviors, and data loss."
@@ -339,11 +357,11 @@ msgstr ""
 "Uporabljate razvojno različico programa. Lahko se pojavijo napake, nenavadno "
 "delovanje, pride pa lahko celo do izgube podatkov."
 
-#: src/gui/gtd-window.c:338
+#: src/gui/gtd-window.c:340
 msgid "Details"
 msgstr "Podrobnosti"
 
-#: src/gui/gtd-window.ui:141
+#: src/gui/menus.ui:13
 msgid "_About To Do"
 msgstr "_O Programu"
 
